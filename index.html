@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Official API documentation for the Altafid platform - Manage contacts, tasks, and accounts programmatically">
+    <title>Altafid API Documentation</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="https://github.com/yourusername/altafid-api-docs" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Build with Altafid API</h1>
+                <p class="hero-subtitle">Powerful RESTful API for managing contacts, tasks, accounts, and more</p>
+                <div class="hero-buttons">
+                    <a href="quickstart.html" class="btn btn-primary">Get Started</a>
+                    <a href="docs.html" class="btn btn-secondary">Read Docs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure Authentication</h3>
+                    <p>Token-based authentication with JWT access and refresh tokens. Enterprise-grade security for your integrations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Contact Management</h3>
+                    <p>Search, list, and manage client contacts with powerful filtering and pagination capabilities.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Task Automation</h3>
+                    <p>Create and manage tasks programmatically. Perfect for workflow automation and CRM integration.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏢</div>
+                    <h3>Staff Management</h3>
+                    <p>Manage tenant staff members, roles, and permissions through a simple RESTful interface.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>RESTful Design</h3>
+                    <p>Intuitive REST API following industry standards with JSON responses and consistent error handling.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Easy Integration</h3>
+                    <p>Comprehensive examples in multiple languages including cURL, JavaScript, and Python.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Example Section -->
+    <section class="code-example">
+        <div class="container">
+            <h2 class="section-title">Quick Example</h2>
+            <div class="example-grid">
+                <div class="example-description">
+                    <h3>Get Started in Minutes</h3>
+                    <p>Authenticate and create your first task with just a few API calls.</p>
+                    <ol class="steps-list">
+                        <li>Login to get your access token</li>
+                        <li>Use the token in your API requests</li>
+                        <li>Create tasks, manage contacts, and more</li>
+                    </ol>
+                    <a href="quickstart.html" class="btn btn-primary">View Full Guide →</a>
+                </div>
+                <div class="example-code">
+                    <pre><code class="language-bash"># 1. Login
+curl -X POST 'https://api.altafid.dev.altafid.net/api/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "your-email@example.com",
+    "password": "your-password"
+  }'
+
+# 2. Create a task
+curl -X POST 'https://api.altafid.dev.altafid.net/api/tasks' \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "taskName": "Follow up with client",
+    "taskType": "EMAIL",
+    "priority": "HIGH",
+    "status": "OPEN"
+  }'</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Endpoints Section -->
+    <section class="endpoints">
+        <div class="container">
+            <h2 class="section-title">Available Endpoints</h2>
+            <div class="endpoints-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-method post">POST</div>
+                    <div class="endpoint-details">
+                        <h4>/api/auth/login</h4>
+                        <p>Authenticate and receive access tokens</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-method get">GET</div>
+                    <div class="endpoint-details">
+                        <h4>/api/contacts/firm/TENANT/{uuid}</h4>
+                        <p>List and search contacts</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-method post">POST</div>
+                    <div class="endpoint-details">
+                        <h4>/api/tasks</h4>
+                        <p>Create new tasks</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-method get">GET</div>
+                    <div class="endpoint-details">
+                        <h4>/api/tenant-staff/all/paginated</h4>
+                        <p>List staff members</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="docs.html" class="btn btn-secondary">View All Endpoints →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section class="resources">
+        <div class="container">
+            <h2 class="section-title">Resources</h2>
+            <div class="resources-grid">
+                <a href="quickstart.html" class="resource-card">
+                    <h3>📚 Quick Start Guide</h3>
+                    <p>Get up and running in 5 minutes with our comprehensive quick start guide.</p>
+                </a>
+                <a href="docs.html" class="resource-card">
+                    <h3>📖 API Reference</h3>
+                    <p>Complete API documentation with detailed endpoint descriptions and examples.</p>
+                </a>
+                <a href="#" class="resource-card">
+                    <h3>💻 Code Examples</h3>
+                    <p>Ready-to-use code samples in bash, JavaScript, Python, and more.</p>
+                </a>
+                <a href="#" class="resource-card">
+                    <h3>💬 Support</h3>
+                    <p>Need help? Contact our support team or join our developer community.</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Altafid API</h4>
+                    <p>Build powerful integrations with the Altafid platform.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="docs.html">API Reference</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:support@altafid.com">Email Support</a></li>
+                        <li><a href="https://status.altafid.com">Status Page</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://github.com/altafid">GitHub</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

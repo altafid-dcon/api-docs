@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start Guide - Altafid API Documentation</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html" class="active">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="https://github.com/yourusername/altafid-api-docs" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <!-- Sidebar -->
+            <aside class="doc-sidebar">
+                <h3>Quick Start</h3>
+                <ul>
+                    <li><a href="#authenticate">1. Authenticate</a></li>
+                    <li><a href="#first-call">2. First API Call</a></li>
+                    <li><a href="#common-use-cases">3. Common Use Cases</a></li>
+                    <li><a href="#example-scripts">4. Example Scripts</a></li>
+                    <li><a href="#error-handling">5. Error Handling</a></li>
+                    <li><a href="#best-practices">6. Best Practices</a></li>
+                    <li><a href="#sdks">7. SDKs & Libraries</a></li>
+                    <li><a href="#next-steps">8. Next Steps</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="doc-content">
+                <h1>Quick Start Guide</h1>
+                <p>Get started with the Altafid API in 5 minutes.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <h2 id="authenticate">1. Authenticate and Get Tokens</h2>
+                <p>First, you need to login to obtain access and refresh tokens.</p>
+
+                <h3>Login Request</h3>
+                <pre><code class="language-bash">curl 'https://api.altafid.dev.altafid.net/api/auth/login' \
+  -X POST \
+  -H 'accept: application/json' \
+  -H 'content-type: application/json' \
+  --data-raw '{
+    "username": "your-email@example.com",
+    "password": "your-password"
+  }'</code></pre>
+
+                <h3>Response</h3>
+                <pre><code class="language-json">{
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 86400,
+  "user": {
+    "id": "TS019A25A48E6177E8B989E9AECCA3F6DF",
+    "email": "your-email@example.com",
+    "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+    ...
+  }
+}</code></pre>
+
+                <div class="callout info">
+                    <strong>💡 Save these values:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li><code>accessToken</code> - Use for API requests</li>
+                        <li><code>refreshToken</code> - Use to get new access token</li>
+                        <li><code>user.tenantUuid</code> - Your tenant UUID</li>
+                        <li><code>user.id</code> - Your user ID</li>
+                        <li><code>user.email</code> - Your email</li>
+                    </ul>
+                </div>
+
+                <h2 id="first-call">2. Make Your First API Call</h2>
+                <h3>Test Authentication</h3>
+                <pre><code class="language-bash">curl 'https://api.altafid.dev.altafid.net/api/tenant-staff/all/paginated?page=0&size=1' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'x-tenant-uuid: YOUR_TENANT_UUID' \
+  -H 'x-user-email: your-email@example.com' \
+  -H 'x-user-id: YOUR_USER_ID' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+
+                <p>If successful, you'll receive a JSON response with staff data.</p>
+
+                <h2 id="common-use-cases">3. Common Use Cases</h2>
+
+                <h3>Create a Task</h3>
+                <pre><code class="language-bash">curl 'https://api.altafid.dev.altafid.net/api/tasks' \
+  -X POST \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: YOUR_TENANT_UUID' \
+  -H 'x-user-email: your-email@example.com' \
+  -H 'x-user-id: YOUR_USER_ID' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data '{
+    "taskName": "My First Task",
+    "taskType": "TODO",
+    "queue": "ACCOUNT_ONBOARDING",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "partnerId": "YOUR_TENANT_UUID",
+    "assignedToId": "YOUR_USER_ID",
+    "dueDate": "2026-02-01T00:00:00.000Z",
+    "description": "&lt;p&gt;This is my first task via API&lt;/p&gt;",
+    "createdById": "YOUR_USER_ID",
+    "createdByType": "ADVISOR_STAFF"
+  }'</code></pre>
+
+                <h3>Search for a Contact</h3>
+                <pre><code class="language-bash">curl 'https://api.altafid.dev.altafid.net/api/contacts/firm/TENANT/YOUR_TENANT_UUID?searchTerm=john&page=0&size=20' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'x-tenant-uuid: YOUR_TENANT_UUID' \
+  -H 'x-user-email: your-email@example.com' \
+  -H 'x-user-id: YOUR_USER_ID' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+
+                <h3>Find a Staff Member</h3>
+                <pre><code class="language-bash">curl 'https://api.altafid.dev.altafid.net/api/tenant-staff/search?name=admin&page=0&size=20' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'x-tenant-uuid: YOUR_TENANT_UUID' \
+  -H 'x-user-email: your-email@example.com' \
+  -H 'x-user-id: YOUR_USER_ID' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+
+                <h2 id="example-scripts">4. Use Example Scripts</h2>
+                <p>We provide ready-to-use bash scripts:</p>
+                <pre><code class="language-bash"># Make scripts executable
+chmod +x examples/*.sh
+
+# Login and get tokens
+./examples/login.sh
+
+# Create a task
+./examples/create-task.sh
+
+# Search for contacts
+./examples/search-contact.sh john
+
+# List staff members
+./examples/list-staff.sh
+
+# Refresh your token
+./examples/refresh-token.sh
+
+# Logout
+./examples/logout.sh</code></pre>
+
+                <h2 id="error-handling">5. Error Handling</h2>
+
+                <h3>Common HTTP Status Codes</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Meaning</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>200</td>
+                            <td>Success</td>
+                            <td>Request completed successfully</td>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>Unauthorized</td>
+                            <td>Check your access token</td>
+                        </tr>
+                        <tr>
+                            <td>403</td>
+                            <td>Forbidden</td>
+                            <td>Verify permissions</td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>Not Found</td>
+                            <td>Check endpoint URL</td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>Server Error</td>
+                            <td>Contact support</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Example Error Response</h3>
+                <pre><code class="language-json">{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or expired access token",
+    "details": {}
+  }
+}</code></pre>
+
+                <h2 id="best-practices">6. Best Practices</h2>
+
+                <div class="callout success">
+                    <strong>✅ DO:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Store credentials securely (use environment variables)</li>
+                        <li>Implement retry logic for failed requests</li>
+                        <li>Cache frequently accessed data</li>
+                        <li>Use pagination for large datasets</li>
+                        <li>Log all API interactions</li>
+                    </ul>
+                </div>
+
+                <div class="callout warning">
+                    <strong>❌ DON'T:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Hardcode credentials in your code</li>
+                        <li>Make excessive API calls in loops</li>
+                        <li>Ignore error responses</li>
+                        <li>Store sensitive data in plain text</li>
+                    </ul>
+                </div>
+
+                <h2 id="sdks">7. SDKs and Libraries</h2>
+
+                <h3>JavaScript/Node.js</h3>
+                <pre><code class="language-javascript">const axios = require('axios');
+
+// 1. Login first
+async function login(username, password) {
+  const response = await axios.post(
+    'https://api.altafid.dev.altafid.net/api/auth/login',
+    { username, password }
+  );
+  return response.data;
+}
+
+// 2. Create API client with tokens
+function createAPIClient(accessToken, tenantUuid, userEmail, userId) {
+  return axios.create({
+    baseURL: 'https://api.altafid.dev.altafid.net',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'x-tenant-uuid': tenantUuid,
+      'x-user-email': userEmail,
+      'x-user-id': userId,
+      'x-user-type': 'TENANT_STAFF'
+    }
+  });
+}
+
+// 3. Use the API
+async function main() {
+  // Login
+  const auth = await login('your-email@example.com', 'your-password');
+  
+  // Create API client
+  const api = createAPIClient(
+    auth.accessToken,
+    auth.user.tenantUuid,
+    auth.user.email,
+    auth.user.id
+  );
+  
+  // Create a task
+  const task = await api.post('/api/tasks', {
+    taskName: 'My Task',
+    taskType: 'TODO',
+    queue: 'ACCOUNT_ONBOARDING',
+    status: 'OPEN',
+    priority: 'MEDIUM',
+    partnerId: auth.user.tenantUuid,
+    assignedToId: auth.user.id,
+    dueDate: '2026-02-01T00:00:00.000Z',
+    description: '&lt;p&gt;Task description&lt;/p&gt;',
+    createdById: auth.user.id,
+    createdByType: 'ADVISOR_STAFF'
+  });
+  
+  console.log('Task created:', task.data);
+}
+
+main().catch(console.error);</code></pre>
+
+                <h3>Python</h3>
+                <pre><code class="language-python">import requests
+
+class AltafidAPI:
+    def __init__(self):
+        self.base_url = 'https://api.altafid.dev.altafid.net'
+        self.access_token = None
+        self.refresh_token = None
+        self.user_info = None
+    
+    def login(self, username, password):
+        """Login and store tokens"""
+        response = requests.post(
+            f'{self.base_url}/api/auth/login',
+            json={'username': username, 'password': password}
+        )
+        response.raise_for_status()
+        
+        data = response.json()
+        self.access_token = data['accessToken']
+        self.refresh_token = data['refreshToken']
+        self.user_info = data['user']
+        
+        return data
+    
+    def _get_headers(self):
+        """Get authenticated headers"""
+        return {
+            'Authorization': f'Bearer {self.access_token}',
+            'x-tenant-uuid': self.user_info['tenantUuid'],
+            'x-user-email': self.user_info['email'],
+            'x-user-id': self.user_info['id'],
+            'x-user-type': 'TENANT_STAFF'
+        }
+    
+    def create_task(self, task_data):
+        """Create a new task"""
+        response = requests.post(
+            f'{self.base_url}/api/tasks',
+            json=task_data,
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        return response.json()
+
+# Usage
+api = AltafidAPI()
+api.login('your-email@example.com', 'your-password')
+
+task = api.create_task({
+    'taskName': 'My Task',
+    'taskType': 'TODO',
+    'queue': 'ACCOUNT_ONBOARDING',
+    'status': 'OPEN',
+    'priority': 'MEDIUM',
+    'partnerId': api.user_info['tenantUuid'],
+    'assignedToId': api.user_info['id'],
+    'dueDate': '2026-02-01T00:00:00.000Z',
+    'description': '&lt;p&gt;Task description&lt;/p&gt;',
+    'createdById': api.user_info['id'],
+    'createdByType': 'ADVISOR_STAFF'
+})
+
+print('Task created:', task)</code></pre>
+
+                <h2 id="next-steps">8. Next Steps</h2>
+                <ul>
+                    <li>✅ Read the <a href="docs.html">full API documentation</a></li>
+                    <li>✅ Review authentication details</li>
+                    <li>✅ Explore specific endpoints: Contacts, Tasks, Tenant Staff</li>
+                    <li>✅ Join our developer community</li>
+                    <li>✅ Subscribe to API updates</li>
+                </ul>
+
+                <hr style="margin: 3rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <h2>Support</h2>
+                <p>Need help? We're here for you:</p>
+                <ul>
+                    <li>📧 <strong>Email</strong>: api-support@altafid.com</li>
+                    <li>💬 <strong>Slack</strong>: Join our channel</li>
+                    <li>📚 <strong>Documentation</strong>: docs.altafid.com</li>
+                    <li>🛠 <strong>Bug Reports</strong>: GitHub Issues</li>
+                </ul>
+
+                <p style="text-align: center; margin-top: 3rem; font-size: 1.5rem;">
+                    <strong>Happy coding! 🚀</strong>
+                </p>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Altafid API</h4>
+                    <p>Build powerful integrations with the Altafid platform.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="docs.html">API Reference</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:support@altafid.com">Email Support</a></li>
+                        <li><a href="https://status.altafid.com">Status Page</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://github.com/altafid">GitHub</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
