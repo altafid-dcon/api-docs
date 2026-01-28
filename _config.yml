@@ -1,0 +1,69 @@
+# GitHub Pages Configuration
+title: Altafid API Documentation
+description: Official API documentation for Altafid platform
+theme: jekyll-theme-cayman
+
+# URL settings
+baseurl: "" # Leave empty if using custom domain
+url: "https://docs.altafid.com" # Your custom domain or GitHub Pages URL
+
+# Author
+author:
+  name: Altafid
+  email: support@altafid.com
+
+# Navigation
+header_pages:
+  - README.md
+  - docs/authentication.md
+  - docs/contacts.md
+  - docs/tasks.md
+  - docs/tenant-staff.md
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .gitignore
+  - LICENSE
+
+# Include
+include:
+  - _pages
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: "docs"
+      type: "docs"
+    values:
+      layout: "default"
+      nav: true
