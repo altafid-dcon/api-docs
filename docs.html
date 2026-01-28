@@ -33,6 +33,24 @@
         .method-post { background: #d1fae5; color: #065f46; }
         .method-get { background: #dbeafe; color: #1e40af; }
         .method-put { background: #fef3c7; color: #78350f; }
+        
+        /* Sidebar grouping styles */
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+        .sidebar-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-section ul {
+            list-style: none;
+            margin-left: 0;
+        }
     </style>
 </head>
 <body>
@@ -52,27 +70,54 @@
         <div class="doc-layout">
             <aside class="doc-sidebar">
                 <h3>API Documentation</h3>
-                <ul>
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#auth">Authentication</a></li>
-                    <li><a href="#auth-login">POST /auth/login</a></li>
-                    <li><a href="#auth-refresh">POST /auth/refresh</a></li>
-                    <li><a href="#tasks">Tasks</a></li>
-                    <li><a href="#tasks-create">POST /tasks</a></li>
-                    <li><a href="#enums">Enums Reference</a></li>
-                    <li><a href="#contacts">Tenant Contacts</a></li>
-                    <li><a href="#contacts-search">GET /contacts</a></li>
-                    <li><a href="#staff">Tenant Staff</a></li>
-                    <li><a href="#staff-search">GET /staff/search</a></li>
-                    <li><a href="#tasks-list">POST /tasks/filter</a></li>
-                    <li><a href="#tasks-update">PUT /tasks/{id}</a></li>
-                    <li><a href="#contacts-list">GET /contacts (list all)</a></li>
-                    <li><a href="#staff-list">GET /staff/all</a></li>
-                    <li><a href="#contacts-create">POST /contacts</a></li>
-                    <li><a href="#accounts">Accounts</a></li>
-                    <li><a href="#accounts-search">GET /accounts (search)</a></li>
-                    <li><a href="#accounts-list">GET /accounts (list all)</a></li>
-                </ul>
+                
+                <div class="sidebar-section">
+                    <ul>
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#auth">Authentication</a></li>
+                        <li><a href="#auth-login">POST /auth/login</a></li>
+                        <li><a href="#auth-refresh">POST /auth/refresh</a></li>
+                        <li><a href="#enums">Enums Reference</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Tasks</div>
+                    <ul>
+                        <li><a href="#tasks">Overview</a></li>
+                        <li><a href="#tasks-create">POST /tasks</a></li>
+                        <li><a href="#tasks-list">POST /tasks/filter</a></li>
+                        <li><a href="#tasks-update">PUT /tasks/{id}</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Contacts</div>
+                    <ul>
+                        <li><a href="#contacts">Overview</a></li>
+                        <li><a href="#contacts-search">GET /contacts (search)</a></li>
+                        <li><a href="#contacts-list">GET /contacts (list all)</a></li>
+                        <li><a href="#contacts-create">POST /contacts</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Staff</div>
+                    <ul>
+                        <li><a href="#staff">Overview</a></li>
+                        <li><a href="#staff-search">GET /staff/search</a></li>
+                        <li><a href="#staff-list">GET /staff/all</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Accounts</div>
+                    <ul>
+                        <li><a href="#accounts">Overview</a></li>
+                        <li><a href="#accounts-search">GET /accounts (search)</a></li>
+                        <li><a href="#accounts-list">GET /accounts (list all)</a></li>
+                    </ul>
+                </div>
             </aside>
 
             <main class="doc-content">
@@ -501,10 +546,6 @@
                     <strong>💡 Use <code>tenantStaffUuid</code></strong> as <code>assignedToId</code> when creating tasks
                 </div>
 
-                
-                
-                
-
                 <!-- LIST TASKS -->
                 <h3 id="tasks-list"><span class="method-badge method-post">POST</span>/api/tasks/filter?page={page}&size={size}</h3>
                 <p>Retrieve a paginated list of tasks with optional filters</p>
@@ -602,23 +643,24 @@
 
                 <h4>Response 200 OK</h4>
                 <p>Returns the updated task object with the same structure as the create task response.</p>
-<!-- LIST ALL CONTACTS -->
-<h3 id="contacts-list"><span class="method-badge method-get">GET</span>/api/contacts/firm/TENANT/{tenantUuid}?page={page}&size={size}</h3>
-<p>List all tenant contacts with pagination</p>
 
-<h4>Query Parameters</h4>
-<table>
-    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
-    </tbody>
-</table>
+                <!-- LIST ALL CONTACTS -->
+                <h3 id="contacts-list"><span class="method-badge method-get">GET</span>/api/contacts/firm/TENANT/{tenantUuid}?page={page}&size={size}</h3>
+                <p>List all tenant contacts with pagination</p>
 
-<h4>cURL</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/firm/TENANT/T019A16FF372A70B5A9307B00CE85E4DA?page=0&size=20' \
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/firm/TENANT/T019A16FF372A70B5A9307B00CE85E4DA?page=0&size=20' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
@@ -629,25 +671,25 @@
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
-</div>
+                </div>
 
-<!-- LIST ALL STAFF -->
-<h3 id="staff-list"><span class="method-badge method-get">GET</span>/api/tenant-staff/all/paginated?page={page}&size={size}</h3>
-<p>List all tenant staff with pagination</p>
+                <!-- LIST ALL STAFF -->
+                <h3 id="staff-list"><span class="method-badge method-get">GET</span>/api/tenant-staff/all/paginated?page={page}&size={size}</h3>
+                <p>List all tenant staff with pagination</p>
 
-<h4>Query Parameters</h4>
-<table>
-    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
-    </tbody>
-</table>
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
+                    </tbody>
+                </table>
 
-<h4>cURL</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tenant-staff/all/paginated?page=0&size=20' \
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tenant-staff/all/paginated?page=0&size=20' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
@@ -658,50 +700,50 @@
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
-</div>
+                </div>
 
-<!-- CREATE CONTACT -->
-<h3 id="contacts-create"><span class="method-badge method-post">POST</span>/api/contacts</h3>
-<p>Create a new contact</p>
+                <!-- CREATE CONTACT -->
+                <h3 id="contacts-create"><span class="method-badge method-post">POST</span>/api/contacts</h3>
+                <p>Create a new contact</p>
 
-<div class="callout warning">
-    <strong>⚠️ Important:</strong> 
-    <br>
-    <code>Kaboom AI integration can use this API to create a new lead/contact</code>
-    <br>
-    <code>firmId</code> must equal <code>tenantUuid</code> = <code>T019A16FF372A70B5A9307B00CE85E4DA</code>
-</div>
+                <div class="callout warning">
+                    <strong>⚠️ Important:</strong> 
+                    <br>
+                    <code>Kaboom AI integration can use this API to create a new lead/contact</code>
+                    <br>
+                    <code>firmId</code> must equal <code>tenantUuid</code> = <code>T019A16FF372A70B5A9307B00CE85E4DA</code>
+                </div>
 
-<h4>Request Body</h4>
-<table>
-    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code>firstName</code></td><td>string</td><td>✅</td><td>First name</td></tr>
-        <tr><td><code>middleName</code></td><td>string</td><td>No</td><td>Middle name</td></tr>
-        <tr><td><code>paternalLastName</code></td><td>string</td><td>✅</td><td>Paternal last name</td></tr>
-        <tr><td><code>maternalLastName</code></td><td>string</td><td>No</td><td>Maternal surname</td></tr>
-        <tr><td><code>preferredEmail</code></td><td>string</td><td>✅*</td><td>Email address (*required if no phone)</td></tr>
-        <tr><td><code>phoneNumber</code></td><td>object</td><td>✅*</td><td>Phone number object (*required if no email)</td></tr>
-        <tr><td><code>contactMeans</code></td><td>enum</td><td>✅</td><td><code>EMAIL</code>, <code>PHONE</code></td></tr>
-        <tr><td><code>contactType</code></td><td>enum</td><td>✅</td><td><code>SUBSCRIBER</code></td></tr>
-        <tr><td><code>status</code></td><td>enum</td><td>✅</td><td><code>ACTIVE</code></td></tr>
-        <tr><td><code>firmId</code></td><td>string</td><td>✅</td><td>Must be tenantUuid (T019A16FF372A70B5A9307B00CE85E4DA)</td></tr>
-        <tr><td><code>firmType</code></td><td>string</td><td>✅</td><td><code>TENANT</code></td></tr>
-        <tr><td><code>preferredContactLanguage</code></td><td>string</td><td>✅</td><td><code>ENGLISH</code></td></tr>
-        <tr><td><code>contactManagerId</code></td><td>string</td><td>No</td><td>Staff UUID (from staff search API)</td></tr>
-        <tr><td><code>contactManagerFirmType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
-        <tr><td><code>stage</code></td><td>string</td><td>No</td><td>etapa1 or etapa2 or etapa3</td></tr>
-    </tbody>
-</table>
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>firstName</code></td><td>string</td><td>✅</td><td>First name</td></tr>
+                        <tr><td><code>middleName</code></td><td>string</td><td>No</td><td>Middle name</td></tr>
+                        <tr><td><code>paternalLastName</code></td><td>string</td><td>✅</td><td>Paternal last name</td></tr>
+                        <tr><td><code>maternalLastName</code></td><td>string</td><td>No</td><td>Maternal surname</td></tr>
+                        <tr><td><code>preferredEmail</code></td><td>string</td><td>✅*</td><td>Email address (*required if no phone)</td></tr>
+                        <tr><td><code>phoneNumber</code></td><td>object</td><td>✅*</td><td>Phone number object (*required if no email)</td></tr>
+                        <tr><td><code>contactMeans</code></td><td>enum</td><td>✅</td><td><code>EMAIL</code>, <code>PHONE</code></td></tr>
+                        <tr><td><code>contactType</code></td><td>enum</td><td>✅</td><td><code>SUBSCRIBER</code></td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td>✅</td><td><code>ACTIVE</code></td></tr>
+                        <tr><td><code>firmId</code></td><td>string</td><td>✅</td><td>Must be tenantUuid (T019A16FF372A70B5A9307B00CE85E4DA)</td></tr>
+                        <tr><td><code>firmType</code></td><td>string</td><td>✅</td><td><code>TENANT</code></td></tr>
+                        <tr><td><code>preferredContactLanguage</code></td><td>string</td><td>✅</td><td><code>ENGLISH</code></td></tr>
+                        <tr><td><code>contactManagerId</code></td><td>string</td><td>No</td><td>Staff UUID (from staff search API)</td></tr>
+                        <tr><td><code>contactManagerFirmType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
+                        <tr><td><code>stage</code></td><td>string</td><td>No</td><td>etapa1 or etapa2 or etapa3</td></tr>
+                    </tbody>
+                </table>
 
-<div class="callout info">
-    <strong>💡 Note:</strong> At least one contact means (email or phone) is required. Use <code>contactManagerId</code> from the <a href="#staff-search">staff search API</a> to assign a contact manager.
-</div>
+                <div class="callout info">
+                    <strong>💡 Note:</strong> At least one contact means (email or phone) is required. Use <code>contactManagerId</code> from the <a href="#staff-search">staff search API</a> to assign a contact manager.
+                </div>
 
-<h4>Request Example</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>{
+                <h4>Request Example</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "firstName": "poc",
   "paternalLastName": "last",
   "contactType": "SUBSCRIBER",
@@ -717,12 +759,12 @@
   "contactMeans": "EMAIL",
   "contactManagerFirmType": "TENANT"
 }</code></pre>
-</div>
+                </div>
 
-<h4>cURL</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts' \
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
   -H 'content-type: application/json' \
@@ -731,12 +773,12 @@
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF' \
   --data-raw '{"firstName":"poc","paternalLastName":"last","contactType":"SUBSCRIBER","firmId":"T019A16FF372A70B5A9307B00CE85E4DA","firmType":"TENANT","preferredContactLanguage":"ENGLISH","status":"ACTIVE","middleName":"middle","maternalLastName":"maternal","preferredEmail":"poctestcontact@example.com","contactManagerId":"TS019A25A48E6177E8B989E9AECCA3F6DF","stage":"etapa2","contactMeans":"EMAIL","contactManagerFirmType":"TENANT"}'</code></pre>
-</div>
+                </div>
 
-<h4>Response 201 Created</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>{
+                <h4>Response 201 Created</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "contactUuid": "C019A5EE30BE0703E97DF93284EDE4CFE",
   "firstName": "poc",
   "middleName": "middle",
@@ -753,30 +795,30 @@
   "createdAt": "2026-01-29T04:30:00.000000",
   "updatedAt": "2026-01-29T04:30:00.000000"
 }</code></pre>
-</div>
+                </div>
 
-<!-- ACCOUNTS -->
-<h2 id="accounts">Accounts</h2>
+                <!-- ACCOUNTS -->
+                <h2 id="accounts">Accounts</h2>
 
-<!-- SEARCH ACCOUNTS -->
-<h3 id="accounts-search"><span class="method-badge method-get">GET</span>/api/accounts/linked?keyword={keyword}</h3>
-<p>Search linked accounts by account number or keyword</p>
+                <!-- SEARCH ACCOUNTS -->
+                <h3 id="accounts-search"><span class="method-badge method-get">GET</span>/api/accounts/linked?keyword={keyword}</h3>
+                <p>Search linked accounts by account number or keyword</p>
 
-<h4>Query Parameters</h4>
-<table>
-    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code>keyword</code></td><td>string</td><td>No</td><td>Search by account number or name</td></tr>
-        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 50)</td></tr>
-        <tr><td><code>sort</code></td><td>string</td><td>No</td><td>Sort field (e.g., accountNumber)</td></tr>
-    </tbody>
-</table>
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>keyword</code></td><td>string</td><td>No</td><td>Search by account number or name</td></tr>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 50)</td></tr>
+                        <tr><td><code>sort</code></td><td>string</td><td>No</td><td>Sort field (e.g., accountNumber)</td></tr>
+                    </tbody>
+                </table>
 
-<h4>cURL</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=11' \
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=11' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
@@ -787,12 +829,12 @@
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
-</div>
+                </div>
 
-<h4>Response 200 OK</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>{
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "content": [
     {
       "accountUuid": "14c5c174-4e5f-5be7-bb73-d7d511452ef5",
@@ -843,27 +885,27 @@
   "totalElements": 1,
   "totalPages": 1
 }</code></pre>
-</div>
+                </div>
 
-<!-- LIST ALL ACCOUNTS -->
-<h3 id="accounts-list"><span class="method-badge method-get">GET</span>/api/accounts/linked</h3>
-<p>List all linked accounts with pagination</p>
+                <!-- LIST ALL ACCOUNTS -->
+                <h3 id="accounts-list"><span class="method-badge method-get">GET</span>/api/accounts/linked</h3>
+                <p>List all linked accounts with pagination</p>
 
-<h4>Query Parameters</h4>
-<table>
-    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 50)</td></tr>
-        <tr><td><code>sort</code></td><td>string</td><td>No</td><td>Sort field (e.g., accountNumber)</td></tr>
-        <tr><td><code>keyword</code></td><td>string</td><td>No</td><td>Leave empty to list all accounts</td></tr>
-    </tbody>
-</table>
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 50)</td></tr>
+                        <tr><td><code>sort</code></td><td>string</td><td>No</td><td>Sort field (e.g., accountNumber)</td></tr>
+                        <tr><td><code>keyword</code></td><td>string</td><td>No</td><td>Leave empty to list all accounts</td></tr>
+                    </tbody>
+                </table>
 
-<h4>cURL</h4>
-<div class="code-block-wrapper">
-    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=' \
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=' \
   -H 'accept: application/json, text/plain, */*' \
   -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
@@ -874,14 +916,14 @@
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
-</div>
+                </div>
 
-<h4>Response 200 OK</h4>
-<p>Returns the same structure as the search endpoint with paginated account data.</p>
+                <h4>Response 200 OK</h4>
+                <p>Returns the same structure as the search endpoint with paginated account data.</p>
 
-<div class="callout info">
-    <strong>💡 Use <code>accountUuid</code></strong> to reference accounts in other API calls
-</div>
+                <div class="callout info">
+                    <strong>💡 Use <code>accountUuid</code></strong> to reference accounts in other API calls
+                </div>
             </main>
         </div>
     </div>
