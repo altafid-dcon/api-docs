@@ -516,6 +516,9 @@
                 <table>
                     <thead><tr><th>Header</th><th>Value</th><th>Description</th></tr></thead>
                     <tbody>
+                        <tr><td><code>content-type</code></td><td><code>application/json</code></tr>
+                        <tr><td><code>origin</code></td><td><code>https://conpat.uat.altafid.net/</code></tr>
+                        <tr><td><code>referer</code></td><td><code>https://conpat.uat.altafid.net/</code></tr>
                         <tr><td><code>Authorization</code></td><td><code>Bearer {token}</code></td><td>Access token from login</td></tr>
                         <tr><td><code>x-tenant-uuid</code></td><td><code>T019A16FF372A70B5A9307B00CE85E4DA</code></td><td>Tenant identifier</td></tr>
                         <tr><td><code>x-user-email</code></td><td><code>kaboom-poc@yopmail.com</code></td><td>User email</td></tr>
@@ -542,10 +545,16 @@
                 <h4>cURL</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/auth/login' \
-  -H 'accept: application/json, text/plain, */*' \
-  -H 'content-type: application/json' \
-  --data-raw '{"username":"kaboom-poc@yopmail.com","password":"Password123!"}'</code></pre>
+                    <pre><code>curl --location 'https://api.altafid.dev.altafid.net/api/auth/login' \
+--header 'content-type: application/json' \
+--header 'origin: https://conpat.uat.altafid.net' \
+--header 'referer: https://conpat.uat.altafid.net/' \
+--header 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+--header 'x-user-email: kaboom-poc@yopmail.com' \
+--header 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+--header 'x-user-type: TENANT_STAFF' \
+--data-raw '{"username":"kaboom-poc@yopmail.com","password":"Password123!"}'
+</code></pre>
                 </div>
 
                 <h4>Response 200 OK</h4>
@@ -584,12 +593,14 @@
                 <h3 id="auth-refresh"><span class="method-badge method-post">POST</span>/api/auth/refresh</h3>
                 <p>Refresh expired access token</p>
 
-                <h4>Request Body</h4>
+                <h4>cURL</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "refreshToken": "eyJhbGciOiJIUzI1NiJ9..."
-}</code></pre>
+                    <pre><code>curl --location 'https://api.altafid.dev.altafid.net/api/auth/refresh' \
+--header 'content-type: application/json' \
+--header 'origin: https://conpat.uat.altafid.net' \
+--header 'referer: https://conpat.uat.altafid.net/' \
+--data '{"refreshToken":"eyJhbGciOiJIUzI1NiJ9..1s9dbSm6D7OutI8p-JzqWkeGFvmdVED4jMN8o2U4UX8"}'</code></pre>
                 </div>
 
                 <h4>Response 200 OK</h4>
