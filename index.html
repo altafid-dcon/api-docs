@@ -4,361 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altafid API Documentation</title>
-    <style>
-        /* ========================================
-           Altafid API Documentation Styles
-           ======================================== */
-
-        /* CSS Variables */
-        :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1e40af;
-            --secondary-color: #64748b;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --background: #ffffff;
-            --surface: #f8fafc;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --border-color: #e2e8f0;
-            --code-bg: #1e293b;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-        }
-
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-primary);
-            background-color: var(--background);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            line-height: 1.2;
-            margin-bottom: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        h1 { font-size: 2.5rem; }
-        h2 { font-size: 2rem; }
-        h3 { font-size: 1.5rem; }
-        h4 { font-size: 1.25rem; }
-
-        p {
-            margin-bottom: 1rem;
-            color: var(--text-secondary);
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            color: var(--primary-dark);
-        }
-
-        /* Navigation */
-        .navbar {
-            background: var(--background);
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .navbar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 20px;
-        }
-
-        .nav-brand h1 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-            margin: 0;
-        }
-
-        .nav-menu a {
-            color: var(--text-primary);
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-menu a:hover,
-        .nav-menu a.active {
-            color: var(--primary-color);
-        }
-
-        /* Documentation Page Styles */
-        .doc-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 3rem;
-            margin-top: 2rem;
-        }
-
-        .doc-sidebar {
-            position: sticky;
-            top: 100px;
-            height: fit-content;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: 10px;
-        }
-
-        .doc-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .doc-sidebar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        .doc-sidebar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .doc-sidebar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Firefox scrollbar */
-        .doc-sidebar {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
-        }
-
-        .doc-sidebar h3 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .doc-sidebar ul {
-            list-style: none;
-        }
-
-        .doc-sidebar li {
-            margin-bottom: 0.5rem;
-        }
-
-        .doc-sidebar a {
-            color: var(--text-secondary);
-            display: block;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .doc-sidebar a:hover,
-        .doc-sidebar a.active {
-            background-color: var(--surface);
-            color: var(--primary-color);
-        }
-
-        .doc-content {
-            max-width: 900px;
-        }
-
-        .doc-content h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .doc-content h2 {
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .doc-content h3 {
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .doc-content pre {
-            background-color: var(--code-bg);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            margin: 1.5rem 0;
-        }
-
-        .doc-content code {
-            color: #e2e8f0;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.875rem;
-        }
-
-        .doc-content p code,
-        .doc-content li code,
-        .doc-content td code,
-        .doc-content th code {
-            background-color: #f1f5f9;
-            color: #dc2626;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.875em;
-            font-weight: 600;
-        }
-
-        .doc-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-            font-size: 0.9rem;
-        }
-
-        .doc-content th,
-        .doc-content td {
-            padding: 0.75rem;
-            text-align: left;
-            border: 1px solid var(--border-color);
-        }
-
-        .doc-content th {
-            background-color: var(--surface);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .doc-content td {
-            color: var(--text-secondary);
-        }
-
-        /* Callouts */
-        .callout {
-            padding: 1rem 1.25rem;
-            border-radius: 0.5rem;
-            margin: 1.5rem 0;
-            border-left: 4px solid;
-        }
-
-        .callout.info {
-            background-color: #dbeafe;
-            border-color: var(--primary-color);
-            color: #1e3a8a;
-        }
-
-        .callout.info strong {
-            color: #1e40af;
-        }
-
-        .callout.info code {
-            background-color: rgba(255, 255, 255, 0.7);
-            color: #1e40af;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.875em;
-        }
-
-        .callout.warning {
-            background-color: #fef3c7;
-            border-color: var(--warning-color);
-            color: #78350f;
-        }
-
-        .callout.warning strong {
-            color: #92400e;
-        }
-
-        .callout.warning code {
-            background-color: rgba(255, 255, 255, 0.7);
-            color: #92400e;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.875em;
-            font-weight: 600;
-        }
-
-        .callout.success {
-            background-color: #d1fae5;
-            border-color: var(--success-color);
-            color: #065f46;
-        }
-
-        .callout.success strong {
-            color: #047857;
-        }
-
-        .callout ul, .callout ol {
-            color: inherit;
-            margin-top: 0.5rem;
-        }
-
-        .callout li {
-            color: inherit;
-        }
-
-        /* Footer */
-        .footer {
-            background-color: var(--text-primary);
-            color: white;
-            padding: 3rem 0 1rem;
-            margin-top: 5rem;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .footer-bottom p {
-            color: rgba(255, 255, 255, 0.6);
-            margin: 0;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .doc-layout {
-                grid-template-columns: 1fr;
-            }
-            
-            .doc-sidebar {
-                position: relative;
-                max-height: none;
-                top: 0;
-            }
-            
-            .nav-menu {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
         .copy-button {
             position: absolute;
@@ -451,30 +97,18 @@
                         <li><a href="#contacts">Overview</a></li>
                         <li><a href="#contacts-search">GET /contacts (search)</a></li>
                         <li><a href="#contacts-list">GET /contacts (list all)</a></li>
+                        <li><a href="#contacts-detail">GET /contacts/{contactUuid}</a></li>
                         <li><a href="#contacts-create">POST /contacts</a></li>
-                        <li><a href="#contacts-update">PUT /contacts/{id}</a></li>
-                        <li><a href="#contacts-list-v2">POST /v2/contacts</a></li>
-                        <li><a href="#contacts-config">GET Config APIs</a></li>
                     </ul>
                 </div>
-                
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Notes</div>
-                    <ul>
-                        <li><a href="#notes">Overview</a></li>
-                        <li><a href="#notes-create">POST /notes/contacts/{id}</a></li>
-                        <li><a href="#notes-update">PUT /notes/{noteId}</a></li>
-                        <li><a href="#notes-attachments-init">POST /notes/.../attachments/init</a></li>
-                        <li><a href="#notes-attachments-upload">PUT S3 Upload</a></li>
-                        <li><a href="#notes-attachments-confirm">POST .../attachments/confirm-upload</a></li>
-                    </ul>
-                </div>
-                
+
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Households</div>
                     <ul>
                         <li><a href="#households">Overview</a></li>
                         <li><a href="#households-list">POST /v2/households</a></li>
+                        <li><a href="#households-detail">GET /households/{id}/detail</a></li>
+                        <li><a href="#households-members">GET /households/{id}/members</a></li>
                     </ul>
                 </div>
                 
@@ -516,9 +150,6 @@
                 <table>
                     <thead><tr><th>Header</th><th>Value</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code>content-type</code></td><td><code>application/json</code></tr>
-                        <tr><td><code>origin</code></td><td><code>https://conpat.uat.altafid.net/</code></tr>
-                        <tr><td><code>referer</code></td><td><code>https://conpat.uat.altafid.net/</code></tr>
                         <tr><td><code>Authorization</code></td><td><code>Bearer {token}</code></td><td>Access token from login</td></tr>
                         <tr><td><code>x-tenant-uuid</code></td><td><code>T019A16FF372A70B5A9307B00CE85E4DA</code></td><td>Tenant identifier</td></tr>
                         <tr><td><code>x-user-email</code></td><td><code>kaboom-poc@yopmail.com</code></td><td>User email</td></tr>
@@ -545,16 +176,14 @@
                 <h4>cURL</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl --location 'https://api.altafid.dev.altafid.net/api/auth/login' \
---header 'content-type: application/json' \
---header 'origin: https://conpat.uat.altafid.net' \
---header 'referer: https://conpat.uat.altafid.net/' \
---header 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
---header 'x-user-email: kaboom-poc@yopmail.com' \
---header 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
---header 'x-user-type: TENANT_STAFF' \
---data-raw '{"username":"kaboom-poc@yopmail.com","password":"Password123!"}'
-</code></pre>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/auth/login' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  --data-raw '{"username":"kaboom-poc@yopmail.com","password":"Password123!"}'</code></pre>
                 </div>
 
                 <h4>Response 200 OK</h4>
@@ -593,14 +222,25 @@
                 <h3 id="auth-refresh"><span class="method-badge method-post">POST</span>/api/auth/refresh</h3>
                 <p>Refresh expired access token</p>
 
+                <h4>Request Body</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9..."
+}</code></pre>
+                </div>
+
                 <h4>cURL</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl --location 'https://api.altafid.dev.altafid.net/api/auth/refresh' \
---header 'content-type: application/json' \
---header 'origin: https://conpat.uat.altafid.net' \
---header 'referer: https://conpat.uat.altafid.net/' \
---data '{"refreshToken":"eyJhbGciOiJIUzI1NiJ9..1s9dbSm6D7OutI8p-JzqWkeGFvmdVED4jMN8o2U4UX8"}'</code></pre>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/auth/refresh' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  --data-raw '{"refreshToken":"YOUR_REFRESH_TOKEN"}'</code></pre>
                 </div>
 
                 <h4>Response 200 OK</h4>
@@ -709,83 +349,6 @@
 }</code></pre>
                 </div>
 
-                <!-- LIST TASKS -->
-                <h3 id="tasks-list"><span class="method-badge method-post">POST</span>/api/tasks/filter?page={page}&size={size}</h3>
-                <p>Retrieve a paginated list of tasks with optional filters</p>
-
-                <h4>Query Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>formUuid</code></td><td>string</td><td>No</td><td>Form UUID filter</td></tr>
-                        <tr><td><code>langCode</code></td><td>string</td><td>No</td><td>Language code (e.g., en-US)</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tasks/filter?page=0&size=20' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: kaboom-poc@yopmail.com' \
-  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"formUuid":"FF019ACE73F70976DFA062DF0E93EFBCAE","langCode":"en-US"}'</code></pre>
-                </div>
-
-                <!-- UPDATE TASK -->
-                <h3 id="tasks-update"><span class="method-badge method-put">PUT</span>/api/tasks/{taskId}</h3>
-                <p>Update an existing task by ID</p>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>taskId</code></td><td>integer</td><td>✅</td><td>Task ID from task creation response</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <p>Send only the fields you want to update. All fields from the create task API are supported.</p>
-
-                <h4>Request Example (Update Priority)</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "priority": "MEDIUM"
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tasks/536' \
-  -X 'PUT' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: kaboom-poc@yopmail.com' \
-  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"priority":"MEDIUM"}'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <p>Returns the updated task object with the same structure as the create task response.</p>
-
                 <!-- ENUMS -->
                 <h2 id="enums">Enums Reference</h2>
 
@@ -847,7 +410,7 @@
 
                 <!-- CONTACTS -->
                 <h2 id="contacts">Contacts</h2>
-                <p>Use contacts API to get <code>contactId</code> for task creation and notes</p>
+                <p>Use contacts API to get <code>contactId</code> for task creation</p>
 
                 <h3 id="contacts-search"><span class="method-badge method-get">GET</span>/api/contacts/firm/TENANT/{tenantUuid}?searchTerm={term}</h3>
                 <p>Search contacts by name or email</p>
@@ -874,8 +437,58 @@
   -H 'x-user-type: TENANT_STAFF'</code></pre>
                 </div>
 
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "content": [
+    {
+      "displayName": "Mark Henry",
+      "contactUuid": "C019C03AFB97379B48C926FCE1552D05F",
+      "firstName": "Mark",
+      "middleName": null,
+      "paternalLastName": "Henry",
+      "maternalLastName": null,
+      "contactType": "ACTIVE",
+      "status": "ACTIVE",
+      "firmType": "TENANT",
+      "firmEntityUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+      "firmName": "CONPAT_UAT",
+      "preferredEmail": "mark@gmail.com",
+      "primaryEmail": "mark@gmail.com",
+      "preferredPhoneNumber": {
+        "country": "IN",
+        "phoneCountryCode": "+91",
+        "phoneNumber": "9844521687"
+      },
+      "contactMeans": "PHONE",
+      "preferredContactLanguage": "ENGLISH"
+    },
+    {
+      "displayName": "Stephen Mark Kerr .",
+      "contactUuid": "C019A5EE77B9F72F3847EA5CB38237A2A",
+      "firstName": "Stephen",
+      "middleName": "Mark",
+      "paternalLastName": "Kerr",
+      "maternalLastName": ".",
+      "contactType": "SUBSCRIBER",
+      "status": "ACTIVE",
+      "preferredEmail": "stephenkerr@nielsen.com",
+      "primaryEmail": "",
+      "preferredPhoneNumber": {
+        "country": "CL",
+        "phoneCountryCode": "+56",
+        "phoneNumber": "982195593"
+      }
+    }
+  ],
+  "totalElements": 2,
+  "totalPages": 1
+}</code></pre>
+                </div>
+
                 <div class="callout info">
-                    <strong>💡 Use <code>contactUuid</code></strong> as <code>contactId</code> when creating tasks or notes
+                    <strong>💡 Use <code>contactUuid</code></strong> as <code>contactId</code> when creating tasks
                 </div>
 
                 <!-- LIST ALL CONTACTS -->
@@ -895,12 +508,83 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/firm/TENANT/T019A16FF372A70B5A9307B00CE85E4DA?page=0&size=20' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <!-- CONTACT DETAIL (NEW) -->
+                <h3 id="contacts-detail"><span class="method-badge method-get">GET</span>/api/contacts/{contactUuid}</h3>
+                <p>Retrieve full details for a single contact by their UUID. The contact response does <strong>not</strong> include a <code>householdUuid</code>. To find which household(s) a contact belongs to, use the <a href="#households-members">Household Members</a> endpoint.</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactUuid</code></td><td>string</td><td>The contact's UUID (e.g. <code>C019BA4AEE01E71768B486A1E54172A19</code>)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/C019BA4AEE01E71768B486A1E54172A19' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "contactUuid": "C019BA4AEE01E71768B486A1E54172A19",
+  "displayName": "Isidora Test 1",
+  "firstName": "Isidora",
+  "middleName": null,
+  "paternalLastName": "Test",
+  "maternalLastName": "1",
+  "contactType": "ACTIVE",
+  "status": "ACTIVE",
+  "firmType": "TENANT",
+  "firmEntityUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "preferredEmail": "isidora@example.com",
+  "primaryEmail": "isidora@example.com",
+  "preferredPhoneNumber": {
+    "country": "CL",
+    "phoneCountryCode": "+56",
+    "phoneNumber": "912345678"
+  },
+  "contactMeans": "EMAIL",
+  "preferredContactLanguage": "SPANISH",
+  "dateOfBirth": "1990-01-15",
+  "gender": "FEMALE",
+  "identityType": "NATIONAL_ID",
+  "identityCountry": "CHL",
+  "identityId": "12345678-9",
+  "addresses": [],
+  "associatedOrganisations": null,
+  "compliance": null,
+  "contactAssociations": null
+}</code></pre>
+                </div>
+
+                <div class="callout warning">
+                    <strong>⚠️ Household ↔ Contact Relationship:</strong> Contacts do <strong>not</strong> have a <code>householdUuid</code> field. The relationship is many-to-many, managed through <strong>Household Members</strong>. To find a contact's household(s), query the <a href="#households-members">members endpoint</a> and match by <code>contactUuid</code>. See the <a href="#households">Households section</a> for the full data model.
                 </div>
 
                 <!-- CREATE CONTACT -->
@@ -937,6 +621,10 @@
                     </tbody>
                 </table>
 
+                <div class="callout info">
+                    <strong>💡 Note:</strong> At least one contact means (email or phone) is required. Use <code>contactManagerId</code> from the <a href="#staff-search">staff search API</a> to assign a contact manager.
+                </div>
+
                 <h4>Request Example</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
@@ -962,7 +650,7 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
   -H 'content-type: application/json' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
@@ -972,727 +660,69 @@
   --data-raw '{"firstName":"poc","paternalLastName":"last","contactType":"SUBSCRIBER","firmId":"T019A16FF372A70B5A9307B00CE85E4DA","firmType":"TENANT","preferredContactLanguage":"ENGLISH","status":"ACTIVE","middleName":"middle","maternalLastName":"maternal","preferredEmail":"poctestcontact@example.com","contactManagerId":"TS019A25A48E6177E8B989E9AECCA3F6DF","stage":"etapa2","contactMeans":"EMAIL","contactManagerFirmType":"TENANT"}'</code></pre>
                 </div>
 
-                <!-- UPDATE CONTACT -->
-                <h3 id="contacts-update"><span class="method-badge method-put">PUT</span>/api/contacts/{contactId}</h3>
-                <p>Update contact details including compliance information</p>
-
-                <div class="callout warning">
-                    <strong>⚠️ Important:</strong> 
-                    <br>
-                    <code>Kaboom AI integration can use this API to update contact compliance details</code>
-                    <br>
-                    Use configuration APIs to get allowed values for fields like contactSource, segmentName, and stageName
-                </div>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <p>Send the complete contact object with updated fields. All fields from create contact are supported, plus additional compliance fields:</p>
-                
-                <h5>Core Fields</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactUuid</code></td><td>string</td><td>✅</td><td>Must match contactId from path</td></tr>
-                        <tr><td><code>firstName</code></td><td>string</td><td>✅</td><td>First name</td></tr>
-                        <tr><td><code>paternalLastName</code></td><td>string</td><td>✅</td><td>Paternal last name (shown as "Last names" in UI)</td></tr>
-                        <tr><td><code>middleName</code></td><td>string</td><td>No</td><td>Middle name</td></tr>
-                        <tr><td><code>maternalLastName</code></td><td>string</td><td>No</td><td>Maternal surname</td></tr>
-                        <tr><td><code>displayName</code></td><td>string</td><td>No</td><td>Auto-generated from names</td></tr>
-                        <tr><td><code>preferredEmail</code></td><td>string</td><td>✅*</td><td>Email address (*required if no phone)</td></tr>
-                        <tr><td><code>preferredPhoneNumber</code></td><td>object</td><td>✅*</td><td>Phone object with phoneCountryCode and phoneNumber (*required if no email)</td></tr>
-                        <tr><td><code>contactType</code></td><td>enum</td><td>✅</td><td><code>SUBSCRIBER</code>, <code>ACTIVE</code></td></tr>
-                        <tr><td><code>status</code></td><td>enum</td><td>✅</td><td><code>ACTIVE</code></td></tr>
-                        <tr><td><code>firmEntityUuid</code></td><td>string</td><td>✅</td><td>Tenant UUID</td></tr>
-                        <tr><td><code>firmName</code></td><td>string</td><td>No</td><td>Tenant name (auto-populated)</td></tr>
-                        <tr><td><code>firmType</code></td><td>string</td><td>✅</td><td><code>TENANT</code></td></tr>
-                        <tr><td><code>preferredContactLanguage</code></td><td>string</td><td>✅</td><td><code>ENGLISH</code>, <code>SPANISH</code></td></tr>
-                        <tr><td><code>contactMeans</code></td><td>enum</td><td>✅</td><td><code>EMAIL</code>, <code>PHONE</code></td></tr>
-                        <tr><td><code>contactPreference</code></td><td>enum</td><td>No</td><td><code>CALL</code>, <code>EMAIL</code> (Contact Preference in UI)</td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Personal Information (Compliance Fields)</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>gender</code></td><td>enum</td><td>No</td><td><code>MALE</code>, <code>FEMALE</code>, <code>OTHER</code></td></tr>
-                        <tr><td><code>dateOfBirth</code></td><td>string</td><td>No</td><td>Format: YYYY-MM-DD (Date of Birth in UI)</td></tr>
-                        <tr><td><code>identityType</code></td><td>enum</td><td>No</td><td><code>NATIONAL_ID</code>, <code>PASSPORT</code> (Identity ID dropdown)</td></tr>
-                        <tr><td><code>identityId</code></td><td>string</td><td>No</td><td>ID number (Identity ID field)</td></tr>
-                        <tr><td><code>identityCountry</code></td><td>string</td><td>No</td><td>3-letter country code (Identity country in UI)</td></tr>
-                        <tr><td><code>countryOfCitizenship</code></td><td>string</td><td>No</td><td>3-letter country code (Country of Citizenship)</td></tr>
-                        <tr><td><code>countryOfBirth</code></td><td>string</td><td>No</td><td>3-letter country code (Country of Birth)</td></tr>
-                        <tr><td><code>maritalStatus</code></td><td>enum</td><td>No</td><td><code>SINGLE</code>, <code>MARRIED</code>, <code>DIVORCED</code>, <code>WIDOWED</code></td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Sales Information Fields</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactSource</code></td><td>string</td><td>No</td><td>Contact Source dropdown - Use <a href="#contacts-config-sources">GET /contacts/sources</a> API</td></tr>
-                        <tr><td><code>contactPreference</code></td><td>enum</td><td>No</td><td>Contact Preference - <code>CALL</code>, <code>EMAIL</code></td></tr>
-                        <tr><td><code>segmentName</code></td><td>string</td><td>No</td><td>Segment dropdown - Use <a href="#contacts-config-segments">GET /contacts/segments</a> API</td></tr>
-                        <tr><td><code>capturedByEntityUuid</code></td><td>string</td><td>No</td><td>Captured By dropdown - Staff UUID</td></tr>
-                        <tr><td><code>capturedByType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
-                        <tr><td><code>stageName</code></td><td>string</td><td>No</td><td>Stage dropdown - Use <a href="#contacts-config-stages">GET /contacts/stages</a> API</td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Financial Information Fields</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>liquidNetWorth</code></td><td>string</td><td>No</td><td>Liquid Net Worth (numeric string)</td></tr>
-                        <tr><td><code>totalNetWorth</code></td><td>string</td><td>No</td><td>Total Net Worth (numeric string)</td></tr>
-                        <tr><td><code>annualIncome</code></td><td>string</td><td>No</td><td>Annual Income (numeric string)</td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Partnership/Management Fields</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactManagerEntityUuid</code></td><td>string</td><td>No</td><td>Contact manager staff UUID</td></tr>
-                        <tr><td><code>contactManagerType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Address Fields</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>addresses</code></td><td>array</td><td>No</td><td>Array of address objects (see structure below)</td></tr>
-                    </tbody>
-                </table>
-
-                <h5>Address Object Structure</h5>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>addressUuid</code></td><td>string</td><td>No</td><td>Address UUID (for updates, omit for new addresses)</td></tr>
-                        <tr><td><code>country</code></td><td>string</td><td>✅</td><td>3-letter country code (e.g., ALB, USA)</td></tr>
-                        <tr><td><code>city</code></td><td>string</td><td>✅</td><td>City name</td></tr>
-                        <tr><td><code>state</code></td><td>string</td><td>✅</td><td>State/Province name</td></tr>
-                        <tr><td><code>commune</code></td><td>string</td><td>No</td><td>Commune</td></tr>
-                        <tr><td><code>streetName</code></td><td>string</td><td>✅</td><td>Street name</td></tr>
-                        <tr><td><code>streetNumber</code></td><td>string</td><td>✅</td><td>Street number</td></tr>
-                        <tr><td><code>apartment</code></td><td>string</td><td>No</td><td>Apartment/Suite number</td></tr>
-                        <tr><td><code>zipCode</code></td><td>string</td><td>✅</td><td>Postal Code</td></tr>
-                        <tr><td><code>addressType</code></td><td>enum</td><td>No</td><td><code>HOME</code>, <code>OFFICE</code></td></tr>
-                        <tr><td><code>contactAddressType</code></td><td>enum</td><td>No</td><td><code>SALES</code></td></tr>
-                        <tr><td><code>isPrimary</code></td><td>boolean</td><td>No</td><td>true/false</td></tr>
-                        <tr><td><code>landmark</code></td><td>string</td><td>No</td><td>Landmark reference</td></tr>
-                        <tr><td><code>latitude</code></td><td>number</td><td>No</td><td>Geo coordinate</td></tr>
-                        <tr><td><code>longitude</code></td><td>number</td><td>No</td><td>Geo coordinate</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="callout info">
-                    <strong>💡 Note on Required Fields:</strong><br>
-                    - At least one contact method (email OR phone) is required<br>
-                    - When adding addresses, Country, City, State, Street, Street Number, and Postal Code are mandatory<br>
-                    - Multiple addresses can be added to the addresses array
-                </div>
-
-                <h4>Request Example</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "contactUuid": "C019A5EE30BE0703E97DF93284EDE4CFE",
-  "firstName": "Alejandra",
-  "paternalLastName": "Kabakian",
-  "contactType": "SUBSCRIBER",
-  "status": "ACTIVE",
-  "firmEntityUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
-  "firmName": "CONPAT_UAT",
-  "firmType": "TENANT",
-  "preferredContactLanguage": "SPANISH",
-  "contactMeans": "EMAIL",
-  "contactPreference": "CALL",
-  "preferredEmail": "alekabakian@gmail.com",
-  "preferredPhoneNumber": {
-    "phoneCountryCode": "+56",
-    "phoneNumber": "963065816"
-  },
-  "gender": "FEMALE",
-  "dateOfBirth": "1978-07-18",
-  "identityType": "NATIONAL_ID",
-  "identityId": "23817081-8",
-  "identityCountry": "CHL",
-  "countryOfCitizenship": "ALB",
-  "countryOfBirth": "ALB",
-  "maritalStatus": "SINGLE",
-  "annualIncome": "45000",
-  "liquidNetWorth": "1233",
-  "totalNetWorth": "30000",
-  "contactSource": "conocido",
-  "segmentName": "ultraHighNetWorth",
-  "stageName": "etapa2",
-  "contactManagerEntityUuid": "TS019A25A48E6177E8B989E9AECCA3F6DF",
-  "contactManagerType": "TENANT",
-  "capturedByEntityUuid": "TS019A4A28181679D6B9C0622062BA56D8",
-  "capturedByType": "TENANT",
-  "addresses": [
-    {
-      "addressUuid": "CAD019C0FE044D87C2E9BE47D7BEE24C6AE",
-      "country": "ALB",
-      "city": "Kaboom City",
-      "state": "Kaboom State",
-      "commune": "Kaboom Commune",
-      "streetName": "Kaboom Street",
-      "streetNumber": "123",
-      "apartment": "123",
-      "zipCode": "5123445",
-      "addressType": "HOME",
-      "contactAddressType": "SALES",
-      "isPrimary": false,
-      "landmark": null,
-      "latitude": null,
-      "longitude": null
-    }
-  ]
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/C019A5EE30BE0703E97DF93284EDE4CFE' \
-  -X 'PUT' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"contactUuid":"C019A5EE30BE0703E97DF93284EDE4CFE","firstName":"Alejandra","paternalLastName":"Kabakian","contactType":"SUBSCRIBER","status":"ACTIVE","firmEntityUuid":"T019A16FF372A70B5A9307B00CE85E4DA","firmType":"TENANT","preferredContactLanguage":"SPANISH","contactMeans":"EMAIL","preferredEmail":"alekabakian@gmail.com","gender":"FEMALE","dateOfBirth":"1978-07-18","identityType":"NATIONAL_ID","identityId":"23817081-8","identityCountry":"CHL","maritalStatus":"SINGLE","annualIncome":"45000","liquidNetWorth":"1233","totalNetWorth":"30000","segmentName":"ultraHighNetWorth","stageName":"etapa2"}'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <p>Returns the updated contact object with the same structure as the create contact response.</p>
-
-                <div class="callout info">
-                    <strong>💡 Pro Tip:</strong> Use the <a href="#contacts-config">configuration APIs</a> below to fetch allowed values for contactSource, segmentName, and stageName fields before updating contacts.
-                </div>
-
-                <!-- CONTACTS LIST V2 -->
-                <h3 id="contacts-list-v2"><span class="method-badge method-post">POST</span>/api/v2/contacts?includeCustomFields={bool}</h3>
-                <p>List contacts with advanced filtering (V2 API)</p>
-
-                <h4>Query Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>includeCustomFields</code></td><td>boolean</td><td>No</td><td>Include custom fields in response (default: false)</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Example</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "page": 0,
-  "size": 20
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v2/contacts?includeCustomFields=true' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"page":0,"size":20}'</code></pre>
-                </div>
-
-                <!-- CONTACTS CONFIGURATION APIS -->
-                <h3 id="contacts-config">Contact Configuration APIs</h3>
-                <p>These APIs return tenant-specific allowed values for contact fields</p>
-
-                <div class="callout info">
-                    <strong>💡 Usage:</strong> Call these APIs to get valid values for contactSource, segmentName, and stageName before creating or updating contacts
-                </div>
-
-                <!-- CONTACT SOURCES -->
-                <h3 id="contacts-config-sources"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/sources</h3>
-                <p>Get allowed contact source values</p>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/sources' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>[
-  {
-    "id": 1,
-    "code": "conocido",
-    "displayName": "Conocido",
-    "description": "Known contact source"
-  },
-  {
-    "id": 2,
-    "code": "referral",
-    "displayName": "Referral",
-    "description": "Referred by existing client"
-  }
-]</code></pre>
-                </div>
-
-                <!-- CONTACT SEGMENTS -->
-                <h3 id="contacts-config-segments"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/segments</h3>
-                <p>Get allowed contact segment values</p>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/segments' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>[
-  {
-    "id": 1,
-    "code": "ultraHighNetWorth",
-    "displayName": "Ultra High Net Worth",
-    "description": "UHNW segment",
-    "minNetWorth": 30000000,
-    "maxNetWorth": null
-  },
-  {
-    "id": 2,
-    "code": "highNetWorth",
-    "displayName": "High Net Worth",
-    "description": "HNW segment",
-    "minNetWorth": 1000000,
-    "maxNetWorth": 30000000
-  }
-]</code></pre>
-                </div>
-
-                <!-- CONTACT STAGES -->
-                <h3 id="contacts-config-stages"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/stages</h3>
-                <p>Get allowed contact stage values</p>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/stages' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>[
-  {
-    "id": 1,
-    "code": "etapa1",
-    "displayName": "Etapa 1",
-    "description": "Stage 1 - Initial Contact",
-    "order": 1
-  },
-  {
-    "id": 2,
-    "code": "etapa2",
-    "displayName": "Etapa 2",
-    "description": "Stage 2 - Qualification",
-    "order": 2
-  },
-  {
-    "id": 3,
-    "code": "etapa3",
-    "displayName": "Etapa 3",
-    "description": "Stage 3 - Proposal",
-    "order": 3
-  }
-]</code></pre>
-                </div>
-
-                <!-- NOTES -->
-                <h2 id="notes">Notes</h2>
-                <p>Notes can be linked to contacts or households and can include attachments</p>
-
-                <div class="callout warning">
-                    <strong>⚠️ Important:</strong>
-                    <br>
-                    <code>Kaboom AI integration can use this API to create notes for contacts</code>
-                    <br>
-                    Notes can be created without attachments, or attachments can be added using the upload workflow
-                </div>
-
-                <h3 id="notes-create"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}</h3>
-                <p>Create a new note for a contact (with or without attachments)</p>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID (from contacts API)</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>textContent</code></td><td>string</td><td>✅</td><td>Note title/header</td></tr>
-                        <tr><td><code>description</code></td><td>string</td><td>✅</td><td>Note content (HTML supported)</td></tr>
-                        <tr><td><code>noteCreatedFor</code></td><td>string</td><td>✅</td><td>Must match contactId from path</td></tr>
-                        <tr><td><code>attachmentUrls</code></td><td>array</td><td>✅</td><td>Array of S3 URLs (empty array if no attachments)</td></tr>
-                        <tr><td><code>associations</code></td><td>array</td><td>✅</td><td>Array of associated contacts/households</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Association Object Structure</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>type</code></td><td>string</td><td>✅</td><td><code>CONTACT</code> or <code>HOUSEHOLD</code></td></tr>
-                        <tr><td><code>contactUuid</code></td><td>string</td><td>*</td><td>Required if type is CONTACT</td></tr>
-                        <tr><td><code>householdUuid</code></td><td>string</td><td>*</td><td>Required if type is HOUSEHOLD</td></tr>
-                        <tr><td><code>name</code></td><td>string</td><td>✅</td><td>Display name</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Example (Without Attachments)</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "textContent": "Call Summary",
-  "description": "<p>This is a summary from the call with the client</p>",
-  "noteCreatedFor": "C019C03B89AD675C4A8661CBDC8BBD986",
-  "attachmentUrls": [],
-  "associations": [
-    {
-      "type": "CONTACT",
-      "contactUuid": "C019C06D3FF2076BC986600EC8CA01F23",
-      "householdUuid": null,
-      "name": "John Doe"
-    },
-    {
-      "type": "HOUSEHOLD",
-      "contactUuid": null,
-      "householdUuid": "H019C09315DE575DFA44E591AD677E971",
-      "name": "Doe Family Household"
-    }
-  ]
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"textContent":"Call Summary","description":"<p>This is a summary from the call</p>","noteCreatedFor":"C019C03B89AD675C4A8661CBDC8BBD986","attachmentUrls":[],"associations":[{"type":"CONTACT","contactUuid":"C019C06D3FF2076BC986600EC8CA01F23","householdUuid":null,"name":"John Doe"}]}'</code></pre>
-                </div>
-
                 <h4>Response 201 Created</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>{
-  "noteUuid": "N019C0EFAE59F71A39170C901FF0BD7E0",
-  "textContent": "Call Summary",
-  "description": "<p>This is a summary from the call</p>",
-  "noteCreatedFor": "C019C03B89AD675C4A8661CBDC8BBD986",
-  "attachmentUrls": [],
-  "associations": [...],
-  "createdAt": "2026-01-30T12:58:31.000000",
-  "updatedAt": "2026-01-30T12:58:31.000000"
+  "contactUuid": "C019A5EE30BE0703E97DF93284EDE4CFE",
+  "firstName": "poc",
+  "middleName": "middle",
+  "paternalLastName": "last",
+  "maternalLastName": "maternal",
+  "displayName": "poc middle last maternal",
+  "preferredEmail": "poctestcontact@example.com",
+  "contactType": "SUBSCRIBER",
+  "status": "ACTIVE",
+  "firmType": "TENANT",
+  "firmEntityUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "preferredContactLanguage": "ENGLISH",
+  "contactMeans": "EMAIL",
+  "createdAt": "2026-01-29T04:30:00.000000",
+  "updatedAt": "2026-01-29T04:30:00.000000"
 }</code></pre>
                 </div>
 
-                <div class="callout info">
-                    <strong>💡 Save the <code>noteUuid</code></strong> from the response to update the note later with attachments
-                </div>
-
-                <!-- UPDATE NOTE -->
-                <h3 id="notes-update"><span class="method-badge method-put">PUT</span>/api/v1/notes/{noteId}</h3>
-                <p>Update an existing note (including adding attachments)</p>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>noteId</code></td><td>string</td><td>✅</td><td>Note UUID from create response</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <p>Same structure as create note. Update any fields including <code>attachmentUrls</code> array.</p>
-
-                <h4>Request Example (With Attachments)</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "textContent": "Call Summary",
-  "description": "<p>Updated summary with attachment</p>",
-  "associations": [...],
-  "attachmentUrls": [
-    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.png?X-Amz-Algorithm=..."
-  ]
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/N019C0EFAE59F71A39170C901FF0BD7E0' \
-  -X 'PUT' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"textContent":"Call Summary","description":"<p>Updated summary</p>","associations":[...],"attachmentUrls":["https://..."]}'</code></pre>
-                </div>
-
-                <!-- ATTACHMENT WORKFLOW -->
-                <h3>Note Attachment Upload Workflow</h3>
-                <p>To add attachments to a note, follow this 3-step process:</p>
-
-                <div class="callout info">
-                    <strong>Attachment Upload Steps:</strong><br>
-                    1. Initialize upload to get S3 presigned URLs<br>
-                    2. Upload files directly to S3 using the presigned URLs<br>
-                    3. Confirm upload to finalize attachments<br>
-                    4. Update note with confirmed attachment URLs
-                </div>
-
-                <!-- STEP 1: INIT ATTACHMENTS -->
-                <h3 id="notes-attachments-init"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}/attachments/init</h3>
-                <p><strong>Step 1:</strong> Initialize attachment upload and get S3 presigned URLs</p>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>files</code></td><td>array</td><td>✅</td><td>Array of file metadata objects</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>File Object Structure</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>fileName</code></td><td>string</td><td>✅</td><td>Original file name</td></tr>
-                        <tr><td><code>extension</code></td><td>string</td><td>✅</td><td>File extension (png, pdf, jpg, etc.)</td></tr>
-                        <tr><td><code>fileSize</code></td><td>integer</td><td>✅</td><td>File size in bytes</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Example</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "files": [
-    {
-      "fileName": "call-transcript.pdf",
-      "extension": "pdf",
-      "fileSize": 43433
-    }
-  ]
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986/attachments/init' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"files":[{"fileName":"call-transcript.pdf","extension":"pdf","fileSize":43433}]}'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "uploadUrls": [
-    {
-      "fileName": "call-transcript.pdf",
-      "uploadUrl": "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&...",
-      "fileUrl": "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&X-Amz-Expires=604800&..."
-    }
-  ]
-}</code></pre>
-                </div>
-
-                <div class="callout info">
-                    <strong>💡 Save both URLs:</strong><br>
-                    - Use <code>uploadUrl</code> for Step 2 (uploading file to S3)<br>
-                    - Use <code>fileUrl</code> for Step 3 (confirming upload)
-                </div>
-
-                <!-- STEP 2: S3 UPLOAD -->
-                <h3 id="notes-attachments-upload"><span class="method-badge method-put">PUT</span>S3 Presigned URL</h3>
-                <p><strong>Step 2:</strong> Upload the file directly to S3 using the presigned URL from Step 1</p>
-
-                <h4>Headers</h4>
-                <table>
-                    <thead><tr><th>Header</th><th>Value</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>Content-Type</code></td><td>File MIME type</td><td>e.g., image/png, application/pdf</td></tr>
-                        <tr><td><code>Content-Length</code></td><td>File size</td><td>Size in bytes</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=...' \
-  -X 'PUT' \
-  -H 'Content-Type: application/pdf' \
-  -H 'Content-Length: 43433' \
-  --data-binary '@/path/to/local/file.pdf'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <p>Empty response body on successful upload</p>
-
-                <!-- STEP 3: CONFIRM UPLOAD -->
-                <h3 id="notes-attachments-confirm"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}/attachments/confirm-upload</h3>
-                <p><strong>Step 3:</strong> Confirm the upload and finalize attachments</p>
-
-                <h4>Path Parameters</h4>
-                <table>
-                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Body</h4>
-                <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>attachmentUrls</code></td><td>array</td><td>✅</td><td>Array of fileUrl values from Step 1 response</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>Request Example</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "attachmentUrls": [
-    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&X-Amz-Expires=604800&..."
-  ]
-}</code></pre>
-                </div>
-
-                <h4>cURL</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986/attachments/confirm-upload' \
-  -H 'accept: application/json' \
-  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-  -H 'content-type: application/json' \
-  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
-  -H 'x-user-type: TENANT_STAFF' \
-  --data-raw '{"attachmentUrls":["https://altafid-notes-dev.s3.amazonaws.com/notes/..."]}'</code></pre>
-                </div>
-
-                <h4>Response 200 OK</h4>
-                <div class="code-block-wrapper">
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                    <pre><code>{
-  "confirmedUrls": [
-    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?..."
-  ]
-}</code></pre>
-                </div>
-
-                <div class="callout info">
-                    <strong>💡 Final Step:</strong> Use the confirmed URLs from this response in the <code>attachmentUrls</code> array when updating your note via <a href="#notes-update">PUT /notes/{noteId}</a>
-                </div>
-
-                <!-- HOUSEHOLDS -->
+                <!-- HOUSEHOLDS (NEW) -->
                 <h2 id="households">Households</h2>
-                <p>Households group related contacts together</p>
 
-                <h3 id="households-list"><span class="method-badge method-post">POST</span>/api/v2/households</h3>
-                <p>List households with pagination and filtering</p>
+                <p>Households are grouping entities (e.g. a family or business group) that contain <strong>members</strong>. Members can be <strong>Contacts</strong> (people) or <strong>Organisations</strong> (companies/entities).</p>
 
-                <h4>Request Body</h4>
+                <div class="callout info">
+                    <strong>Data Model — Many-to-Many Relationship:</strong>
+                    <ul>
+                        <li>A Household can have many members (Contacts and Organisations)</li>
+                        <li>A Contact can belong to multiple Households</li>
+                        <li>The join entity is <strong>HouseholdMember</strong>, which carries metadata: <code>isPrimary</code>, <code>isFinanciallyResponsible</code>, <code>canMakeDecisions</code>, <code>ownershipPercentage</code>, <code>relationshipType</code></li>
+                        <li>There is <strong>no</strong> <code>householdId</code> on the Contact entity</li>
+                    </ul>
+                    <br>
+                    <strong>Structure:</strong> <code>Household (1) ↔ (many) HouseholdMember ↔ (1) Contact/Organisation</code>
+                </div>
+
+                <h4>API Flow: Household → Contacts</h4>
                 <table>
-                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <thead><tr><th>Step</th><th>Endpoint</th><th>Purpose</th></tr></thead>
                     <tbody>
-                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
-                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
-                        <tr><td><code>filters</code></td><td>array</td><td>No</td><td>Array of filter objects (empty for all)</td></tr>
+                        <tr><td>1</td><td><code>POST /api/v2/households</code></td><td>List households, get <code>householdUuid</code> values</td></tr>
+                        <tr><td>2</td><td><code>GET /api/households/{householdUuid}/members</code></td><td>Get members, filter by <code>memberType == "CONTACT"</code></td></tr>
+                        <tr><td>3</td><td><code>GET /api/contacts/{contactUuid}</code></td><td>Optionally fetch full contact details</td></tr>
                     </tbody>
                 </table>
 
-                <h4>Request Example</h4>
+                <h4>API Flow: Contact → Household(s)</h4>
+                <table>
+                    <thead><tr><th>Step</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td><code>GET /api/contacts/{contactUuid}</code></td><td>Get contact info</td></tr>
+                        <tr><td>2</td><td><code>GET /api/households/{householdUuid}/members</code></td><td>Resolve household membership — the UI calls this to display which household(s) the contact belongs to</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- Households List (NEW) -->
+                <h3 id="households-list"><span class="method-badge method-post">POST</span>/api/v2/households</h3>
+                <p>List all households for the tenant (paginated). Returns basic household info — <strong>does not include members</strong>.</p>
+
+                <h4>Request Body</h4>
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>{
@@ -1706,18 +736,271 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v2/households' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
   -H 'content-type: application/json' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
-  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
-  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF' \
   --data-raw '{"page":0,"size":20,"filters":[]}'</code></pre>
                 </div>
 
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "content": [
+    {
+      "householdUuid": "H019C1D5FB17170678A60DDF055E06FC2",
+      "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+      "name": "Agent Household",
+      "partnershipUuid": null,
+      "partnershipManagerUuid": null,
+      "relationshipManagerType": "TENANT_STAFF",
+      "relationshipManagerUuid": "TS019A25A48E6177E8B989E9AECCA3F6DF",
+      "isActive": true,
+      "totalValue": 0,
+      "totalManagementAssets": 0,
+      "createdAt": "2026-02-02T08:02:16.5622",
+      "updatedAt": "2026-02-02T08:02:16.562202",
+      "memberCount": null,
+      "accountCount": 0,
+      "portfolioCount": null,
+      "accounts": null,
+      "partnershipName": null,
+      "relationshipManagerName": "Robert Williams Waldo 1",
+      "partnershipManagerName": null
+    }
+  ],
+  "totalElements": 15,
+  "totalPages": 1
+}</code></pre>
+                </div>
+
+                <h4>Response Fields</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>householdUuid</code></td><td>string</td><td>Unique household identifier — use this for detail/members calls</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td>Household name</td></tr>
+                        <tr><td><code>relationshipManagerUuid</code></td><td>string</td><td>Staff UUID of the relationship manager</td></tr>
+                        <tr><td><code>relationshipManagerName</code></td><td>string</td><td>Display name of the relationship manager</td></tr>
+                        <tr><td><code>isActive</code></td><td>boolean</td><td>Whether the household is active</td></tr>
+                        <tr><td><code>totalValue</code></td><td>number</td><td>Total value of household</td></tr>
+                        <tr><td><code>totalManagementAssets</code></td><td>number</td><td>Total management assets</td></tr>
+                        <tr><td><code>accountCount</code></td><td>number</td><td>Number of linked accounts</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- Household Detail (NEW) -->
+                <h3 id="households-detail"><span class="method-badge method-get">GET</span>/api/households/{householdUuid}/detail</h3>
+                <p>Get full household details including <strong>members</strong>, accounts, and portfolios embedded in the response.</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>householdUuid</code></td><td>string</td><td>The household UUID (e.g. <code>H019A5F49509F7F5AA706D631023AE72D</code>)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/households/H019A5F49509F7F5AA706D631023AE72D/detail' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "name": "Familia Casassus",
+  "partnershipUuid": null,
+  "partnershipManagerUuid": null,
+  "relationshipManagerType": "TENANT_STAFF",
+  "relationshipManagerUuid": "TS019BA4AA0DBC782BA33809EE921758D8",
+  "isActive": true,
+  "totalValue": null,
+  "totalManagementAssets": null,
+  "createdAt": "2025-11-07T17:07:11.647576",
+  "updatedAt": "2026-01-16T20:09:31.901234",
+  "members": [
+    {
+      "householdMemberUuid": "HM019A5F4950A27745890123726BDD6368",
+      "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+      "memberType": "CONTACT",
+      "contactUuid": "C019A5EE1F2BC79129B4371298633D089",
+      "displayName": "Unknown Member",
+      "isPrimary": false,
+      "isFinanciallyResponsible": false,
+      "canMakeDecisions": false,
+      "isActive": true
+    },
+    {
+      "householdMemberUuid": "HM019A5F4950AD7576BCFDA4EEE5EB0485",
+      "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+      "memberType": "ORGANISATION",
+      "organisationUuid": "O019A5F1CCC067E5BB25B0DA6421BE345",
+      "displayName": "Unknown Member",
+      "isPrimary": false,
+      "isFinanciallyResponsible": false,
+      "canMakeDecisions": false,
+      "isActive": true
+    }
+  ],
+  "accounts": [],
+  "portfolios": [],
+  "partnershipName": null,
+  "relationshipManagerName": "Miguel Rodriguez",
+  "partnershipManagerName": null
+}</code></pre>
+                </div>
+
+                <div class="callout warning">
+                    <strong>⚠️ Note:</strong> The <code>/detail</code> endpoint may return <code>"displayName": "Unknown Member"</code> and <code>null</code> for <code>contactName</code>/<code>organisationName</code>. To get fully resolved names, use the <a href="#households-members"><code>/members</code></a> endpoint instead.
+                </div>
+
+                <!-- Household Members (NEW) -->
+                <h3 id="households-members"><span class="method-badge method-get">GET</span>/api/households/{householdUuid}/members</h3>
+                <p>Get the list of members for a household with <strong>fully resolved names and details</strong>. This is the recommended endpoint for mapping household ↔ contact relationships.</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>householdUuid</code></td><td>string</td><td>The household UUID</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/households/H019A5F49509F7F5AA706D631023AE72D/members' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "householdMemberUuid": "HM019A5F4950A27745890123726BDD6368",
+    "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+    "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+    "memberType": "CONTACT",
+    "displayName": "Amanda Esther Argandoña Castro",
+    "contactId": 879,
+    "contactUuid": "C019A5EE1F2BC79129B4371298633D089",
+    "contactName": "Amanda Esther Argandoña Castro",
+    "organisationUuid": null,
+    "organisationName": null,
+    "isPrimary": false,
+    "isFinanciallyResponsible": false,
+    "canMakeDecisions": false,
+    "ownershipPercentage": null,
+    "relationshipType": null,
+    "relationshipDescription": null,
+    "isActive": true,
+    "isDeleted": false,
+    "createdAt": "2025-11-07T17:07:11.652898"
+  },
+  {
+    "householdMemberUuid": "HM019A5F4950A772C798B48A4F10D71DB6",
+    "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+    "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+    "memberType": "CONTACT",
+    "displayName": "Carlos Ignacio Casassus Fontecilla",
+    "contactId": 843,
+    "contactUuid": "C019A5EE11B1570C99AC17F24864E4A8B",
+    "contactName": "Carlos Ignacio Casassus Fontecilla",
+    "organisationUuid": null,
+    "organisationName": null,
+    "isPrimary": false,
+    "isFinanciallyResponsible": false,
+    "canMakeDecisions": false,
+    "ownershipPercentage": null,
+    "relationshipType": null,
+    "isActive": true,
+    "isDeleted": false,
+    "createdAt": "2025-11-07T17:07:11.658719"
+  },
+  {
+    "householdMemberUuid": "HM019A5F4950AD7576BCFDA4EEE5EB0485",
+    "householdUuid": "H019A5F49509F7F5AA706D631023AE72D",
+    "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+    "memberType": "ORGANISATION",
+    "displayName": "Green Barakiel Corp",
+    "contactId": null,
+    "contactUuid": null,
+    "contactName": null,
+    "organisationId": 149,
+    "organisationUuid": "O019A5F1CCC067E5BB25B0DA6421BE345",
+    "organisationName": "Green Barakiel Corp",
+    "isPrimary": false,
+    "isFinanciallyResponsible": false,
+    "canMakeDecisions": false,
+    "ownershipPercentage": null,
+    "relationshipType": null,
+    "isActive": true,
+    "isDeleted": false,
+    "createdAt": "2025-11-07T17:07:11.667856"
+  }
+]</code></pre>
+                </div>
+
+                <h4>Member Fields</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>householdMemberUuid</code></td><td>string</td><td>Unique ID of the join record</td></tr>
+                        <tr><td><code>householdUuid</code></td><td>string</td><td>Parent household UUID</td></tr>
+                        <tr><td><code>memberType</code></td><td>string</td><td><code>"CONTACT"</code> (person) or <code>"ORGANISATION"</code> (company)</td></tr>
+                        <tr><td><code>contactUuid</code></td><td>string | null</td><td>Contact UUID — present when <code>memberType</code> is <code>"CONTACT"</code></td></tr>
+                        <tr><td><code>contactId</code></td><td>number | null</td><td>Internal contact ID</td></tr>
+                        <tr><td><code>contactName</code></td><td>string | null</td><td>Contact display name</td></tr>
+                        <tr><td><code>organisationUuid</code></td><td>string | null</td><td>Organisation UUID — present when <code>memberType</code> is <code>"ORGANISATION"</code></td></tr>
+                        <tr><td><code>organisationId</code></td><td>number | null</td><td>Internal organisation ID</td></tr>
+                        <tr><td><code>organisationName</code></td><td>string | null</td><td>Organisation display name</td></tr>
+                        <tr><td><code>displayName</code></td><td>string</td><td>Resolved display name of the member</td></tr>
+                        <tr><td><code>isPrimary</code></td><td>boolean</td><td>Whether this is the primary member of the household</td></tr>
+                        <tr><td><code>isFinanciallyResponsible</code></td><td>boolean</td><td>Whether this member is financially responsible</td></tr>
+                        <tr><td><code>canMakeDecisions</code></td><td>boolean</td><td>Whether this member can make decisions for the household</td></tr>
+                        <tr><td><code>ownershipPercentage</code></td><td>number | null</td><td>Ownership percentage in the household</td></tr>
+                        <tr><td><code>relationshipType</code></td><td>string | null</td><td>Relationship type (e.g. spouse, child, etc.)</td></tr>
+                        <tr><td><code>relationshipDescription</code></td><td>string | null</td><td>Free-text relationship description</td></tr>
+                        <tr><td><code>isActive</code></td><td>boolean</td><td>Whether the membership is active</td></tr>
+                        <tr><td><code>isDeleted</code></td><td>boolean</td><td>Soft delete flag</td></tr>
+                    </tbody>
+                </table>
+
                 <div class="callout info">
-                    <strong>💡 Use <code>householdUuid</code></strong> from the response to associate notes with households
+                    <strong>💡 Tip:</strong> To get all contacts in a household, filter the members array: <code>members.filter(m => m.memberType === "CONTACT")</code> — then use each member's <code>contactUuid</code> to fetch full contact details via <code>GET /api/contacts/{contactUuid}</code> if needed.
                 </div>
 
                 <!-- STAFF -->
@@ -1749,9 +1032,140 @@
   -H 'x-user-type: TENANT_STAFF'</code></pre>
                 </div>
 
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "content": [
+    {
+      "tenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+      "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+      "firstName": "kaboom",
+      "middleName": "",
+      "paternalLastName": "poc",
+      "maternalLastName": "",
+      "userEmail": "kaboom-poc@yopmail.com",
+      "email": "kaboom-poc@yopmail.com",
+      "staffType": "ADMIN",
+      "legalResidence": "United States",
+      "timeZone": "UTC -5:00",
+      "platformLanguage": "en-US",
+      "commissionCurrency": "USD",
+      "contactPhone": null,
+      "jobPosition": null,
+      "dateOfBirth": null,
+      "currentResidence": null,
+      "isActive": true,
+      "createdAt": "2026-01-28T21:00:40.613087",
+      "updatedAt": "2026-01-28T21:02:03.638174"
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1
+}</code></pre>
+                </div>
+
                 <div class="callout info">
                     <strong>💡 Use <code>tenantStaffUuid</code></strong> as <code>assignedToId</code> when creating tasks
                 </div>
+
+                <!-- LIST TASKS -->
+                <h3 id="tasks-list"><span class="method-badge method-post">POST</span>/api/tasks/filter?page={page}&size={size}</h3>
+                <p>Retrieve a paginated list of tasks with optional filters</p>
+
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>formUuid</code></td><td>string</td><td>No</td><td>Form UUID filter</td></tr>
+                        <tr><td><code>langCode</code></td><td>string</td><td>No</td><td>Language code (e.g., en-US)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tasks/filter?page=0&size=20' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"formUuid":"FF019ACE73F70976DFA062DF0E93EFBCAE","langCode":"en-US"}'</code></pre>
+                </div>
+
+                <!-- UPDATE TASK -->
+                <h3 id="tasks-update"><span class="method-badge method-put">PUT</span>/api/tasks/{taskId}</h3>
+                <p>Update an existing task by ID</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>taskId</code></td><td>integer</td><td>✅</td><td>Task ID from task creation response</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <p>Send only the fields you want to update. All fields from the create task API are supported.</p>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>taskName</code></td><td>string</td><td>Task title</td></tr>
+                        <tr><td><code>taskType</code></td><td>enum</td><td><code>EMAIL</code>, <code>CALL</code>, <code>TODO</code></td></tr>
+                        <tr><td><code>queue</code></td><td>enum</td><td>Task queue</td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td>Task status</td></tr>
+                        <tr><td><code>priority</code></td><td>enum</td><td><code>HIGH</code>, <code>MEDIUM</code>, <code>LOW</code></td></tr>
+                        <tr><td><code>assignedToId</code></td><td>string</td><td>Staff UUID</td></tr>
+                        <tr><td><code>dueDate</code></td><td>string</td><td>ISO 8601 format</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td>Task description (HTML supported)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Example (Update Priority)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "priority": "MEDIUM"
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tasks/536' \
+  -X 'PUT' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: kaboom-poc@yopmail.com' \
+  -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"priority":"MEDIUM"}'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <p>Returns the updated task object with the same structure as the create task response.</p>
 
                 <!-- LIST ALL STAFF -->
                 <h3 id="staff-list"><span class="method-badge method-get">GET</span>/api/tenant-staff/all/paginated?page={page}&size={size}</h3>
@@ -1770,8 +1184,12 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/tenant-staff/all/paginated?page=0&size=20' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
@@ -1800,12 +1218,72 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=11' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "content": [
+    {
+      "accountUuid": "14c5c174-4e5f-5be7-bb73-d7d511452ef5",
+      "linkState": "linked",
+      "linkDate": "2000-01-01T00:00:00",
+      "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+      "accountNumber": "11000457",
+      "custodian": "stonex",
+      "accountStatus": "O",
+      "accountType": "UNKNOWN",
+      "marginAccount": true,
+      "taxResidency": null,
+      "disposalMethodForMutualFunds": "FIFO",
+      "disposalMethodForOtherSecurities": "FIFO",
+      "w8W9Indicator": null,
+      "baseCurrency": "USD",
+      "defaultFxCurrency": "USD",
+      "positionOnly": true,
+      "taxable": true,
+      "householdUuid": "H019A691D490478708B45387D9212BA1A",
+      "householdName": "Sociedad De Inversiones Macam Limitada",
+      "partnershipManagerUuid": "",
+      "partnershipManagerName": "",
+      "relationshipManagerUuid": "TS019A5F3EFF7476BEA03564E19B3AEBE1",
+      "relationshipManagerName": "Sebastián Costa",
+      "snapshotDate": "2025-11-27T00:00:00",
+      "distinctFxCurrencies": "USD/USDE",
+      "trading": "Discretionary",
+      "currentEodBalanceClp": 348838258.54,
+      "previousEodBalanceClp": 349429695.45,
+      "netDepositsClp": 0.00,
+      "dayChangeClp": -591436.91,
+      "gainLossClp": -591436.91,
+      "currentEodBalanceEur": 320815.20,
+      "previousEodBalanceEur": 320755.02,
+      "netDepositsEur": 0.00,
+      "dayChangeEur": 60.18,
+      "gainLossEur": 60.18,
+      "currentEodBalanceUsd": 375442.02,
+      "previousEodBalanceUsd": 375371.59,
+      "netDepositsUsd": 0.00,
+      "dayChangeUsd": 70.43,
+      "gainLossUsd": 70.43
+    }
+  ],
+  "page": 0,
+  "size": 50,
+  "totalElements": 1,
+  "totalPages": 1
+}</code></pre>
                 </div>
 
                 <!-- LIST ALL ACCOUNTS -->
@@ -1827,13 +1305,20 @@
                 <div class="code-block-wrapper">
                     <button class="copy-button" onclick="copyCode(this)">Copy</button>
                     <pre><code>curl 'https://api.altafid.dev.altafid.net/api/accounts/linked?page=0&size=50&sort=accountNumber&keyword=' \
-  -H 'accept: application/json' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-US,en;q=0.5' \
   -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'origin: https://conpat.uat.altafid.net' \
+  -H 'referer: https://conpat.uat.altafid.net/' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
   -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
   -H 'x-user-email: kaboom-poc@yopmail.com' \
   -H 'x-user-id: TS019C06688AA57248B9EA5325DBDFC48E' \
   -H 'x-user-type: TENANT_STAFF'</code></pre>
                 </div>
+
+                <h4>Response 200 OK</h4>
+                <p>Returns the same structure as the search endpoint with paginated account data.</p>
 
                 <div class="callout info">
                     <strong>💡 Use <code>accountUuid</code></strong> to reference accounts in other API calls
