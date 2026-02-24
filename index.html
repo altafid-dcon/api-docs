@@ -99,6 +99,12 @@
                         <li><a href="#contacts-list">GET /contacts (list all)</a></li>
                         <li><a href="#contacts-detail">GET /contacts/{contactUuid}</a></li>
                         <li><a href="#contacts-create">POST /contacts</a></li>
+                        <li><a href="#contacts-update">PUT /contacts/{contactId}</a></li>
+                        <li><a href="#contacts-list-v2">POST /v2/contacts</a></li>
+                        <li><a href="#contacts-config">Configuration APIs</a></li>
+                        <li><a href="#contacts-config-sources">GET /contacts/sources</a></li>
+                        <li><a href="#contacts-config-segments">GET /contacts/segments</a></li>
+                        <li><a href="#contacts-config-stages">GET /contacts/stages</a></li>
                     </ul>
                 </div>
 
@@ -422,7 +428,7 @@
 
                 <!-- CONTACTS -->
                 <h2 id="contacts">Contacts</h2>
-                <p>Use contacts API to get <code>contactId</code> for task creation</p>
+                <p>Use contacts API to get <code>contactId</code> for task creation and notes</p>
 
                 <h3 id="contacts-search"><span class="method-badge method-get">GET</span>/api/contacts/firm/TENANT/{tenantUuid}?searchTerm={term}</h3>
                 <p>Search contacts by name or email</p>
@@ -500,7 +506,7 @@
                 </div>
 
                 <div class="callout info">
-                    <strong>💡 Use <code>contactUuid</code></strong> as <code>contactId</code> when creating tasks
+                    <strong>💡 Use <code>contactUuid</code></strong> as <code>contactId</code> when creating tasks or notes
                 </div>
 
                 <!-- LIST ALL CONTACTS -->
@@ -532,7 +538,7 @@
   -H 'x-user-type: TENANT_STAFF'</code></pre>
                 </div>
 
-                <!-- CONTACT DETAIL (NEW) -->
+                <!-- CONTACT DETAIL -->
                 <h3 id="contacts-detail"><span class="method-badge method-get">GET</span>/api/contacts/{contactUuid}</h3>
                 <p>Retrieve full details for a single contact by their UUID. The contact response does <strong>not</strong> include a <code>householdUuid</code>. To find which household(s) a contact belongs to, use the <a href="#households-members">Household Members</a> endpoint.</p>
 
@@ -692,8 +698,388 @@
   "createdAt": "2026-01-29T04:30:00.000000",
   "updatedAt": "2026-01-29T04:30:00.000000"
 }</code></pre>
+                </div>
 
+                <!-- UPDATE CONTACT -->
+                <h3 id="contacts-update"><span class="method-badge method-put">PUT</span>/api/contacts/{contactId}</h3>
+                <p>Update contact details including compliance information</p>
 
+                <div class="callout warning">
+                    <strong>⚠️ Important:</strong> 
+                    <br>
+                    <code>Kaboom AI integration can use this API to update contact compliance details</code>
+                    <br>
+                    Use configuration APIs to get allowed values for fields like contactSource, segmentName, and stageName
+                </div>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <p>Send the complete contact object with updated fields. All fields from create contact are supported, plus additional compliance fields:</p>
+                
+                <h5>Core Fields</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactUuid</code></td><td>string</td><td>✅</td><td>Must match contactId from path</td></tr>
+                        <tr><td><code>firstName</code></td><td>string</td><td>✅</td><td>First name</td></tr>
+                        <tr><td><code>paternalLastName</code></td><td>string</td><td>✅</td><td>Paternal last name (shown as "Last names" in UI)</td></tr>
+                        <tr><td><code>middleName</code></td><td>string</td><td>No</td><td>Middle name</td></tr>
+                        <tr><td><code>maternalLastName</code></td><td>string</td><td>No</td><td>Maternal surname</td></tr>
+                        <tr><td><code>displayName</code></td><td>string</td><td>No</td><td>Auto-generated from names</td></tr>
+                        <tr><td><code>preferredEmail</code></td><td>string</td><td>✅*</td><td>Email address (*required if no phone)</td></tr>
+                        <tr><td><code>preferredPhoneNumber</code></td><td>object</td><td>✅*</td><td>Phone object with phoneCountryCode and phoneNumber (*required if no email)</td></tr>
+                        <tr><td><code>contactType</code></td><td>enum</td><td>✅</td><td><code>SUBSCRIBER</code>, <code>ACTIVE</code></td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td>✅</td><td><code>ACTIVE</code></td></tr>
+                        <tr><td><code>firmEntityUuid</code></td><td>string</td><td>✅</td><td>Tenant UUID</td></tr>
+                        <tr><td><code>firmName</code></td><td>string</td><td>No</td><td>Tenant name (auto-populated)</td></tr>
+                        <tr><td><code>firmType</code></td><td>string</td><td>✅</td><td><code>TENANT</code></td></tr>
+                        <tr><td><code>preferredContactLanguage</code></td><td>string</td><td>✅</td><td><code>ENGLISH</code>, <code>SPANISH</code></td></tr>
+                        <tr><td><code>contactMeans</code></td><td>enum</td><td>✅</td><td><code>EMAIL</code>, <code>PHONE</code></td></tr>
+                        <tr><td><code>contactPreference</code></td><td>enum</td><td>No</td><td><code>CALL</code>, <code>EMAIL</code> (Contact Preference in UI)</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Personal Information (Compliance Fields)</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>gender</code></td><td>enum</td><td>No</td><td><code>MALE</code>, <code>FEMALE</code>, <code>OTHER</code></td></tr>
+                        <tr><td><code>dateOfBirth</code></td><td>string</td><td>No</td><td>Format: YYYY-MM-DD (Date of Birth in UI)</td></tr>
+                        <tr><td><code>identityType</code></td><td>enum</td><td>No</td><td><code>NATIONAL_ID</code>, <code>PASSPORT</code> (Identity ID dropdown)</td></tr>
+                        <tr><td><code>identityId</code></td><td>string</td><td>No</td><td>ID number (Identity ID field)</td></tr>
+                        <tr><td><code>identityCountry</code></td><td>string</td><td>No</td><td>3-letter country code (Identity country in UI)</td></tr>
+                        <tr><td><code>countryOfCitizenship</code></td><td>string</td><td>No</td><td>3-letter country code (Country of Citizenship)</td></tr>
+                        <tr><td><code>countryOfBirth</code></td><td>string</td><td>No</td><td>3-letter country code (Country of Birth)</td></tr>
+                        <tr><td><code>maritalStatus</code></td><td>enum</td><td>No</td><td><code>SINGLE</code>, <code>MARRIED</code>, <code>DIVORCED</code>, <code>WIDOWED</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Sales Information Fields</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactSource</code></td><td>string</td><td>No</td><td>Contact Source dropdown - Use <a href="#contacts-config-sources">GET /contacts/sources</a> API</td></tr>
+                        <tr><td><code>contactPreference</code></td><td>enum</td><td>No</td><td>Contact Preference - <code>CALL</code>, <code>EMAIL</code></td></tr>
+                        <tr><td><code>segmentName</code></td><td>string</td><td>No</td><td>Segment dropdown - Use <a href="#contacts-config-segments">GET /contacts/segments</a> API</td></tr>
+                        <tr><td><code>capturedByEntityUuid</code></td><td>string</td><td>No</td><td>Captured By dropdown - Staff UUID</td></tr>
+                        <tr><td><code>capturedByType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
+                        <tr><td><code>stageName</code></td><td>string</td><td>No</td><td>Stage dropdown - Use <a href="#contacts-config-stages">GET /contacts/stages</a> API</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Financial Information Fields</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>liquidNetWorth</code></td><td>string</td><td>No</td><td>Liquid Net Worth (numeric string)</td></tr>
+                        <tr><td><code>totalNetWorth</code></td><td>string</td><td>No</td><td>Total Net Worth (numeric string)</td></tr>
+                        <tr><td><code>annualIncome</code></td><td>string</td><td>No</td><td>Annual Income (numeric string)</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Partnership/Management Fields</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactManagerEntityUuid</code></td><td>string</td><td>No</td><td>Contact manager staff UUID</td></tr>
+                        <tr><td><code>contactManagerType</code></td><td>string</td><td>No</td><td><code>TENANT</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Address Fields</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>addresses</code></td><td>array</td><td>No</td><td>Array of address objects (see structure below)</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>Address Object Structure</h5>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>addressUuid</code></td><td>string</td><td>No</td><td>Address UUID (for updates, omit for new addresses)</td></tr>
+                        <tr><td><code>country</code></td><td>string</td><td>✅</td><td>3-letter country code (e.g., ALB, USA)</td></tr>
+                        <tr><td><code>city</code></td><td>string</td><td>✅</td><td>City name</td></tr>
+                        <tr><td><code>state</code></td><td>string</td><td>✅</td><td>State/Province name</td></tr>
+                        <tr><td><code>commune</code></td><td>string</td><td>No</td><td>Commune</td></tr>
+                        <tr><td><code>streetName</code></td><td>string</td><td>✅</td><td>Street name</td></tr>
+                        <tr><td><code>streetNumber</code></td><td>string</td><td>✅</td><td>Street number</td></tr>
+                        <tr><td><code>apartment</code></td><td>string</td><td>No</td><td>Apartment/Suite number</td></tr>
+                        <tr><td><code>zipCode</code></td><td>string</td><td>✅</td><td>Postal Code</td></tr>
+                        <tr><td><code>addressType</code></td><td>enum</td><td>No</td><td><code>HOME</code>, <code>OFFICE</code></td></tr>
+                        <tr><td><code>contactAddressType</code></td><td>enum</td><td>No</td><td><code>SALES</code></td></tr>
+                        <tr><td><code>isPrimary</code></td><td>boolean</td><td>No</td><td>true/false</td></tr>
+                        <tr><td><code>landmark</code></td><td>string</td><td>No</td><td>Landmark reference</td></tr>
+                        <tr><td><code>latitude</code></td><td>number</td><td>No</td><td>Geo coordinate</td></tr>
+                        <tr><td><code>longitude</code></td><td>number</td><td>No</td><td>Geo coordinate</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout info">
+                    <strong>💡 Note on Required Fields:</strong><br>
+                    - At least one contact method (email OR phone) is required<br>
+                    - When adding addresses, Country, City, State, Street, Street Number, and Postal Code are mandatory<br>
+                    - Multiple addresses can be added to the addresses array
+                </div>
+
+                <h4>Request Example</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "contactUuid": "C019A5EE30BE0703E97DF93284EDE4CFE",
+  "firstName": "Alejandra",
+  "paternalLastName": "Kabakian",
+  "contactType": "SUBSCRIBER",
+  "status": "ACTIVE",
+  "firmEntityUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "firmName": "CONPAT_UAT",
+  "firmType": "TENANT",
+  "preferredContactLanguage": "SPANISH",
+  "contactMeans": "EMAIL",
+  "contactPreference": "CALL",
+  "preferredEmail": "alekabakian@gmail.com",
+  "preferredPhoneNumber": {
+    "phoneCountryCode": "+56",
+    "phoneNumber": "963065816"
+  },
+  "gender": "FEMALE",
+  "dateOfBirth": "1978-07-18",
+  "identityType": "NATIONAL_ID",
+  "identityId": "23817081-8",
+  "identityCountry": "CHL",
+  "countryOfCitizenship": "ALB",
+  "countryOfBirth": "ALB",
+  "maritalStatus": "SINGLE",
+  "annualIncome": "45000",
+  "liquidNetWorth": "1233",
+  "totalNetWorth": "30000",
+  "contactSource": "conocido",
+  "segmentName": "ultraHighNetWorth",
+  "stageName": "etapa2",
+  "contactManagerEntityUuid": "TS019A25A48E6177E8B989E9AECCA3F6DF",
+  "contactManagerType": "TENANT",
+  "capturedByEntityUuid": "TS019A4A28181679D6B9C0622062BA56D8",
+  "capturedByType": "TENANT",
+  "addresses": [
+    {
+      "addressUuid": "CAD019C0FE044D87C2E9BE47D7BEE24C6AE",
+      "country": "ALB",
+      "city": "Kaboom City",
+      "state": "Kaboom State",
+      "commune": "Kaboom Commune",
+      "streetName": "Kaboom Street",
+      "streetNumber": "123",
+      "apartment": "123",
+      "zipCode": "5123445",
+      "addressType": "HOME",
+      "contactAddressType": "SALES",
+      "isPrimary": false,
+      "landmark": null,
+      "latitude": null,
+      "longitude": null
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/contacts/C019A5EE30BE0703E97DF93284EDE4CFE' \
+  -X 'PUT' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"contactUuid":"C019A5EE30BE0703E97DF93284EDE4CFE","firstName":"Alejandra","paternalLastName":"Kabakian","contactType":"SUBSCRIBER","status":"ACTIVE","firmEntityUuid":"T019A16FF372A70B5A9307B00CE85E4DA","firmType":"TENANT","preferredContactLanguage":"SPANISH","contactMeans":"EMAIL","preferredEmail":"alekabakian@gmail.com","gender":"FEMALE","dateOfBirth":"1978-07-18","identityType":"NATIONAL_ID","identityId":"23817081-8","identityCountry":"CHL","maritalStatus":"SINGLE","annualIncome":"45000","liquidNetWorth":"1233","totalNetWorth":"30000","segmentName":"ultraHighNetWorth","stageName":"etapa2"}'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <p>Returns the updated contact object with the same structure as the create contact response.</p>
+
+                <div class="callout info">
+                    <strong>💡 Pro Tip:</strong> Use the <a href="#contacts-config">configuration APIs</a> below to fetch allowed values for contactSource, segmentName, and stageName fields before updating contacts.
+                </div>
+
+                <!-- CONTACTS LIST V2 -->
+                <h3 id="contacts-list-v2"><span class="method-badge method-post">POST</span>/api/v2/contacts?includeCustomFields={bool}</h3>
+                <p>List contacts with advanced filtering (V2 API)</p>
+
+                <h4>Query Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>includeCustomFields</code></td><td>boolean</td><td>No</td><td>Include custom fields in response (default: false)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>page</code></td><td>integer</td><td>No</td><td>Page number (default: 0)</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td>No</td><td>Page size (default: 20)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Example</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "page": 0,
+  "size": 20
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v2/contacts?includeCustomFields=true' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"page":0,"size":20}'</code></pre>
+                </div>
+
+                <!-- CONTACTS CONFIGURATION APIS -->
+                <h3 id="contacts-config">Contact Configuration APIs</h3>
+                <p>These APIs return tenant-specific allowed values for contact fields</p>
+
+                <div class="callout info">
+                    <strong>💡 Usage:</strong> Call these APIs to get valid values for contactSource, segmentName, and stageName before creating or updating contacts
+                </div>
+
+                <!-- CONTACT SOURCES -->
+                <h3 id="contacts-config-sources"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/sources</h3>
+                <p>Get allowed contact source values</p>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/sources' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "id": 1,
+    "code": "conocido",
+    "displayName": "Conocido",
+    "description": "Known contact source"
+  },
+  {
+    "id": 2,
+    "code": "referral",
+    "displayName": "Referral",
+    "description": "Referred by existing client"
+  }
+]</code></pre>
+                </div>
+
+                <!-- CONTACT SEGMENTS -->
+                <h3 id="contacts-config-segments"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/segments</h3>
+                <p>Get allowed contact segment values</p>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/segments' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "id": 1,
+    "code": "ultraHighNetWorth",
+    "displayName": "Ultra High Net Worth",
+    "description": "UHNW segment",
+    "minNetWorth": 30000000,
+    "maxNetWorth": null
+  },
+  {
+    "id": 2,
+    "code": "highNetWorth",
+    "displayName": "High Net Worth",
+    "description": "HNW segment",
+    "minNetWorth": 1000000,
+    "maxNetWorth": 30000000
+  }
+]</code></pre>
+                </div>
+
+                <!-- CONTACT STAGES -->
+                <h3 id="contacts-config-stages"><span class="method-badge method-get">GET</span>/api/core/platformconfigs/v1/contacts/stages</h3>
+                <p>Get allowed contact stage values</p>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/stages' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "id": 1,
+    "code": "etapa1",
+    "displayName": "Etapa 1",
+    "description": "Stage 1 - Initial Contact",
+    "order": 1
+  },
+  {
+    "id": 2,
+    "code": "etapa2",
+    "displayName": "Etapa 2",
+    "description": "Stage 2 - Qualification",
+    "order": 2
+  },
+  {
+    "id": 3,
+    "code": "etapa3",
+    "displayName": "Etapa 3",
+    "description": "Stage 3 - Proposal",
+    "order": 3
+  }
+]</code></pre>
                 </div>
 
                 <!-- NOTES -->
