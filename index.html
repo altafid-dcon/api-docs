@@ -103,6 +103,18 @@
                 </div>
 
                 <div class="sidebar-section">
+                    <div class="sidebar-section-title">Notes</div>
+                    <ul>
+                        <li><a href="#notes">Overview</a></li>
+                        <li><a href="#notes-create">POST /notes/contacts/{id}</a></li>
+                        <li><a href="#notes-update">PUT /notes/{noteId}</a></li>
+                        <li><a href="#notes-attachments-init">POST /attachments/init</a></li>
+                        <li><a href="#notes-attachments-upload">PUT S3 Upload</a></li>
+                        <li><a href="#notes-attachments-confirm">POST /attachments/confirm</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
                     <div class="sidebar-section-title">Households</div>
                     <ul>
                         <li><a href="#households">Overview</a></li>
@@ -680,6 +692,329 @@
   "createdAt": "2026-01-29T04:30:00.000000",
   "updatedAt": "2026-01-29T04:30:00.000000"
 }</code></pre>
+
+
+                </div>
+
+                <!-- NOTES -->
+                <h2 id="notes">Notes</h2>
+                <p>Notes can be linked to contacts or households and can include attachments</p>
+
+                <div class="callout warning">
+                    <strong>⚠️ Important:</strong>
+                    <br>
+                    <code>Kaboom AI integration can use this API to create notes for contacts</code>
+                    <br>
+                    Notes can be created without attachments, or attachments can be added using the upload workflow
+                </div>
+
+                <h3 id="notes-create"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}</h3>
+                <p>Create a new note for a contact (with or without attachments)</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID (from contacts API)</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>textContent</code></td><td>string</td><td>✅</td><td>Note title/header</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td>✅</td><td>Note content (HTML supported)</td></tr>
+                        <tr><td><code>noteCreatedFor</code></td><td>string</td><td>✅</td><td>Must match contactId from path</td></tr>
+                        <tr><td><code>attachmentUrls</code></td><td>array</td><td>✅</td><td>Array of S3 URLs (empty array if no attachments)</td></tr>
+                        <tr><td><code>associations</code></td><td>array</td><td>✅</td><td>Array of associated contacts/households</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Association Object Structure</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>type</code></td><td>string</td><td>✅</td><td><code>CONTACT</code> or <code>HOUSEHOLD</code></td></tr>
+                        <tr><td><code>contactUuid</code></td><td>string</td><td>*</td><td>Required if type is CONTACT</td></tr>
+                        <tr><td><code>householdUuid</code></td><td>string</td><td>*</td><td>Required if type is HOUSEHOLD</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td>✅</td><td>Display name</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Example (Without Attachments)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "textContent": "Call Summary",
+  "description": "<p>This is a summary from the call with the client</p>",
+  "noteCreatedFor": "C019C03B89AD675C4A8661CBDC8BBD986",
+  "attachmentUrls": [],
+  "associations": [
+    {
+      "type": "CONTACT",
+      "contactUuid": "C019C06D3FF2076BC986600EC8CA01F23",
+      "householdUuid": null,
+      "name": "John Doe"
+    },
+    {
+      "type": "HOUSEHOLD",
+      "contactUuid": null,
+      "householdUuid": "H019C09315DE575DFA44E591AD677E971",
+      "name": "Doe Family Household"
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"textContent":"Call Summary","description":"<p>This is a summary from the call</p>","noteCreatedFor":"C019C03B89AD675C4A8661CBDC8BBD986","attachmentUrls":[],"associations":[{"type":"CONTACT","contactUuid":"C019C06D3FF2076BC986600EC8CA01F23","householdUuid":null,"name":"John Doe"}]}'</code></pre>
+                </div>
+
+                <h4>Response 201 Created</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "noteUuid": "N019C0EFAE59F71A39170C901FF0BD7E0",
+  "textContent": "Call Summary",
+  "description": "<p>This is a summary from the call</p>",
+  "noteCreatedFor": "C019C03B89AD675C4A8661CBDC8BBD986",
+  "attachmentUrls": [],
+  "associations": [...],
+  "createdAt": "2026-01-30T12:58:31.000000",
+  "updatedAt": "2026-01-30T12:58:31.000000"
+}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    <strong>💡 Save the <code>noteUuid</code></strong> from the response to update the note later with attachments
+                </div>
+
+                <!-- UPDATE NOTE -->
+                <h3 id="notes-update"><span class="method-badge method-put">PUT</span>/api/v1/notes/{noteId}</h3>
+                <p>Update an existing note (including adding attachments)</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>noteId</code></td><td>string</td><td>✅</td><td>Note UUID from create response</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <p>Same structure as create note. Update any fields including <code>attachmentUrls</code> array.</p>
+
+                <h4>Request Example (With Attachments)</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "textContent": "Call Summary",
+  "description": "<p>Updated summary with attachment</p>",
+  "associations": [...],
+  "attachmentUrls": [
+    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.png?X-Amz-Algorithm=..."
+  ]
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/N019C0EFAE59F71A39170C901FF0BD7E0' \
+  -X 'PUT' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"textContent":"Call Summary","description":"<p>Updated summary</p>","associations":[...],"attachmentUrls":["https://..."]}'</code></pre>
+                </div>
+
+                <!-- ATTACHMENT WORKFLOW -->
+                <h3>Note Attachment Upload Workflow</h3>
+                <p>To add attachments to a note, follow this 3-step process:</p>
+
+                <div class="callout info">
+                    <strong>Attachment Upload Steps:</strong><br>
+                    1. Initialize upload to get S3 presigned URLs<br>
+                    2. Upload files directly to S3 using the presigned URLs<br>
+                    3. Confirm upload to finalize attachments<br>
+                    4. Update note with confirmed attachment URLs
+                </div>
+
+                <!-- STEP 1: INIT ATTACHMENTS -->
+                <h3 id="notes-attachments-init"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}/attachments/init</h3>
+                <p><strong>Step 1:</strong> Initialize attachment upload and get S3 presigned URLs</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>files</code></td><td>array</td><td>✅</td><td>Array of file metadata objects</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>File Object Structure</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fileName</code></td><td>string</td><td>✅</td><td>Original file name</td></tr>
+                        <tr><td><code>extension</code></td><td>string</td><td>✅</td><td>File extension (png, pdf, jpg, etc.)</td></tr>
+                        <tr><td><code>fileSize</code></td><td>integer</td><td>✅</td><td>File size in bytes</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Example</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "files": [
+    {
+      "fileName": "call-transcript.pdf",
+      "extension": "pdf",
+      "fileSize": 43433
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986/attachments/init' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"files":[{"fileName":"call-transcript.pdf","extension":"pdf","fileSize":43433}]}'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "uploadUrls": [
+    {
+      "fileName": "call-transcript.pdf",
+      "uploadUrl": "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&...",
+      "fileUrl": "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&X-Amz-Expires=604800&..."
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    <strong>💡 Save both URLs:</strong><br>
+                    - Use <code>uploadUrl</code> for Step 2 (uploading file to S3)<br>
+                    - Use <code>fileUrl</code> for Step 3 (confirming upload)
+                </div>
+
+                <!-- STEP 2: S3 UPLOAD -->
+                <h3 id="notes-attachments-upload"><span class="method-badge method-put">PUT</span>S3 Presigned URL</h3>
+                <p><strong>Step 2:</strong> Upload the file directly to S3 using the presigned URL from Step 1</p>
+
+                <h4>Headers</h4>
+                <table>
+                    <thead><tr><th>Header</th><th>Value</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>Content-Type</code></td><td>File MIME type</td><td>e.g., image/png, application/pdf</td></tr>
+                        <tr><td><code>Content-Length</code></td><td>File size</td><td>Size in bytes</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=...' \
+  -X 'PUT' \
+  -H 'Content-Type: application/pdf' \
+  -H 'Content-Length: 43433' \
+  --data-binary '@/path/to/local/file.pdf'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <p>Empty response body on successful upload</p>
+
+                <!-- STEP 3: CONFIRM UPLOAD -->
+                <h3 id="notes-attachments-confirm"><span class="method-badge method-post">POST</span>/api/v1/notes/contacts/{contactId}/attachments/confirm-upload</h3>
+                <p><strong>Step 3:</strong> Confirm the upload and finalize attachments</p>
+
+                <h4>Path Parameters</h4>
+                <table>
+                    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>contactId</code></td><td>string</td><td>✅</td><td>Contact UUID</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <table>
+                    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>attachmentUrls</code></td><td>array</td><td>✅</td><td>Array of fileUrl values from Step 1 response</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Example</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "attachmentUrls": [
+    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260130T125831Z&X-Amz-Expires=604800&..."
+  ]
+}</code></pre>
+                </div>
+
+                <h4>cURL</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl 'https://api.altafid.dev.altafid.net/api/v1/notes/contacts/C019C03B89AD675C4A8661CBDC8BBD986/attachments/confirm-upload' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'content-type: application/json' \
+  -H 'x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA' \
+  -H 'x-user-email: conpat_suhas_admin@yopmail.com' \
+  -H 'x-user-id: TS019A25A48E6177E8B989E9AECCA3F6DF' \
+  -H 'x-user-type: TENANT_STAFF' \
+  --data-raw '{"attachmentUrls":["https://altafid-notes-dev.s3.amazonaws.com/notes/..."]}'</code></pre>
+                </div>
+
+                <h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "confirmedUrls": [
+    "https://altafid-notes-dev.s3.amazonaws.com/notes/T019A16FF372A70B5A9307B00CE85E4DA/temp/C019C03B89AD675C4A8661CBDC8BBD986/NAT019C0EFBD7D07519B722B9A414E39C96.pdf?..."
+  ]
+}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    <strong>💡 Final Step:</strong> Use the confirmed URLs from this response in the <code>attachmentUrls</code> array when updating your note via <a href="#notes-update">PUT /notes/{noteId}</a>
                 </div>
 
                 <!-- HOUSEHOLDS (NEW) -->
