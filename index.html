@@ -131,13 +131,14 @@
                 </div>
                 
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Staff</div>
-                    <ul>
-                        <li><a href="#staff">Overview</a></li>
-                        <li><a href="#staff-search">GET /staff/search</a></li>
-                        <li><a href="#staff-list">GET /staff/all</a></li>
-                    </ul>
-                </div>
+    <div class="sidebar-section-title">Staff</div>
+    <ul>
+        <li><a href="#staff">Overview</a></li>
+        <li><a href="#staff-search">GET /staff/search</a></li>
+        <li><a href="#staff-get-by-id">GET /staff/{id}</a></li>
+        <li><a href="#staff-list">GET /staff/all</a></li>
+    </ul>
+</div>
                 
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Accounts</div>
@@ -1790,6 +1791,57 @@
                     <strong>💡 Use <code>tenantStaffUuid</code></strong> as <code>assignedToId</code> when creating tasks
                 </div>
 
+                <h3 id="staff-get-by-id"><span class="method-badge method-get">GET</span>/api/tenant-staff/{id}</h3>
+<p>Get a staff member by their ID</p>
+
+<h4>Path Parameters</h4>
+<table>
+    <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>id</code></td><td>string</td><td>Yes</td><td>The unique ID of the tenant staff member</td></tr>
+    </tbody>
+</table>
+
+<h4>cURL</h4>
+<div class="code-block-wrapper">
+    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+    <pre><code>curl 'https://api.altafid.com/api/tenant-staff/TS019D1B8A5EAC77E49D84C3483C659B50' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
+  -H 'x-tenant-uuid: T019CFD220F1371F1A8BCC1DD4D869483' \
+  -H 'x-user-email: support@altafid.com' \
+  -H 'x-user-id: TS019D1B8A5EAC77E49D84C3483C659B50' \
+  -H 'x-user-type: TENANT_STAFF'</code></pre>
+</div>
+<h4>Response 200 OK</h4>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+    "staffUuid": "TS019D1B8A5EAC77E49D84C3483C659B50",
+    "firstName": "Support",
+    "middleName": "",
+    "email": "support@altafid.com",
+    "userEmail": "support@altafid.com",
+    "maternalLastName": "",
+    "legalResidence": "Chile",
+    "platformLanguage": "en-US",
+    "contactPhone": null,
+    "currentResidence": null,
+    "isDeleted": false,
+    "timeZone": "America/Santiago",
+    "jobPosition": null,
+    "profilePictureUrl": null,
+    "dateOfBirth": null,
+    "staffType": "ADMIN",
+    "staffCategory": "TENANT_STAFF",
+    "firm": null,
+    "partnerUuid": null,
+    "isActive": true,
+    "commissionCurrency": "USD",
+    "createdAt": "2026-03-23T16:32:26.373826",
+    "updatedAt": "2026-03-23T16:32:26.373829",
+    "paternalLastName": "Altafid"
+}</code></pre>
                 <!-- LIST TASKS -->
                 <h3 id="tasks-list"><span class="method-badge method-post">POST</span>/api/tasks/filter?page={page}&size={size}</h3>
                 <p>Retrieve a paginated list of tasks with optional filters</p>
