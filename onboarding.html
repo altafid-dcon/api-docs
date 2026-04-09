@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Onboarding - Altafid API Documentation</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post { background: #d1fae5; color: #065f46; }
+        .method-get  { background: #dbeafe; color: #1e40af; }
+        .method-put  { background: #fef3c7; color: #78350f; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 180px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-section ul { list-style: none; margin-left: 0; }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+
+        .matrix-table th { white-space: nowrap; }
+        .tick  { color: #16a34a; font-size: 1.1rem; }
+        .cross { color: #dc2626; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand"><h1>Altafid API</h1></div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="onboarding.html" class="active">Client Onboarding</a></li>
+                <li><a href="https://github.com/altafid-dcon/api-docs" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+
+            <!-- Sidebar -->
+            <aside class="doc-sidebar">
+                <h3>Client Onboarding</h3>
+
+                <div class="sidebar-section">
+                    <ul>
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#flow">Creation Flow</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Create Contact</div>
+                    <ul>
+                        <li><a href="#create-contact">POST /api/contacts</a></li>
+                        <li><a href="#create-contact-payload">Full Payload</a></li>
+                        <li><a href="#create-contact-response">Response</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Update Contact</div>
+                    <ul>
+                        <li><a href="#update-sales">Sales Information</a></li>
+                        <li><a href="#update-compliance">Compliance Information</a></li>
+                        <li><a href="#activate">Activate (credentials)</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Enums &amp; Config</div>
+                    <ul>
+                        <li><a href="#dynamic-enums">Dynamic Enum APIs</a></li>
+                        <li><a href="#hardcoded-enums">Hardcoded Enums</a></li>
+                        <li><a href="#field-matrix">Field Matrix</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="doc-content">
+                <h1 id="overview">Client Onboarding</h1>
+                <p>This guide walks through the full process of onboarding a new client (contact) into the Altafid platform via the REST API — from initial creation through compliance and sales profile updates to credential activation.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    All requests require standard auth headers — see <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FLOW -->
+                <h2 id="flow">Onboarding Flow</h2>
+                <p>A contact goes through three sequential API calls before they are fully active on the platform:</p>
+
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Create Contact</div>
+                        <div class="step-desc">POST /api/contacts<br>Returns <code>contactUuid</code></div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Update Profile</div>
+                        <div class="step-desc">PUT /api/contacts/{uuid}<br>Sales &amp; compliance data</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Activate</div>
+                        <div class="step-desc">PUT + POST /credentials/init<br>Sets primaryEmail &amp; creates login</div>
+                    </div>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Order matters:</strong> <code>credentials/init</code> will fail unless <code>primaryEmail</code> has been set via the PUT endpoint first.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- CREATE CONTACT -->
+                <h2 id="create-contact">
+                    <span class="method-badge method-post">POST</span>/api/contacts
+                </h2>
+                <p>Creates a new contact (client individual). Returns a <code>contactUuid</code> used in all subsequent calls.</p>
+
+                <h3 id="create-contact-payload">Request Body</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  // ── Identity ────────────────────────────────────────────────
+  "firstName":                "Juan",           // required
+  "paternalLastName":         "García",         // required
+  "maternalLastName":         "López",          // optional
+  "middleName":               "Carlos",         // optional
+
+  // ── Classification ──────────────────────────────────────────
+  "contactType":              "SUBSCRIBER",     // required  — see enum table
+  "contactMeans":             "EMAIL",          // required  — EMAIL | PHONE | MESSAGE
+  "preferredContactLanguage": "SPANISH",        // required  — SPANISH | ENGLISH
+
+  // ── Firm / manager ──────────────────────────────────────────
+  "firmId":                   "&lt;tenantUuid&gt;",   // required
+  "firmType":                 "TENANT",         // required
+  "contactManagerId":         "&lt;staffUuid&gt;",   // required
+  "contactManagerFirmType":   "TENANT",         // required
+  "status":                   "ACTIVE",         // required
+
+  // ── Contact details ─────────────────────────────────────────
+  "preferredEmail":           "juan@example.com",
+  "dateOfBirth":              "1980-05-20",     // YYYY-MM-DD
+  "gender":                   "MALE",           // MALE | FEMALE
+  "maritalStatus":            "MARRIED",        // see enum table
+
+  "preferredPhoneNumber": {
+    "phoneCountryCode":       "+56",
+    "phoneNumber":            "912345678"
+  },
+
+  // ── Government ID ───────────────────────────────────────────
+  "identityType":             "CHILE_RUT",      // CHILE_RUT | PASSPORT
+  "identityId":               "12345678-9",
+  "identityCountry":          "CHL",            // ISO-3 country code
+
+  // ── CRM fields (values fetched from config APIs) ────────────
+  "contactSource":            "conSource001",   // GET /api/contacts/sources
+  "marketSegment":            "highNetWorth",   // GET /api/contacts/segments
+  "contactPreference":        "EMAIL"           // EMAIL | CALL | MESSAGE
+}</code></pre>
+                </div>
+
+                <h4>Required Fields Summary</h4>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>firstName</code></td><td>string</td><td><span class="badge-required">required</span></td><td></td></tr>
+                        <tr><td><code>paternalLastName</code></td><td>string</td><td><span class="badge-required">required</span></td><td></td></tr>
+                        <tr><td><code>maternalLastName</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td></td></tr>
+                        <tr><td><code>middleName</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td></td></tr>
+                        <tr><td><code>contactType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>SUBSCRIBER</code> | <code>PROSPECT</code> | <code>NON_SUBSCRIBER</code></td></tr>
+                        <tr><td><code>contactMeans</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>EMAIL</code> | <code>PHONE</code> | <code>MESSAGE</code></td></tr>
+                        <tr><td><code>preferredContactLanguage</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>SPANISH</code> | <code>ENGLISH</code></td></tr>
+                        <tr><td><code>firmId</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Tenant UUID</td></tr>
+                        <tr><td><code>firmType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td>Always <code>TENANT</code></td></tr>
+                        <tr><td><code>contactManagerId</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Staff UUID</td></tr>
+                        <tr><td><code>contactManagerFirmType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td>Always <code>TENANT</code></td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td><span class="badge-required">required</span></td><td>Always <code>ACTIVE</code></td></tr>
+                        <tr><td><code>preferredEmail</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Set here for creation; <code>primaryEmail</code> set later via PUT</td></tr>
+                        <tr><td><code>dateOfBirth</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Format: <code>YYYY-MM-DD</code></td></tr>
+                        <tr><td><code>gender</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>MALE</code> | <code>FEMALE</code></td></tr>
+                        <tr><td><code>maritalStatus</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>MARRIED</code> | <code>SINGLE</code> | <code>DIVORCED</code> | <code>WIDOWED</code></td></tr>
+                        <tr><td><code>preferredPhoneNumber</code></td><td>object</td><td><span class="badge-optional">optional</span></td><td><code>{ phoneCountryCode, phoneNumber }</code></td></tr>
+                        <tr><td><code>identityType</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>CHILE_RUT</code> | <code>PASSPORT</code></td></tr>
+                        <tr><td><code>identityId</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>The ID value</td></tr>
+                        <tr><td><code>identityCountry</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>ISO-3 (e.g. <code>CHL</code>, <code>ARG</code>, <code>USA</code>)</td></tr>
+                        <tr><td><code>contactSource</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/contacts/sources</code></td></tr>
+                        <tr><td><code>marketSegment</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/contacts/segments</code></td></tr>
+                        <tr><td><code>contactPreference</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>EMAIL</code> | <code>CALL</code> | <code>MESSAGE</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="create-contact-response">Response 200 OK</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "contactUuid": "C019BFA7DAD1B73438B06B6D0C33A4D11",
+  "firstName": "Juan",
+  "paternalLastName": "García",
+  ...
+}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    <strong>Save <code>contactUuid</code></strong> — you need it for all update and activation calls.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- UPDATE SALES -->
+                <h2 id="update-sales">
+                    <span class="method-badge method-put">PUT</span>/api/contacts/{contactUuid} — Sales Information
+                </h2>
+                <p>Updates the contact's sales-side profile: address, CRM stage, segment, financial figures, and identity details. This is the same endpoint used for all contact updates — the fields you include determine what gets updated.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "firstName": "Peter",
+  "paternalLastName": "Parker",
+  "contactType": "SUBSCRIBER",
+  "preferredContactLanguage": "ENGLISH",
+  "status": "ACTIVE",
+  "gender": "MALE",
+  "dateOfBirth": "1980-05-09",
+  "maritalStatus": "SINGLE",
+
+  "preferredEmail": "peter.parker@yopmail.com",
+  "preferredPhoneNumber": {
+    "phoneCountryCode": "+1",
+    "phoneNumber": "4704704011"
+  },
+
+  // ── Financial ───────────────────────────────────────────────
+  "annualIncome":   "365332",
+  "liquidNetWorth": "76526753",
+  "totalNetWorth":  "354353421",
+
+  // ── Government ID ───────────────────────────────────────────
+  "identityType":    "PASSPORT",
+  "identityId":      "P7652675672",
+  "identityCountry": "AFG",
+
+  "countryOfCitizenship": "AGO",
+  "countryOfBirth":       "ARG",
+
+  // ── CRM metadata (values from config APIs) ──────────────────
+  "contactSource":  "conSource001",   // GET /api/contacts/sources
+  "segmentName":    "conSegment001",  // GET /api/contacts/segments
+  "stageName":      "conStage001",    // GET /api/config/stages
+  "contactPreference": "CALL",
+  "contactMeans":   "PHONE",
+  "displayName":    "Peter Parker",
+
+  // ── Firm / manager ──────────────────────────────────────────
+  "firmEntityUuid":            "T0198DDA7B8EC7B6D9E12734DA8657106",
+  "firmName":                  "Sprint 1 Tenant Admin 4",
+  "firmType":                  "TENANT",
+  "capturedByEntityUuid":      "PS0199CA8F08C270B5A5B0DFD3B565B332",
+  "capturedByType":            "TENANT",
+  "contactManagerEntityUuid":  "PS0199CA8F08C270B5A5B0DFD3B565B332",
+  "contactManagerType":        "PARTNER",
+
+  // ── Addresses ───────────────────────────────────────────────
+  "addresses": [
+    {
+      "addressUuid":         "CAD019C0DDC195371089C082DE6450D625B",  // include for update; omit for new
+      "streetNumber":        "123-AB",
+      "streetName":          "GR St.",
+      "city":                "Grecian",
+      "state":               "Grestate",
+      "zipCode":             "873678",
+      "country":             "GRC",
+      "apartment":           "XB Apts.",
+      "commune":             "Grecommune",
+      "landmark":            null,
+      "addressType":         "HOME",
+      "contactAddressType":  "SALES",    // SALES | COMPLIANCE
+      "isPrimary":           false
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- UPDATE COMPLIANCE -->
+                <h2 id="update-compliance">
+                    <span class="method-badge method-put">PUT</span>/api/contacts/{contactUuid} — Compliance Information
+                </h2>
+                <p>Updates KYC/compliance data: identity documents, employment history, PEP declarations, address, and financial profile. Uses the same endpoint as the sales update.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "firstName":       "Arpit",
+  "middleName":      null,
+  "paternalLastName": "Gangwar",
+  "maternalLastName": null,
+  "alias":           null,
+
+  "primaryEmail":    "arpitsingh414@gmail.com",
+  "phoneNumber": {
+    "country":          "IN",
+    "phoneCountryCode": "+91",
+    "phoneNumber":      "9897987689"
+  },
+
+  "gender":                    "MALE",
+  "dateOfBirth":               "1991-08-16",
+  "primaryCountryOfCitizenship": "BEL",
+  "countryOfBirth":            "BRA",
+  "maritalStatus":             "SINGLE",
+  "preferredContactLanguage":  "ENGLISH",
+
+  // ── Financial ───────────────────────────────────────────────
+  "annualIncome":   "2222222",
+  "liquidNetWorth": "87675765",
+  "totalNetWorth":  "765767872",
+
+  // ── PEP / Compliance flags ───────────────────────────────────
+  "relatedToPEP":                    false,
+  "directorOrTenPercentShareholder": false,
+  "pepEntries":                      [],
+  "companyNames":                    null,
+  "tradingSymbols":                  null,
+
+  // ── Address (contactAddressType: COMPLIANCE) ─────────────────
+  "addresses": [
+    {
+      "country":             "AFG",
+      "city":                "Kabul",
+      "state":               "Kabul",
+      "commune":             "Labu",
+      "streetName":          "ABC St.",
+      "streetNumber":        "123",
+      "apartment":           "ABC Apt.",
+      "zipCode":             "677621",
+      "contactAddressType":  "COMPLIANCE",  // COMPLIANCE for KYC address
+      "isPrimary":           true,
+      "addressType":         "HOME"
+    }
+  ],
+
+  // ── Identity documents ───────────────────────────────────────
+  "identityDocuments": [
+    {
+      "specificationData": {
+        "specificationType": "CHILE_RUT_CARD",  // see identity types below
+        "country":           "CHL",
+        "identityId":        "CHL8761756",
+        "issuingAuthority":  "Chile Gov"
+      }
+    }
+  ],
+
+  // ── Employment history ───────────────────────────────────────
+  "currentEmployment": null,
+  "employmentHistory": [
+    {
+      "employmentStatus": "employed",       // employed | self_employed | unemployed | retired | student
+      "employerName":     "EMPY Employer",
+      "jobPosition":      "Manager",
+      "startDate":        "1980-05-02",     // YYYY-MM-DD
+      "endDate":          "1986-09-12",     // YYYY-MM-DD
+      "country":          "AF",
+      "streetName":       "Bakul",
+      "regionState":      "Kabul",
+      "streetNumber":     "123",
+      "city":             "Kabul",
+      "apartment":        "XYH Apt.",
+      "commune":          "Labuk",
+      "zipCode":          "8767652"
+    }
+  ],
+
+  // ── Custom fields ────────────────────────────────────────────
+  "customFields": null,
+
+  // ── Read-only (returned in GET, ignored on write) ────────────
+  "contactComplianceUuid": "CCMP019D02804EC87C44BFD85C56048D9AAF",
+  "contactUuid":           null
+}</code></pre>
+                </div>
+
+                <h4>Identity Document Types</h4>
+                <table>
+                    <thead><tr><th>specificationType</th><th>Country</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>CHILE_RUT_CARD</code></td><td>CHL</td><td>Chilean national ID (RUT)</td></tr>
+                        <tr><td><code>PASSPORT</code></td><td>Any</td><td>International passport</td></tr>
+                        <tr><td><code>NATIONAL_ID</code></td><td>Any</td><td>Generic national ID card</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ACTIVATION -->
+                <h2 id="activate">Activation — Set Email + Init Credentials</h2>
+                <p>After creating and updating a contact, run these two calls to enable platform login.</p>
+
+                <h3>Step 3a — Set primaryEmail</h3>
+                <p><span class="method-badge method-put">PUT</span><code>/api/contacts/{contactUuid}</code></p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "primaryEmail":             "juan@example.com",
+  "preferredContactLanguage": "SPANISH",
+
+  // Include identity if the contact has one:
+  "identityType":    "CHILE_RUT",
+  "identityId":      "12345678-9",
+  "identityCountry": "CHL"
+}</code></pre>
+                </div>
+
+                <h3>Step 3b — Initialize credentials</h3>
+                <p><span class="method-badge method-post">POST</span><code>/api/contacts/{contactUuid}/credentials/init</code></p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    Returns <code>200</code> on success. The contact can now log in using their <code>primaryEmail</code>.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DYNAMIC ENUMS -->
+                <h2 id="dynamic-enums">Dynamic Enum APIs</h2>
+                <p>These values are tenant-specific and must be fetched at runtime before syncing contacts. The returned IDs/names are used directly as field values.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>API Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>stageName</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/config/stages</code></td>
+                            <td>Pipeline stages (e.g. <code>etapa1</code>, <code>etapa2</code>, <code>etapa3</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>contactSource</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/contacts/sources</code></td>
+                            <td>Contact origin / lead source</td>
+                        </tr>
+                        <tr>
+                            <td><code>segmentName</code> / <code>marketSegment</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/contacts/segments</code></td>
+                            <td>Market segment classification</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- HARDCODED ENUMS -->
+                <h2 id="hardcoded-enums">Hardcoded Enums</h2>
+                <p>These values are static across all tenants. The API will reject any value not in the allowed list.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Allowed Values</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>gender</code></td>
+                            <td>
+                                <span class="enum-tag">MALE</span>
+                                <span class="enum-tag">FEMALE</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>maritalStatus</code></td>
+                            <td>
+                                <span class="enum-tag">MARRIED</span>
+                                <span class="enum-tag">SINGLE</span>
+                                <span class="enum-tag">DIVORCED</span>
+                                <span class="enum-tag">WIDOWED</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>contactMeans</code></td>
+                            <td>
+                                <span class="enum-tag">EMAIL</span>
+                                <span class="enum-tag">PHONE</span>
+                                <span class="enum-tag">MESSAGE</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>identityType</code></td>
+                            <td>
+                                <span class="enum-tag">CHILE_RUT</span>
+                                <span class="enum-tag">PASSPORT</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>preferredContactLanguage</code></td>
+                            <td>
+                                <span class="enum-tag">SPANISH</span>
+                                <span class="enum-tag">ENGLISH</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>contactType</code></td>
+                            <td>
+                                <span class="enum-tag">SUBSCRIBER</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>status</code></td>
+                            <td>
+                                <span class="enum-tag">ACTIVE</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>contactManagerType</code></td>
+                            <td>
+                                <span class="enum-tag">TENANT</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>firmType</code></td>
+                            <td>
+                                <span class="enum-tag">TENANT</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>contactAddressType</code></td>
+                            <td>
+                                <span class="enum-tag">SALES</span>
+                                <span class="enum-tag">COMPLIANCE</span>
+                            </td>
+                            <td>Determines which profile the address belongs to</td>
+                        </tr>
+                        <tr>
+                            <td><code>employmentStatus</code></td>
+                            <td>
+                                <span class="enum-tag">employed</span>
+                                <span class="enum-tag">self_employed</span>
+                                <span class="enum-tag">unemployed</span>
+                                <span class="enum-tag">retired</span>
+                                <span class="enum-tag">student</span>
+                            </td>
+                            <td>Lowercase</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FIELD MATRIX -->
+                <h2 id="field-matrix">Field Matrix — Which Call Takes Which Field?</h2>
+                <p>Use this as a quick reference when building your integration.</p>
+
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>POST /contacts<br><small>Create</small></th>
+                            <th>PUT /contacts/{id}<br><small>Sales update</small></th>
+                            <th>PUT /contacts/{id}<br><small>Compliance update</small></th>
+                            <th>PUT /contacts/{id}<br><small>Activate</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>firstName</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>paternalLastName</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>maternalLastName</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>middleName</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>contactType</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>contactMeans</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>preferredContactLanguage</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+                        <tr><td><code>firmId</code> / <code>firmEntityUuid</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>firmType</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>contactManagerId</code> / <code>contactManagerEntityUuid</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>status</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>preferredEmail</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>primaryEmail</code></td><td></td><td></td><td class="tick">✓</td><td class="tick">✓</td></tr>
+                        <tr><td><code>dateOfBirth</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>gender</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>maritalStatus</code></td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>preferredPhoneNumber</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>phoneNumber</code> (object)</td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>identityType</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td class="tick">✓</td></tr>
+                        <tr><td><code>identityId</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td class="tick">✓</td></tr>
+                        <tr><td><code>identityCountry</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td class="tick">✓</td></tr>
+                        <tr><td><code>identityDocuments[]</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>contactSource</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>marketSegment</code> / <code>segmentName</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>stageName</code></td><td></td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>contactPreference</code></td><td class="tick">✓</td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>displayName</code></td><td></td><td class="tick">✓</td><td></td><td></td></tr>
+                        <tr><td><code>countryOfCitizenship</code> / <code>primaryCountryOfCitizenship</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>countryOfBirth</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>annualIncome</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>liquidNetWorth</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>totalNetWorth</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>addresses[]</code></td><td></td><td class="tick">✓</td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>employmentHistory[]</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>relatedToPEP</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>directorOrTenPercentShareholder</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>pepEntries[]</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                        <tr><td><code>customFields</code></td><td></td><td></td><td class="tick">✓</td><td></td></tr>
+                    </tbody>
+                </table>
+
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
