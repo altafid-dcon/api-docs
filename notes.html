@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+                <li><a href="notes.html" class="active">Notes</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Notes</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#crud">CRUD</a></li>
+                    <li><a href="#search">Search</a></li>
+                    <li><a href="#attachments">Attachments</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Notes API</h1>
+                <span class="pill vendor">External vendor</span>
+                <p>Notes are contact-scoped records with optional household/contact associations and an attachment flow that uses presigned S3 uploads.</p>
+
+                <h2 id="crud">Core note endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v1/notes/contacts/{contactUuid}</code></td><td>Create a note for a contact.</td></tr>
+                        <tr><td><code>GET /api/v1/notes/contacts/{contactUuid}</code></td><td>List notes for a contact.</td></tr>
+                        <tr><td><code>GET /api/v1/notes/{noteUuid}</code></td><td>Get a single note.</td></tr>
+                        <tr><td><code>PUT /api/v1/notes/{noteUuid}</code></td><td>Update note text, associations, and attachments.</td></tr>
+                        <tr><td><code>DELETE /api/v1/notes/{noteUuid}</code></td><td>Delete a note.</td></tr>
+                    </tbody>
+                </table>
+
+                <pre><code>{
+  "textContent": "&lt;p&gt;Client asked for an updated proposal.&lt;/p&gt;",
+  "description": "Proposal follow-up",
+  "noteCreatedFor": "C019B9D0FD0E5772F9E8ED189895D40C4",
+  "attachmentUrls": [],
+  "associations": [
+    {
+      "type": "HOUSEHOLD",
+      "householdUuid": "H019B9D0FD0E5772F9E8ED189895D40C4",
+      "name": "Doe Family Household"
+    }
+  ]
+}</code></pre>
+
+                <pre><code>{
+  "noteUuid": "N019B9D0FD0E5772F9E8ED189895D40C4",
+  "textContent": "&lt;p&gt;Client asked for an updated proposal.&lt;/p&gt;",
+  "description": "Proposal follow-up",
+  "noteCreatedFor": "C019B9D0FD0E5772F9E8ED189895D40C4",
+  "createdBy": {
+    "type": "TENANT_STAFF",
+    "uuid": "TS019C06688AA57248B9EA5325DBDFC48E"
+  },
+  "associations": [],
+  "attachments": [],
+  "createdAt": "2026-04-22T09:15:00",
+  "updatedAt": "2026-04-22T09:15:00"
+}</code></pre>
+
+                <h2 id="search">Search</h2>
+                <p><code>GET /api/v1/notes/contacts/{contactUuid}/search</code> accepts either <code>q</code> or <code>search</code>. The term must be 2 to 100 characters.</p>
+                <pre><code>GET /api/v1/notes/contacts/{contactUuid}/search?q=proposal&amp;page=0&amp;size=20</code></pre>
+
+                <h2 id="attachments">Attachment flow</h2>
+                <p>Attachments are a three-step flow: initialize upload, upload to S3 with the presigned URL, then confirm the upload before referencing those URLs from the note payload.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Step</th><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/init</code></td><td>Request upload tickets and final URLs.</td></tr>
+                        <tr><td>2</td><td>Use returned presigned URL</td><td>Upload the file directly to storage.</td></tr>
+                        <tr><td>3</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/confirm-upload</code></td><td>Mark the uploaded files as usable.</td></tr>
+                        <tr><td>Optional cleanup</td><td><code>DELETE /api/v1/notes/contacts/{contactUuid}/attachments/cancel</code></td><td>Delete unused uploads.</td></tr>
+                        <tr><td>Download</td><td><code>GET /api/v1/notes/{noteUuid}/attachments/download</code></td><td>Retrieve attachment data for a note.</td></tr>
+                    </tbody>
+                </table>
+
+                <pre><code>{
+  "files": [
+    {
+      "fileName": "proposal",
+      "extension": "pdf",
+      "fileSize": 145000
+    }
+  ]
+}</code></pre>
+
+                <pre><code>{
+  "attachmentUrls": [
+    "https://storage.example.com/notes/..."
+  ]
+}</code></pre>
+
+                <div class="callout warning">
+                    <strong>Attachment constraints:</strong> the init request enforces a maximum file size of 200 KB and limited extensions such as <code>pdf</code>, <code>jpg</code>, <code>jpeg</code>, <code>png</code>, and <code>svg</code>.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                        <li><a href="onboarding.html">Client Onboarding</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

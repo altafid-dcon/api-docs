@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organisations API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+                <li><a href="organisations.html" class="active">Organisations</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Organisations</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#read">Read APIs</a></li>
+                    <li><a href="#write">Create and update</a></li>
+                    <li><a href="#filtering">V2 filtering</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Organisations API</h1>
+                <span class="pill vendor">External vendor</span>
+                <p>Organisations support classic CRUD operations plus the same v2 filtering model used by other major entity endpoints.</p>
+
+                <h2 id="read">Read endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/organisations</code></td><td>Paginated list for the current tenant.</td></tr>
+                        <tr><td><code>GET /api/organisations/{organisationUuid}</code></td><td>Get one organisation.</td></tr>
+                        <tr><td><code>GET /api/organisations/search?searchTerm=</code></td><td>Search by legal name, company name, or identification ID.</td></tr>
+                        <tr><td><code>GET /api/organisations/{organisationUuid}/households</code></td><td>List linked households.</td></tr>
+                    </tbody>
+                </table>
+
+                <p>Classic list and search endpoints accept <code>includeCustomFields=true</code> when you need the expanded response.</p>
+
+                <h2 id="write">Create and update</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/organisations</code></p>
+                <pre><code>{
+  "legalCompanyName": "Acme Advisory LLC",
+  "companyName": "Acme Advisory",
+  "industry": "FINANCIAL_SERVICES",
+  "identificationType": "EIN",
+  "identificationId": "12-3456789",
+  "createdByTenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "preferredPhoneNumber": {
+    "countryCode": "+1",
+    "number": "5557771234"
+  },
+  "administratorContactUuids": [],
+  "associatedContactUuids": []
+}</code></pre>
+
+                <table>
+                    <thead>
+                        <tr><th>Required on create</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>legalCompanyName</code></td><td>Required string.</td></tr>
+                        <tr><td><code>industry</code></td><td>Organisation industry enum.</td></tr>
+                        <tr><td><code>identificationType</code></td><td>Identity type enum.</td></tr>
+                        <tr><td><code>identificationId</code></td><td>Tenant-scoped duplicate checks apply.</td></tr>
+                        <tr><td><code>createdByTenantStaffUuid</code></td><td>Required creator reference.</td></tr>
+                    </tbody>
+                </table>
+
+                <p><span class="method-badge method-put">PUT</span><code>/api/organisations/{organisationUuid}</code> accepts optional replacements for phone numbers, addresses, administrators, and associated contacts.</p>
+                <pre><code>{
+  "companyName": "Acme Advisory Group",
+  "isActive": true,
+  "lockerId": "LOCKER-1001",
+  "administratorContactUuids": ["C019B9D0FD0E5772F9E8ED189895D40C4"]
+}</code></pre>
+
+                <p><span class="method-badge method-delete">DELETE</span><code>/api/organisations/{organisationUuid}</code> returns <code>204</code> on success.</p>
+
+                <h2 id="filtering">V2 filtering</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v2/organisations</code></td><td>Complex filtering, sorting, and pagination.</td></tr>
+                        <tr><td><code>POST /api/v2/organisations/filter-values</code></td><td>Distinct values for a field, optionally against base filters.</td></tr>
+                    </tbody>
+                </table>
+
+                <pre><code>{
+  "filters": [
+    { "field": "isActive", "operator": "equals", "value": "true" }
+  ],
+  "page": 0,
+  "size": 20,
+  "sort": ["legalCompanyName,asc"]
+}</code></pre>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                        <li><a href="onboarding.html">Client Onboarding</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
