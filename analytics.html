@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Analytics</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#event-ingestion">Event ingestion</a></li>
+                    <li><a href="#event-request">Request body</a></li>
+                    <li><a href="#event-example">Example</a></li>
+                    <li><a href="#analytics-query">Query API</a></li>
+                    <li><a href="#query-request">Query request</a></li>
+                    <li><a href="#query-response">Query response</a></li>
+                    <li><a href="#query-example">Example query</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                    <li><a href="#errors">Errors</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1>Analytics</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The Analytics service provides two APIs: one for <strong>ingesting events</strong> from your integration or from the platform itself, and one for <strong>querying</strong> those events with aggregations, time bucketing, and filtering. The service runs independently of the Core API to isolate analytical query load from transactional operations.</p>
+
+                <div class="callout info">
+                    <strong>Base path:</strong> All analytics endpoints are under <code>/api/analytics/</code>. They route through the same API Gateway as all other Altafid endpoints and require the same JWT authentication headers.<br><br>
+                    <strong>How it works:</strong> The Core API automatically publishes platform events (contact created, login, export completed, etc.) to the Analytics service via an internal event outbox. You can also send your own custom events from your integration using the event ingestion endpoint.
+                </div>
+
+                <h2 id="event-ingestion">Event ingestion</h2>
+
+                <p><span class="method-badge method-post">POST</span><code>/api/analytics/events</code></p>
+
+                <p>Send one or more structured events to the analytics store. The endpoint returns <code>202 Accepted</code> — events are validated then written asynchronously. Use this endpoint to track actions in your integration, custom workflow milestones, or to replay historical events during initial data migration.</p>
+
+                <h3 id="event-request">Request body</h3>
+
+                <p>The request body is an <code>AnalyticsEvent</code> object:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "eventType": "contact.created",
+  "occurredAt": "2026-04-22T10:30:00Z",
+  "tenantId": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "actorType": "TENANT_STAFF",
+  "actorId": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "entityType": "CONTACT",
+  "entityId": "C019B9D0FD0E5772F9E8ED189895D40C4",
+  "schemaVersion": 1,
+  "attributes": {
+    "contactType": "ACTIVE",
+    "source": "API_INTEGRATION"
+  }
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>eventType</code></td><td>string</td><td>Yes</td><td>Dot-separated event category, e.g. <code>contact.created</code>, <code>login.success</code>, <code>export.completed</code></td></tr>
+                        <tr><td><code>tenantId</code></td><td>string</td><td>Yes</td><td>Your tenant UUID. Used for multi-tenant data isolation</td></tr>
+                        <tr><td><code>eventId</code></td><td>UUID</td><td>No</td><td>Idempotency key. Auto-generated if omitted</td></tr>
+                        <tr><td><code>occurredAt</code></td><td>ISO 8601</td><td>No</td><td>When the event happened. Defaults to server receipt time</td></tr>
+                        <tr><td><code>actorType</code></td><td>string</td><td>No</td><td>Who triggered the event: <code>TENANT_STAFF</code>, <code>CONTACT</code>, <code>SYSTEM</code></td></tr>
+                        <tr><td><code>actorId</code></td><td>string</td><td>No</td><td>UUID of the actor (staff UUID, contact UUID, etc.)</td></tr>
+                        <tr><td><code>entityType</code></td><td>string</td><td>No</td><td>Type of entity affected: <code>CONTACT</code>, <code>ORGANISATION</code>, <code>HOUSEHOLD</code>, <code>NOTE</code>, etc.</td></tr>
+                        <tr><td><code>entityId</code></td><td>string</td><td>No</td><td>UUID of the entity affected</td></tr>
+                        <tr><td><code>schemaVersion</code></td><td>integer</td><td>No</td><td>Version of your event schema for forward-compatibility. Defaults to 1</td></tr>
+                        <tr><td><code>attributes</code></td><td>object</td><td>No</td><td>Arbitrary string key-value pairs for event-specific metadata</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="event-example">Example</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl -s -X POST "https://api.altafid.dev.altafid.net/api/analytics/events" \
+  -H "Authorization: Bearer &lt;ACCESS_TOKEN&gt;" \
+  -H "x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA" \
+  -H "x-user-email: advisor@conpat.com" \
+  -H "x-user-id: TS019C06688AA57248B9EA5325DBDFC48E" \
+  -H "x-user-type: TENANT_STAFF" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventType": "contact.imported",
+    "tenantId": "T019A16FF372A70B5A9307B00CE85E4DA",
+    "actorType": "SYSTEM",
+    "entityType": "CONTACT",
+    "entityId": "C019B9D0FD0E5772F9E8ED189895D40C4",
+    "attributes": {
+      "source": "CRM_MIGRATION",
+      "batchId": "batch-2026-04-22-001"
+    }
+  }'</code></pre>
+                </div>
+
+                <p><strong>Response:</strong> <code>202 Accepted</code> with no body. The event has been accepted for processing.</p>
+
+                <h2 id="analytics-query">Analytics query</h2>
+
+                <p><span class="method-badge method-post">POST</span><code>/api/analytics/query</code></p>
+
+                <p>Execute an analytical query over ingested events. Supports aggregations (count, sum, avg, min, max), time bucketing (by minute, hour, day, week, or month), field-level filtering, grouping, and result sorting. The query always returns a structured result set with column metadata.</p>
+
+                <h3 id="query-request">Request body</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "eventType": "contact.created",
+  "timeRange": {
+    "from": "2026-04-01T00:00:00Z",
+    "to": "2026-04-22T23:59:59Z"
+  },
+  "granularity": "DAY",
+  "filters": [
+    { "field": "actorType", "op": "EQ", "value": "TENANT_STAFF" }
+  ],
+  "groupBy": [
+    { "field": "actorId" }
+  ],
+  "aggregations": [
+    { "function": "COUNT", "alias": "total_events" },
+    { "function": "COUNT", "field": "entityId", "alias": "unique_contacts" }
+  ],
+  "sort": [
+    { "field": "total_events", "ascending": false }
+  ],
+  "limit": 100
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>eventType</code></td><td>string</td><td>Yes</td><td>Filter to a specific event type (e.g. <code>contact.created</code>)</td></tr>
+                        <tr><td><code>timeRange</code></td><td>object</td><td>Yes</td><td>Object with <code>from</code> and <code>to</code> as ISO 8601 timestamps. Defines the query window</td></tr>
+                        <tr><td><code>granularity</code></td><td>string</td><td>No</td><td>Time bucketing resolution. See <a href="#enum-granularity">TimeGranularity</a> values. Defaults to <code>NONE</code> (no bucketing)</td></tr>
+                        <tr><td><code>filters</code></td><td>array</td><td>No</td><td>Array of field-level filter conditions. Each has <code>field</code>, <code>op</code>, and <code>value</code></td></tr>
+                        <tr><td><code>groupBy</code></td><td>array</td><td>No</td><td>Array of <code>{ "field": "fieldName" }</code> objects for result grouping</td></tr>
+                        <tr><td><code>aggregations</code></td><td>array</td><td>Yes</td><td>At least one aggregation required. Each has <code>function</code>, optional <code>field</code>, and <code>alias</code></td></tr>
+                        <tr><td><code>sort</code></td><td>array</td><td>No</td><td>Array of <code>{ "field": "...", "ascending": true/false }</code> for result ordering</td></tr>
+                        <tr><td><code>limit</code></td><td>integer</td><td>No</td><td>Maximum number of rows to return</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="query-response">Response body</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "columns": [
+    { "name": "time_bucket", "label": "Date", "type": "TIMESTAMP", "role": "TIME" },
+    { "name": "actorId", "label": "Staff", "type": "STRING", "role": "DIMENSION" },
+    { "name": "total_events", "label": "Total Events", "type": "NUMBER", "role": "METRIC", "primary": true }
+  ],
+  "rows": [
+    { "values": ["2026-04-22T00:00:00Z", "TS019C06688AA57248B9EA5325DBDFC48E", 45] },
+    { "values": ["2026-04-21T00:00:00Z", "TS019C06688AA57248B9EA5325DBDFC48E", 32] }
+  ],
+  "generatedAt": "2026-04-22T15:30:00Z",
+  "stats": {
+    "rowCount": 2,
+    "queryTimeMs": 45
+  }
+}</code></pre>
+                </div>
+
+                <p>The <code>columns</code> array describes the shape of each row in <code>rows</code>. Values in each row correspond positionally to the column list. Use <code>columns[i].name</code> as the key and <code>columns[i].type</code> to cast the value correctly.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Response field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>columns</code></td><td>Column metadata: name, label, type, role, and whether it is the primary metric</td></tr>
+                        <tr><td><code>rows</code></td><td>Each row is an object with a <code>values</code> array matching the columns order</td></tr>
+                        <tr><td><code>generatedAt</code></td><td>Server timestamp when the query was executed</td></tr>
+                        <tr><td><code>stats.rowCount</code></td><td>Total number of rows returned</td></tr>
+                        <tr><td><code>stats.queryTimeMs</code></td><td>Server-side query execution time in milliseconds</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="query-example">Example: daily contact creation by advisor</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl -s -X POST "https://api.altafid.dev.altafid.net/api/analytics/query" \
+  -H "Authorization: Bearer &lt;ACCESS_TOKEN&gt;" \
+  -H "x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA" \
+  -H "x-user-email: advisor@conpat.com" \
+  -H "x-user-id: TS019C06688AA57248B9EA5325DBDFC48E" \
+  -H "x-user-type: TENANT_STAFF" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventType": "contact.created",
+    "timeRange": {
+      "from": "2026-04-01T00:00:00Z",
+      "to": "2026-04-30T23:59:59Z"
+    },
+    "granularity": "DAY",
+    "groupBy": [{ "field": "actorId" }],
+    "aggregations": [
+      { "function": "COUNT", "alias": "contacts_created" }
+    ],
+    "sort": [{ "field": "contacts_created", "ascending": false }],
+    "limit": 50
+  }'</code></pre>
+                </div>
+
+                <h2 id="enums">Enum reference</h2>
+
+                <h3 id="enum-granularity">TimeGranularity</h3>
+                <p>Controls how results are bucketed by time. When set, a <code>time_bucket</code> column is automatically added to the result.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">NONE</span>
+                    <span class="enum-tag">MINUTE</span>
+                    <span class="enum-tag">HOUR</span>
+                    <span class="enum-tag">DAY</span>
+                    <span class="enum-tag">WEEK</span>
+                    <span class="enum-tag">MONTH</span>
+                </div>
+
+                <h3>ComparisonOperator (for filters)</h3>
+                <p>Used in the <code>op</code> field of each filter object.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">EQ</span>
+                    <span class="enum-tag">NEQ</span>
+                    <span class="enum-tag">GT</span>
+                    <span class="enum-tag">GTE</span>
+                    <span class="enum-tag">LT</span>
+                    <span class="enum-tag">LTE</span>
+                    <span class="enum-tag">IN</span>
+                    <span class="enum-tag">NOT_IN</span>
+                </div>
+                <ul>
+                    <li><code>EQ</code> / <code>NEQ</code> — equals / not equals (string or number)</li>
+                    <li><code>GT</code> / <code>GTE</code> — greater than / greater than or equal</li>
+                    <li><code>LT</code> / <code>LTE</code> — less than / less than or equal</li>
+                    <li><code>IN</code> / <code>NOT_IN</code> — value is in / not in a list (pass array as <code>value</code>)</li>
+                </ul>
+
+                <h3>AggregationFunction</h3>
+                <p>Used in the <code>function</code> field of each aggregation object. The <code>field</code> is optional for <code>COUNT</code> (counts all rows if omitted).</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">COUNT</span>
+                    <span class="enum-tag">SUM</span>
+                    <span class="enum-tag">AVG</span>
+                    <span class="enum-tag">MIN</span>
+                    <span class="enum-tag">MAX</span>
+                </div>
+
+                <h3>ColumnType (in responses)</h3>
+                <p>Indicates the data type of a column in the result. Use this to correctly parse values in the <code>rows</code> array.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">STRING</span>
+                    <span class="enum-tag">NUMBER</span>
+                    <span class="enum-tag">BOOLEAN</span>
+                    <span class="enum-tag">TIMESTAMP</span>
+                </div>
+
+                <h3>ColumnRole (in responses)</h3>
+                <p>Indicates the semantic role of a column. Useful for driving charts and visualisation logic.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">TIME</span>
+                    <span class="enum-tag">DIMENSION</span>
+                    <span class="enum-tag">METRIC</span>
+                    <span class="enum-tag">UNKNOWN</span>
+                </div>
+                <ul>
+                    <li><code>TIME</code> — the time bucket column (only present when <code>granularity</code> is not <code>NONE</code>)</li>
+                    <li><code>DIMENSION</code> — a groupBy field (categorical, use for chart axes or row labels)</li>
+                    <li><code>METRIC</code> — an aggregated value (numeric, use for chart values). The primary metric has <code>"primary": true</code></li>
+                    <li><code>UNKNOWN</code> — role could not be determined</li>
+                </ul>
+
+                <h2 id="errors">Errors</h2>
+
+                <table>
+                    <thead>
+                        <tr><th>Status</th><th>Meaning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>202 Accepted</code></td><td>Event accepted for ingestion (success for POST /events)</td></tr>
+                        <tr><td><code>400 Bad Request</code></td><td>Missing required fields (<code>eventType</code>, <code>tenantId</code>, <code>aggregations</code>, or <code>timeRange</code>) or invalid enum value</td></tr>
+                        <tr><td><code>401 Unauthorized</code></td><td>Missing or invalid JWT token</td></tr>
+                        <tr><td><code>403 Forbidden</code></td><td>Token valid but insufficient permissions for the requested tenant</td></tr>
+                        <tr><td><code>500 Internal Server Error</code></td><td>Query execution failed — check field names and operator compatibility</td></tr>
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

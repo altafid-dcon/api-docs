@@ -145,9 +145,9 @@
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
-                <li><a href="index.html">Documentation</a></li>
-                <li><a href="onboarding.html" class="active">Client Onboarding</a></li>
-                <li><a href="https://github.com/altafid-dcon/api-docs" target="_blank">GitHub</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
             </ul>
         </div>
     </nav>
@@ -282,8 +282,8 @@
   "identityCountry":          "CHL",            // ISO-3 country code
 
   // ── CRM fields (values fetched from config APIs) ────────────
-  "contactSource":            "conSource001",   // GET /api/contacts/sources
-  "marketSegment":            "highNetWorth",   // GET /api/contacts/segments
+  "contactSource":            "conSource001",   // GET /api/core/platformconfigs/v1/contacts/sources
+  "marketSegment":            "highNetWorth",   // GET /api/core/platformconfigs/v1/contacts/segments
   "contactPreference":        "EMAIL"           // EMAIL | CALL | MESSAGE
 }</code></pre>
                 </div>
@@ -314,8 +314,8 @@
                         <tr><td><code>identityType</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>CHILE_RUT</code> | <code>PASSPORT</code></td></tr>
                         <tr><td><code>identityId</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>The ID value</td></tr>
                         <tr><td><code>identityCountry</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>ISO-3 (e.g. <code>CHL</code>, <code>ARG</code>, <code>USA</code>)</td></tr>
-                        <tr><td><code>contactSource</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/contacts/sources</code></td></tr>
-                        <tr><td><code>marketSegment</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/contacts/segments</code></td></tr>
+                        <tr><td><code>contactSource</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/core/platformconfigs/v1/contacts/sources</code></td></tr>
+                        <tr><td><code>marketSegment</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>From <code>GET /api/core/platformconfigs/v1/contacts/segments</code></td></tr>
                         <tr><td><code>contactPreference</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td><code>EMAIL</code> | <code>CALL</code> | <code>MESSAGE</code></td></tr>
                     </tbody>
                 </table>
@@ -375,9 +375,9 @@
   "countryOfBirth":       "ARG",
 
   // ── CRM metadata (values from config APIs) ──────────────────
-  "contactSource":  "conSource001",   // GET /api/contacts/sources
-  "segmentName":    "conSegment001",  // GET /api/contacts/segments
-  "stageName":      "conStage001",    // GET /api/config/stages
+  "contactSource":  "conSource001",   // GET /api/core/platformconfigs/v1/contacts/sources
+  "segmentName":    "conSegment001",  // GET /api/core/platformconfigs/v1/contacts/segments
+  "stageName":      "conStage001",    // GET /api/core/platformconfigs/v1/contacts/stages
   "contactPreference": "CALL",
   "contactMeans":   "PHONE",
   "displayName":    "Peter Parker",
@@ -570,17 +570,17 @@
                     <tbody>
                         <tr>
                             <td><code>stageName</code></td>
-                            <td><span class="method-badge method-get">GET</span><code>/api/config/stages</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/core/platformconfigs/v1/contacts/stages</code></td>
                             <td>Pipeline stages (e.g. <code>etapa1</code>, <code>etapa2</code>, <code>etapa3</code>)</td>
                         </tr>
                         <tr>
                             <td><code>contactSource</code></td>
-                            <td><span class="method-badge method-get">GET</span><code>/api/contacts/sources</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/core/platformconfigs/v1/contacts/sources</code></td>
                             <td>Contact origin / lead source</td>
                         </tr>
                         <tr>
                             <td><code>segmentName</code> / <code>marketSegment</code></td>
-                            <td><span class="method-badge method-get">GET</span><code>/api/contacts/segments</code></td>
+                            <td><span class="method-badge method-get">GET</span><code>/api/core/platformconfigs/v1/contacts/segments</code></td>
                             <td>Market segment classification</td>
                         </tr>
                     </tbody>
@@ -757,8 +757,45 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Altafid. All rights reserved.</p>
+                <p>&copy; 2026 Altafid. Developer guide.</p>
             </div>
         </div>
     </footer>

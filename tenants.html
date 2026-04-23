@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenants API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Tenants</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#crud">Tenant CRUD</a></li>
+                    <li><a href="#filtering">V2 filtering</a></li>
+                    <li><a href="#stats">Statistics</a></li>
+                    <li><a href="#domains">Domains</a></li>
+                    <li><a href="#branding-admin">Branding (admin)</a></li>
+                    <li><a href="#branding-public">Branding (public)</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Tenants API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>Tenants are the top-level organisational unit in Altafid. Every contact, household, organisation, and staff member is scoped to a tenant. This page documents tenant administration, branding management, custom domain mapping, and the public branding endpoints used for pre-login theming.</p>
+
+                <div class="callout info">
+                    <strong>Role requirements vary:</strong> most tenant management operations require <code>SYSTEM_ADMIN</code>. Branding and domain configuration additionally allow <code>TENANT_ADMIN</code>. The public branding endpoints require no authentication.
+                </div>
+
+                <h2 id="crud">Tenant CRUD</h2>
+                <p>The following endpoints manage tenant records. Most require <code>SYSTEM_ADMIN</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Roles</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/tenants</code></td><td>Paginated list of all tenants. Sort default: name.</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenants/{id}</code></td><td>Get a single tenant by internal ID.</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenants/name/{name}</code></td><td>Get a tenant by name.</td><td>Any authenticated</td></tr>
+                        <tr><td><code>GET /api/tenants/code/{code}</code></td><td>Get a tenant by code (e.g. <code>CONPAT_UAT</code>).</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>POST /api/tenants</code></td><td>Create a new tenant.</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>PUT /api/tenants/{id}</code></td><td>Update an existing tenant by internal ID.</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>DELETE /api/tenants/{id}</code></td><td>Soft-delete a tenant by internal ID.</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                    </tbody>
+                </table>
+
+                <p>The tenant request and response body (<code>TenantDTO</code>):</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "name": "Conpat Advisory",
+  "code": "CONPAT_UAT",
+  "isActive": true,
+  "createdAt": "2025-01-10T09:00:00",
+  "updatedAt": "2026-02-14T16:30:00"
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Required on create/update</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>name</code></td><td>Yes</td><td>Max 255 characters.</td></tr>
+                        <tr><td><code>code</code></td><td>Yes</td><td>Max 50 characters. Used as a human-readable identifier.</td></tr>
+                        <tr><td><code>isActive</code></td><td>No</td><td>Defaults to <code>true</code> on creation.</td></tr>
+                        <tr><td><code>tenantUuid</code></td><td>No (server-assigned)</td><td>Read-only on creation.</td></tr>
+                    </tbody>
+                </table>
+
+                <p>The <strong>hard-delete with full data purge</strong> endpoint is a separate, sensitive operation:</p>
+                <p><span class="method-badge method-post">POST</span><code>/api/tenants/delete</code> — permanently deletes a tenant and all associated data. This operation is irreversible and restricted to <code>SYSTEM_ADMIN</code>.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA"
+}</code></pre>
+                </div>
+
+                <h2 id="filtering">V2 filtering</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/v2/tenants</code> — filter tenants with the standard v2 filter model. Requires <code>SYSTEM_ADMIN</code>.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "filters": [
+    { "field": "isActive", "operator": "equals", "value": "true" }
+  ],
+  "page": 0,
+  "size": 20,
+  "sort": ["name,asc"]
+}</code></pre>
+                </div>
+
+                <p><span class="method-badge method-post">POST</span><code>/api/v2/tenants/filter-values</code> — retrieve distinct values for a filterable field within the tenant scope. See the <a href="conventions.html#filtering">Shared Conventions</a> page for the full filter model.</p>
+
+                <h2 id="stats">Tenant statistics</h2>
+                <p><span class="method-badge method-get">GET</span><code>/api/tenants/{tenantUuid}/stats</code></p>
+                <p>Returns aggregated counts for the tenant. No special role restriction beyond standard authentication.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/tenants/T019A16FF372A70B5A9307B00CE85E4DA/stats" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "householdCount": 42,
+  "contactCount": 815
+}</code></pre>
+                </div>
+
+                <h2 id="domains">Domain management</h2>
+                <p>Tenants can be mapped to a custom public domain which is then used for branding resolution. Requires <code>TENANT_ADMIN</code> or <code>SYSTEM_ADMIN</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/tenants/{tenantUuid}/domains</code></td><td>Create or update the domain mapping for the tenant.</td></tr>
+                        <tr><td><code>GET /api/v1/tenant-domains/{tenantUuid}</code></td><td>Retrieve the current domain mapping for the tenant.</td></tr>
+                    </tbody>
+                </table>
+
+                <p>Request body for domain upsert:</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "domain": "portal.conpat.com",
+  "active": true
+}</code></pre>
+                </div>
+
+                <p>Response:</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "domain": "portal.conpat.com",
+  "active": true,
+  "createdAt": "2026-01-10T09:00:00",
+  "updatedAt": "2026-04-15T11:00:00"
+}</code></pre>
+                </div>
+
+                <h2 id="branding-admin">Branding administration</h2>
+                <p>Tenant admins can customise colours and image assets (logo and favicon) that appear in the Altafid client portal. The workflow is a three-step process: initialise uploads, upload files directly to the presigned S3 URLs, then confirm to publish.</p>
+
+                <h3>GET /api/tenants/{tenantUuid}/branding</h3>
+                <p>Returns the current stored overrides and the system defaults so the admin form can show what is active.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "tenantName": "Conpat Advisory",
+  "stored": {
+    "version": 5,
+    "colors": {
+      "neutral": "#f8f9fa",
+      "primary": "#1a56db",
+      "sidebar": "#1e3a5f"
+    },
+    "useDefault": {
+      "neutral": false,
+      "primary": false,
+      "sidebar": false,
+      "logo": false,
+      "favicon": true
+    },
+    "assets": {
+      "logo": "https://cdn.altafid.net/tenants/T019.../logo.svg",
+      "faviconPng32": null,
+      "faviconIco": null
+    }
+  },
+  "defaults": {
+    "colors": { "neutral": "#ffffff", "primary": "#4a90e2", "sidebar": "#2d3748" },
+    "assets": {
+      "logo": "https://cdn.altafid.net/defaults/logo.svg",
+      "faviconPng32": "https://cdn.altafid.net/defaults/favicon-32.png",
+      "faviconIco": "https://cdn.altafid.net/defaults/favicon.ico"
+    }
+  },
+  "updatedAt": "2026-03-01T12:00:00",
+  "updatedBy": "admin@conpat.com"
+}</code></pre>
+                </div>
+
+                <h3>POST /api/tenants/{tenantUuid}/branding/assets/init</h3>
+                <p>Request presigned S3 upload URLs for one or more branding assets. The response includes a <code>versionHint</code> that must be passed to the confirm step to detect stale sessions.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "files": [
+    { "type": "logo", "ext": "svg" },
+    { "type": "favicon", "ext": "png" }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "versionHint": 5,
+  "uploads": [
+    {
+      "type": "logo",
+      "uploadUrl": "https://s3.amazonaws.com/altafid-assets/upload?X-Amz-...",
+      "finalUrl": "https://cdn.altafid.net/tenants/T019.../logo.svg",
+      "maxBytes": 2097152,
+      "contentType": "image/svg+xml",
+      "expiresAt": "2026-04-22T11:30:00"
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <p>Upload each file by sending a <code>PUT</code> request directly to the <code>uploadUrl</code> with the file content and the matching <code>Content-Type</code> header. The presigned URL is valid until <code>expiresAt</code>.</p>
+
+                <h3>POST /api/tenants/{tenantUuid}/branding/assets/cancel</h3>
+                <p>Cancels any pending upload session so a new init can be performed. Use if an upload was started but not completed.</p>
+
+                <h3>POST /api/tenants/{tenantUuid}/branding/confirm</h3>
+                <p>Saves (publishes) the branding configuration. This is the only step that updates the tenant's visible branding. Each field in <code>useDefault</code> controls whether the system default is shown instead of a stored override.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "colors": {
+    "neutral": "#f8f9fa",
+    "primary": "#1a56db",
+    "sidebar": "#1e3a5f"
+  },
+  "useDefault": {
+    "neutral": false,
+    "primary": false,
+    "sidebar": false,
+    "logo": false,
+    "favicon": true
+  },
+  "assets": {
+    "logo": "https://cdn.altafid.net/tenants/T019.../logo.svg",
+    "faviconPng32": null,
+    "faviconIco": null
+  }
+}</code></pre>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Validation errors on confirm:</strong> the server returns <code>400</code> if upload tickets are expired or already used, if the session version is stale (<code>versionHint</code> mismatch), or if asset URLs from different upload sessions are mixed in the same confirm request.
+                </div>
+
+                <h2 id="branding-public">Public branding endpoints</h2>
+                <p>These endpoints are unauthenticated and are used to load the tenant's colour scheme and assets before the user logs in. Responses are cached with a <code>max-age</code> of 300 seconds.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/public/tenants/{tenantUuid}/branding</code></td><td>Get effective branding by tenant UUID.</td></tr>
+                        <tr><td><code>GET /api/public/branding?domain={domain}</code></td><td>Get effective branding by the tenant's custom domain.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/public/branding?domain=portal.conpat.com"</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "version": 5,
+  "colors": {
+    "neutral": "#f8f9fa",
+    "primary": "#1a56db",
+    "sidebar": "#1e3a5f"
+  },
+  "assets": {
+    "logo": "https://cdn.altafid.net/tenants/T019.../logo.svg",
+    "favicon": {
+      "png32": "https://cdn.altafid.net/defaults/favicon-32.png",
+      "ico": "https://cdn.altafid.net/defaults/favicon.ico"
+    }
+  },
+  "cache": {
+    "ttlSeconds": 300
+  }
+}</code></pre>
+                </div>
+
+                <p>The public response always contains fully resolved URLs — if a field is set to use the default, the default URL is returned rather than <code>null</code>. Returns <code>404</code> when the tenant or domain is not found.</p>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

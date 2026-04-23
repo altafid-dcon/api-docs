@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organisations API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Organisations</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#read">Read APIs</a></li>
+                    <li><a href="#write">Create and update</a></li>
+                    <li><a href="#filtering">V2 filtering</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                    <li><a href="#dynamic-fields">Dynamic fields</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Organisations API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>Organisations represent legal entities — companies, trusts, funds, and other non-individual entities — that your firm tracks. Organisations support CRUD operations plus the same v2 filtering model used by other entity endpoints.</p>
+
+                <h2 id="read">Read endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/organisations</code></td><td>Paginated list for the current tenant.</td></tr>
+                        <tr><td><code>GET /api/organisations/{organisationUuid}</code></td><td>Get one organisation by UUID.</td></tr>
+                        <tr><td><code>GET /api/organisations/search?searchTerm=</code></td><td>Search by legal name, company name, or identification ID.</td></tr>
+                        <tr><td><code>GET /api/organisations/{organisationUuid}/households</code></td><td>List households linked to this organisation.</td></tr>
+                    </tbody>
+                </table>
+
+                <p>List and search endpoints accept <code>includeCustomFields=true</code> when you need the expanded response with custom field values.</p>
+
+                <h2 id="write">Create and update</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/organisations</code></p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "legalCompanyName": "Acme Advisory LLC",
+  "companyName": "Acme Advisory",
+  "industry": "FINANCIAL_AND_INSURANCE_ACTIVITIES",
+  "identificationType": "US_EIN",
+  "identificationId": "12-3456789",
+  "createdByTenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "preferredPhoneNumber": {
+    "countryCode": "+1",
+    "number": "5557771234"
+  },
+  "administratorContactUuids": [],
+  "associatedContactUuids": []
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Required on create</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>legalCompanyName</code></td><td>Full legal registered name.</td></tr>
+                        <tr><td><code>industry</code></td><td>Must be a valid <code>Industry</code> value. See <a href="#enum-industry">enum reference</a>.</td></tr>
+                        <tr><td><code>identificationType</code></td><td>Must be a valid <code>OrganisationIdentificationType</code> value. See <a href="#enum-identification">enum reference</a>.</td></tr>
+                        <tr><td><code>identificationId</code></td><td>The actual ID (tax number, registration number, etc.). Tenant-scoped duplicate checks apply.</td></tr>
+                        <tr><td><code>createdByTenantStaffUuid</code></td><td>UUID of the staff member creating this record.</td></tr>
+                    </tbody>
+                </table>
+
+                <p><span class="method-badge method-put">PUT</span><code>/api/organisations/{organisationUuid}</code> accepts optional replacements for phone numbers, addresses, administrators, and associated contacts.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "companyName": "Acme Advisory Group",
+  "isActive": true,
+  "lockerId": "LOCKER-1001",
+  "administratorContactUuids": ["C019B9D0FD0E5772F9E8ED189895D40C4"]
+}</code></pre>
+                </div>
+
+                <p><span class="method-badge method-delete">DELETE</span><code>/api/organisations/{organisationUuid}</code> returns <code>204 No Content</code> on success.</p>
+
+                <h2 id="filtering">V2 filtering</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v2/organisations</code></td><td>Complex filtering, sorting, and pagination.</td></tr>
+                        <tr><td><code>POST /api/v2/organisations/filter-values</code></td><td>Distinct values for a field, optionally applied against base filters.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "filters": [
+    { "field": "isActive", "operator": "equals", "value": "true" }
+  ],
+  "page": 0,
+  "size": 20,
+  "sort": ["legalCompanyName,asc"]
+}</code></pre>
+                </div>
+
+                <h2 id="enums">Enum reference</h2>
+
+                <h3 id="enum-industry">industry</h3>
+                <p>Sector classification for the organisation. Use the exact enum key in API requests.</p>
+                <div style="margin: 0.5rem 0 1.5rem; line-height: 2.2;">
+                    <span class="enum-tag">MANUFACTURING</span>
+                    <span class="enum-tag">EDUCATION</span>
+                    <span class="enum-tag">PROFESSIONAL_SCIENTIFIC_AND_TECHNICAL_ACTIVITIES</span>
+                    <span class="enum-tag">ADMINISTRATIVE_AND_SUPPORT_SERVICE_ACTIVITIES</span>
+                    <span class="enum-tag">ELECTRICITY_GAS_STEAM_AND_AIR_CONDITIONING_SUPPLY</span>
+                    <span class="enum-tag">ARTS_ENTERTAINMENT_AND_RECREATION</span>
+                    <span class="enum-tag">ACCOMMODATION_AND_FOOD_SERVICE_ACTIVITIES</span>
+                    <span class="enum-tag">AGRICULTURE_FORESTRY_AND_FISHING</span>
+                    <span class="enum-tag">INFORMATION_AND_COMMUNICATION</span>
+                    <span class="enum-tag">OTHER_SERVICE_ACTIVITIES</span>
+                    <span class="enum-tag">WATER_SUPPLY_SEWERAGE_WASTE_MANAGEMENT_AND_REMEDIATION_ACTIVITIES</span>
+                    <span class="enum-tag">WHOLESALE_AND_RETAIL_TRADE_REPAIR_OF_MOTOR_VEHICLES_AND_MOTORCYCLES</span>
+                    <span class="enum-tag">ACTIVITIES_OF_HOUSEHOLDS_AS_EMPLOYERS</span>
+                    <span class="enum-tag">PUBLIC_ADMINISTRATION_AND_DEFENSE</span>
+                    <span class="enum-tag">ACTIVITIES_OF_EXTRATERRITORIAL_ORGANIZATIONS_AND_BODIES</span>
+                    <span class="enum-tag">HUMAN_HEALTH_AND_SOCIAL_WORK_ACTIVITIES</span>
+                    <span class="enum-tag">FINANCIAL_AND_INSURANCE_ACTIVITIES</span>
+                    <span class="enum-tag">TRANSPORTATION_AND_STORAGE</span>
+                    <span class="enum-tag">REAL_ESTATE_ACTIVITIES</span>
+                    <span class="enum-tag">MINING_AND_QUARRYING</span>
+                    <span class="enum-tag">CONSTRUCTION</span>
+                </div>
+
+                <div class="callout info">
+                    For display purposes, use <code>GET /api/industries</code> to retrieve the list of industries with both their API key and human-readable display name. See <a href="conventions.html#dynamic-enums">Dynamic configuration lookups</a> for all lookup endpoints.
+                </div>
+
+                <h3 id="enum-identification">identificationType</h3>
+                <p>The type of identification document or number used to uniquely identify the organisation.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CHILE_RUT</span>
+                    <span class="enum-tag">US_EIN</span>
+                    <span class="enum-tag">UK_COMPANY_NUMBER</span>
+                    <span class="enum-tag">OTHER</span>
+                </div>
+
+                <h2 id="dynamic-fields">Dynamic fields</h2>
+                <p>The industry list with display names can be retrieved from the API at runtime for use in UI dropdowns or validation.</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Lookup endpoint</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>industry</code> (with display names)</td><td><code>GET /api/industries</code></td></tr>
+                        <tr><td><code>country fields</code></td><td><code>GET /api/core/geo/v1/countries</code></td></tr>
+                        <tr><td><code>phone country codes</code></td><td><code>GET /api/core/geo/v1/phone-codes</code></td></tr>
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Staff Management</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#read">Read endpoints</a></li>
+                    <li><a href="#create">Create staff</a></li>
+                    <li><a href="#update">Update staff</a></li>
+                    <li><a href="#search">Search</a></li>
+                    <li><a href="#delete">Delete staff</a></li>
+                    <li><a href="#credentials">Credential management</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Staff Management API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The staff management API is used to administer all staff members who have access to the Altafid platform within a tenant. This includes both direct tenant staff and partner staff assigned to the tenant. All endpoints are under the <code>/api/tenant-staff</code> base path.</p>
+
+                <div class="callout info">
+                    <strong>Staff categories:</strong> <code>TENANT_STAFF</code> are users directly employed or registered under the tenant. <code>PARTNER_STAFF</code> are users assigned through a partner relationship. Both categories are managed through the same set of endpoints.
+                </div>
+
+                <h2 id="read">Read endpoints</h2>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Roles</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/tenant-staff/all</code></td><td>All staff for the current tenant (tenant and partner combined).</td><td><code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, <code>PARTNER_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenant-staff/all/paginated</code></td><td>Paginated version of the all-staff list.</td><td><code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, <code>PARTNER_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenant-staff/all/by-category/{category}</code></td><td>Staff filtered by category: <code>TENANT_STAFF</code> or <code>PARTNER_STAFF</code>.</td><td><code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, <code>PARTNER_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenant-staff/{tenantUuid}/all</code></td><td>All staff for a specific tenant (system admin use).</td><td><code>SYSTEM_ADMIN</code></td></tr>
+                        <tr><td><code>GET /api/tenant-staff/{staffUuid}</code></td><td>Single staff member by UUID.</td><td><code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, <code>PARTNER_ADMIN</code>, <code>TENANT_STAFF</code></td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/tenant-staff/all" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_ADMIN"</code></pre>
+                </div>
+
+                <p>A staff member response (<code>TenantStaffDTO</code>):</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "firstName": "Carlos",
+  "middleName": null,
+  "paternalLastName": "Mendoza",
+  "maternalLastName": "Reyes",
+  "userEmail": "carlos.mendoza@conpat.com",
+  "email": "carlos.mendoza@conpat.com",
+  "staffType": "ADMIN",
+  "legalResidence": "MX",
+  "timeZone": "America/Mexico_City",
+  "platformLanguage": "SPANISH",
+  "commissionCurrency": "MXN",
+  "contactPhone": { "countryCode": "+52", "number": "5512345678" },
+  "jobPosition": "Senior Advisor",
+  "dateOfBirth": "1985-06-15",
+  "currentResidence": "Mexico City",
+  "isActive": true,
+  "createdAt": "2025-03-01T09:00:00",
+  "updatedAt": "2026-01-10T14:30:00"
+}</code></pre>
+                </div>
+
+                <h2 id="create">Create staff</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/tenant-staff</code></p>
+                <p>Creates a new tenant staff member. The user account (credentials) is created at the same time. Returns <code>201 Created</code> with the full staff DTO. Requires <code>SYSTEM_ADMIN</code> or <code>TENANT_ADMIN</code>.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "firstName": "Ana",
+  "paternalLastName": "Garcia",
+  "maternalLastName": "Lopez",
+  "userEmail": "ana.garcia@conpat.com",
+  "email": "ana.garcia@conpat.com",
+  "password": "SecurePass123!",
+  "confirmPassword": "SecurePass123!",
+  "staffType": "ADVISOR",
+  "staffRole": "ADVISOR",
+  "legalResidence": "MX",
+  "currentResidence": "Guadalajara",
+  "timeZone": "America/Mexico_City",
+  "platformLanguage": "SPANISH",
+  "commissionCurrency": "MXN",
+  "contactPhone": { "countryCode": "+52", "number": "3312345678" },
+  "jobPosition": "Financial Advisor",
+  "dateOfBirth": "1990-09-22"
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>tenantUuid</code></td><td>Yes</td><td>Must be a valid tenant UUID.</td></tr>
+                        <tr><td><code>firstName</code></td><td>Yes</td><td>2–50 characters.</td></tr>
+                        <tr><td><code>paternalLastName</code></td><td>Yes</td><td>1–50 characters.</td></tr>
+                        <tr><td><code>userEmail</code></td><td>Yes</td><td>Login email; max 100 characters.</td></tr>
+                        <tr><td><code>email</code></td><td>Yes</td><td>Contact email; max 100 characters.</td></tr>
+                        <tr><td><code>password</code></td><td>Yes</td><td>8–100 characters.</td></tr>
+                        <tr><td><code>confirmPassword</code></td><td>Yes</td><td>Must match <code>password</code>.</td></tr>
+                        <tr><td><code>staffType</code></td><td>Yes</td><td><code>ADMIN</code>, <code>ADVISOR</code>, or <code>MANAGER</code>.</td></tr>
+                        <tr><td><code>staffRole</code></td><td>Yes</td><td>Currently must be <code>ADVISOR</code>.</td></tr>
+                        <tr><td><code>legalResidence</code></td><td>Yes</td><td>Country code.</td></tr>
+                        <tr><td><code>timeZone</code></td><td>Yes</td><td>IANA timezone string.</td></tr>
+                        <tr><td><code>platformLanguage</code></td><td>Yes</td><td>Platform display language.</td></tr>
+                        <tr><td><code>commissionCurrency</code></td><td>Yes</td><td>ISO 4217 currency code.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="update">Update staff</h2>
+                <p><span class="method-badge method-put">PUT</span><code>/api/tenant-staff/{tenantStaffUuid}</code></p>
+                <p>Updates an existing staff member. Partial updates are supported — only send the fields you intend to change. Requires <code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, or <code>PARTNER_ADMIN</code>. Returns the updated <code>TenantStaffDTO</code> on success, or <code>409</code> if the email is already in use by another account.</p>
+
+                <h2 id="search">Search staff</h2>
+                <p><span class="method-badge method-get">GET</span><code>/api/tenant-staff/search?name={query}</code></p>
+                <p>Case-insensitive fuzzy match on first name and last name. Returns a paginated list of matching staff members. Supports standard <code>page</code>, <code>size</code>, and <code>sort</code> query parameters.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/tenant-staff/search?name=garcia&page=0&size=20" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_ADMIN"</code></pre>
+                </div>
+
+                <h2 id="delete">Delete staff</h2>
+                <p><span class="method-badge method-delete">DELETE</span><code>/api/tenant-staff/{tenantStaffUuid}</code></p>
+                <p>Deletes a staff member using a soft-delete workflow. The staff UUID in the path must match the UUID in the request body. Requires <code>TENANT_ADMIN</code> or <code>PARTNER_ADMIN</code>.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "staffUuidToDelete": "TS019C06688AA57248B9EA5325DBDFC48E"
+}</code></pre>
+                </div>
+
+                <h2 id="credentials">Credential management</h2>
+                <p>Two endpoints manage the login credentials of an existing staff member. Neither requires a special role beyond standard admin access.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Response</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-post">POST</span> <code>/api/tenant-staff/{tenantStaffUuid}/credentials/reset</code></td><td>Triggers a password reset email to the staff member's registered email address.</td><td><code>202 Accepted</code></td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span> <code>/api/tenant-staff/{tenantStaffUuid}/credentials/create</code></td><td>Sets a new password directly (admin override, no email flow).</td><td><code>204 No Content</code></td></tr>
+                    </tbody>
+                </table>
+
+                <p>Request body for direct password set:</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "password": "NewSecurePass123!"
+}</code></pre>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Password requirements:</strong> minimum 8 characters. The server validates the <code>password</code> field is present; the same length and character constraints that apply on creation apply here.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>
