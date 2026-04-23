@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="authentication.html" class="active">Authentication</a></li>
             </ul>
         </div>
     </nav>
@@ -37,41 +37,44 @@
 
             <main class="doc-content">
                 <h1>Authentication and MFA</h1>
-                <span class="pill vendor">External vendor</span>
-                <p>The `backend-core` authentication flow supports plain login, refresh token rotation, and MFA setup or verification depending on the user’s policy and current configuration.</p>
+                <span class="pill vendor">External integration</span>
+                <p>The Altafid authentication flow supports plain login, refresh token rotation, and MFA setup or verification depending on the user's policy and current configuration.</p>
 
                 <h2 id="login">POST /api/auth/login</h2>
                 <p>Use email and password to initiate the session.</p>
-                <pre><code>{
-  "username": "kaboom-poc@yopmail.com",
-  "password": "Password123!"
-}</code></pre>
 
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/auth/login" \
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/auth/login" \
   -X POST \
   -H "accept: application/json" \
   -H "content-type: application/json" \
   --data '{
-    "username": "kaboom-poc@yopmail.com",
-    "password": "Password123!"
+    "username": "your-email@example.com",
+    "password": "YourPassword123!"
   }'</code></pre>
+                </div>
 
                 <table>
                     <thead>
                         <tr><th>Status</th><th>Tokens returned</th><th>Meaning</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>LOGIN_SUCCESS</code></td><td><code>token</code>, <code>refreshToken</code></td><td>Authentication completed.</td></tr>
+                        <tr><td><code>LOGIN_SUCCESS</code></td><td><code>token</code>, <code>refreshToken</code></td><td>Authentication completed. Use the token in the <code>Authorization</code> header for all subsequent requests.</td></tr>
                         <tr><td><code>MFA_SETUP_REQUIRED</code></td><td><code>setupToken</code></td><td>MFA policy requires setup before access is granted.</td></tr>
                         <tr><td><code>MFA_REQUIRED</code></td><td><code>challengeToken</code></td><td>Password accepted; MFA verification still required.</td></tr>
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <p>A successful <code>LOGIN_SUCCESS</code> response body:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "status": "LOGIN_SUCCESS",
   "token": "eyJhbGciOiJIUzI1NiJ9...",
   "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-  "username": "kaboom-poc@yopmail.com",
+  "username": "your-email@example.com",
   "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
   "tenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
   "userUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
@@ -81,22 +84,30 @@
   "expiresIn": 3600000,
   "refreshExpiresIn": 604800000
 }</code></pre>
+                </div>
 
                 <h2 id="refresh">POST /api/auth/refresh</h2>
-                <p>Refresh tokens are rotated on every successful refresh.</p>
-                <pre><code>{
+                <p>Refresh tokens are rotated on every successful refresh. Store the new refresh token immediately.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "refreshToken": "YOUR_REFRESH_TOKEN"
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "token": "NEW_ACCESS_TOKEN",
   "refreshToken": "NEW_REFRESH_TOKEN",
   "expiresIn": 3600,
   "refreshExpiresIn": 604800
 }</code></pre>
+                </div>
 
                 <div class="callout info">
-                    <strong>Token lifetime note:</strong> the login response currently documents expiration values in milliseconds, while refresh and MFA verification responses document expiration values in seconds. Client code should normalize these before computing renewal times.
+                    <strong>Token lifetime note:</strong> the login response documents expiration in <em>milliseconds</em>, while refresh and MFA verification responses document expiration in <em>seconds</em>. Normalise these before computing renewal times in your integration.
                 </div>
 
                 <h2 id="session">Session helper endpoints</h2>
@@ -114,54 +125,78 @@
 
                 <h2 id="mfa-login">MFA during login</h2>
                 <p>If login returns <code>MFA_REQUIRED</code>, submit the challenge token and the six-digit TOTP code to complete login.</p>
-                <pre><code>{
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "challengeToken": "CHALLENGE_TOKEN",
   "method": "TOTP",
   "otp": "123456"
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "success": true,
   "token": "ACCESS_TOKEN",
   "refreshToken": "REFRESH_TOKEN",
   "expiresIn": 3600,
   "refreshExpiresIn": 604800
 }</code></pre>
+                </div>
 
                 <h2 id="mfa-setup">MFA setup flow</h2>
-                <p>If login returns <code>MFA_SETUP_REQUIRED</code>, use the short-lived setup token in the <code>Authorization</code> header.</p>
+                <p>If login returns <code>MFA_SETUP_REQUIRED</code>, use the short-lived setup token in the <code>Authorization</code> header for the setup endpoints.</p>
 
                 <h3>POST /api/auth/mfa/setup/init</h3>
-                <pre><code>Authorization: Bearer SETUP_TOKEN
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer SETUP_TOKEN
 
 {
   "method": "TOTP"
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "method": "TOTP",
   "secret": "BASE32_SECRET",
   "otpauthUri": "otpauth://totp/Altafid:email@example.com?secret=..."
 }</code></pre>
+                </div>
 
                 <h3>POST /api/auth/mfa/setup/confirm</h3>
-                <pre><code>Authorization: Bearer SETUP_TOKEN
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer SETUP_TOKEN
 
 {
   "method": "TOTP",
   "otp": "123456"
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "success": true,
   "challengeToken": "CHALLENGE_TOKEN"
 }</code></pre>
+                </div>
 
                 <p>After confirmation, call <code>POST /api/auth/mfa/verify</code> with the returned challenge token to obtain the final access and refresh tokens.</p>
 
                 <h3>GET /api/auth/mfa/status</h3>
-                <p>This endpoint returns whether MFA is enabled, whether it is locked, and the currently configured methods for the authenticated user.</p>
-                <pre><code>{
+                <p>Returns whether MFA is enabled, whether it is locked, and the currently configured methods for the authenticated user.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "mfaEnabled": true,
   "isLocked": false,
   "methods": [
@@ -173,6 +208,7 @@
     }
   ]
 }</code></pre>
+                </div>
 
                 <div class="callout warning">
                     <strong>Failure cases to handle:</strong> invalid login credentials, expired refresh tokens, expired challenge or setup tokens, invalid OTP codes, and temporarily locked MFA methods after repeated failures.
@@ -208,14 +244,15 @@
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -224,5 +261,7 @@
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

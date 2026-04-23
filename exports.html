@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="exports.html" class="active">Exports</a></li>
             </ul>
         </div>
     </nav>
@@ -38,7 +38,7 @@
 
             <main class="doc-content">
                 <h1 id="overview">Exports API</h1>
-                <span class="pill vendor">External vendor</span>
+                <span class="pill vendor">External integration</span>
 
                 <p>The exports API generates downloadable tabular files for contacts, organisations, and households. Both CSV and XLSX formats are supported. The export respects a configurable column list and optional filters, making it suitable for integrating with downstream data pipelines or reporting tools.</p>
 
@@ -60,7 +60,9 @@
                 <h2 id="request">Request structure</h2>
                 <p>All three endpoints share the same request body structure (<code>TabularExportRequest</code>):</p>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "format": "CSV",
   "viewState": {
     "columns": [ ... ],
@@ -73,6 +75,7 @@
   "timezone": "America/Mexico_City",
   "filters": [ ... ]
 }</code></pre>
+                </div>
 
                 <table>
                     <thead>
@@ -93,7 +96,9 @@
                 <h2 id="columns">Column configuration</h2>
                 <p>Each entry in <code>viewState.columns</code> describes one column in the output file. The order of the array determines the column order in the export.</p>
 
-                <pre><code>[
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
   {
     "id": "firstName",
     "label": "First Name",
@@ -119,6 +124,7 @@
     "type": "DATE_TIME"
   }
 ]</code></pre>
+                </div>
 
                 <table>
                     <thead>
@@ -136,20 +142,25 @@
                 <h2 id="filters">Applying filters</h2>
                 <p>The <code>filters</code> array uses the same <code>FilterCondition</code> format as the v2 list and filtering endpoints. Multiple conditions are combined with AND logic.</p>
 
-                <pre><code>[
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
   { "field": "contactType", "operator": "equals", "value": "ACTIVE" },
   { "field": "stage", "operator": "in", "values": ["Prospect", "Client"] }
 ]</code></pre>
+                </div>
 
                 <p>See the <a href="conventions.html#filtering">Shared Conventions — V2 filtering</a> page for the full list of operators and multi-value syntax.</p>
 
                 <h2 id="examples">Examples</h2>
 
                 <h3>Export active contacts to CSV</h3>
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/contacts" \
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/contacts" \
   -X POST \
-  -H "authorization: Bearer YOUR_TOKEN" \
-  -H "content-type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
   -H "x-tenant-uuid: YOUR_TENANT_UUID" \
   -H "x-user-email: YOUR_EMAIL" \
   -H "x-user-id: YOUR_USER_ID" \
@@ -173,12 +184,15 @@
       { "field": "contactType", "operator": "equals", "value": "ACTIVE" }
     ]
   }'</code></pre>
+                </div>
 
                 <h3>Export all households to XLSX</h3>
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/households" \
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/households" \
   -X POST \
-  -H "authorization: Bearer YOUR_TOKEN" \
-  -H "content-type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
   -H "x-tenant-uuid: YOUR_TENANT_UUID" \
   -H "x-user-email: YOUR_EMAIL" \
   -H "x-user-id: YOUR_USER_ID" \
@@ -196,6 +210,7 @@
       ]
     }
   }'</code></pre>
+                </div>
 
                 <h2 id="errors">Error handling</h2>
                 <p>On error the API returns a JSON body instead of a file, with an appropriate HTTP status code.</p>
@@ -223,10 +238,49 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Altafid. Developer guide.</p>
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

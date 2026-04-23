@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="contacts.html" class="active">Contacts</a></li>
             </ul>
         </div>
     </nav>
@@ -34,16 +34,19 @@
                     <li><a href="#associations">Associations</a></li>
                     <li><a href="#credentials">Credentials</a></li>
                     <li><a href="#filtering">V2 filtering</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                    <li><a href="#dynamic-fields">Dynamic fields</a></li>
                 </ul>
             </aside>
 
             <main class="doc-content">
                 <h1 id="overview">Contacts API</h1>
-                <span class="pill vendor">External vendor</span>
-                <p>Contacts are the largest vendor-facing surface in `backend-core`. The API supports standard CRUD, filtered list views, optional compliance payloads, associations, and client-portal credential flows.</p>
+                <span class="pill vendor">External integration</span>
+
+                <p>Contacts are the primary record type for managing individuals on the Altafid platform. The API supports standard CRUD operations, filtered list views, optional compliance payloads, associations to organisations and other contacts, and client-portal credential flows.</p>
 
                 <div class="callout info">
-                    <strong>Roles observed on controller mappings:</strong> most read and write actions are available to tenant, partner, and system roles; delete and some destructive compliance operations are narrower.
+                    <strong>Access model:</strong> most read and write operations are available to tenant, partner, and system roles. Deletion and some destructive compliance operations require elevated permissions.
                 </div>
 
                 <h2 id="list">List and search endpoints</h2>
@@ -52,10 +55,10 @@
                         <tr><th>Endpoint</th><th>Purpose</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>GET /api/contacts</code></td><td>Paginated list with optional <code>includeCustomFields</code>.</td></tr>
+                        <tr><td><code>GET /api/contacts</code></td><td>Paginated list. Pass <code>includeCustomFields=true</code> to include custom field values.</td></tr>
                         <tr><td><code>GET /api/contacts/{contactUuid}</code></td><td>Single contact by UUID.</td></tr>
-                        <tr><td><code>GET /api/contacts/search?searchTerm=</code></td><td>Name or email search.</td></tr>
-                        <tr><td><code>GET /api/contacts/type/{contactType}</code></td><td>List contacts by <code>ContactType</code>.</td></tr>
+                        <tr><td><code>GET /api/contacts/search?searchTerm=</code></td><td>Name or email search (accent-insensitive).</td></tr>
+                        <tr><td><code>GET /api/contacts/type/{contactType}</code></td><td>List contacts by type (<code>ACTIVE</code> or <code>SUBSCRIBER</code>).</td></tr>
                         <tr><td><code>GET /api/contacts/firm/{firmType}/{firmUuid}</code></td><td>Contacts under a firm, with optional <code>searchTerm</code>.</td></tr>
                         <tr><td><code>GET /api/contacts/manager/{managerType}/{managerUuid}</code></td><td>Contacts under a manager.</td></tr>
                         <tr><td><code>GET /api/contacts/{contactUuid}/households</code></td><td>Households linked to a contact.</td></tr>
@@ -64,16 +67,22 @@
                     </tbody>
                 </table>
 
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/contacts/search?searchTerm=jane&amp;page=0&amp;size=20" \
-  -H "authorization: Bearer YOUR_TOKEN" \
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/contacts/search?searchTerm=jane&page=0&size=20" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "x-tenant-uuid: YOUR_TENANT_UUID" \
   -H "x-user-email: YOUR_EMAIL" \
   -H "x-user-id: YOUR_USER_ID" \
   -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
 
                 <h2 id="create">Create and update contacts</h2>
                 <p><span class="method-badge method-post">POST</span><code>/api/contacts</code> accepts core identity, firm, and communication fields and can optionally include compliance and association data.</p>
-                <pre><code>{
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "firstName": "Jane",
   "paternalLastName": "Doe",
   "contactType": "ACTIVE",
@@ -90,24 +99,26 @@
   "segment": "Retail",
   "contactSource": "Referral"
 }</code></pre>
+                </div>
 
                 <table>
                     <thead>
                         <tr><th>Required on create</th><th>Notes</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>firstName</code></td><td>Max 100 chars.</td></tr>
-                        <tr><td><code>paternalLastName</code></td><td>Max 100 chars.</td></tr>
-                        <tr><td><code>contactType</code></td><td>Enum from backend-core.</td></tr>
-                        <tr><td><code>firmId</code></td><td>Target firm UUID.</td></tr>
-                        <tr><td><code>firmType</code></td><td>Polymorphic firm relationship.</td></tr>
-                        <tr><td><code>preferredContactLanguage</code></td><td>Enum.</td></tr>
+                        <tr><td><code>firstName</code></td><td>Max 100 characters.</td></tr>
+                        <tr><td><code>paternalLastName</code></td><td>Max 100 characters.</td></tr>
+                        <tr><td><code>contactType</code></td><td><code>ACTIVE</code> or <code>SUBSCRIBER</code>. See <a href="#enums">enum reference</a>.</td></tr>
+                        <tr><td><code>firmId</code></td><td>UUID of the target tenant, partner firm, or organisation.</td></tr>
+                        <tr><td><code>firmType</code></td><td><code>TENANT</code>, <code>PARTNER</code>, or <code>ORGANISATION</code>. See <a href="#enums">enum reference</a>.</td></tr>
+                        <tr><td><code>preferredContactLanguage</code></td><td><code>ENGLISH</code> or <code>SPANISH</code>. See <a href="#enums">enum reference</a>.</td></tr>
                     </tbody>
                 </table>
 
-                <p><span class="method-badge method-put">PUT</span><code>/api/contacts/{contactUuid}</code> is partial-update oriented. Most fields are optional and null or omitted values are treated differently depending on server-side logic, so send only fields you intend to change.</p>
+                <p><span class="method-badge method-put">PUT</span><code>/api/contacts/{contactUuid}</code> is partial-update oriented. Send only the fields you intend to change — null or omitted values leave existing data unchanged.</p>
 
                 <h2 id="compliance">Compliance endpoints</h2>
+                <p>The compliance profile stores KYC data, financial profile information, and identity documentation for a contact.</p>
                 <table>
                     <thead>
                         <tr><th>Endpoint</th><th>Purpose</th></tr>
@@ -119,7 +130,9 @@
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "primaryEmail": "jane.doe@example.com",
   "phoneNumber": {
     "countryCode": "+1",
@@ -135,10 +148,12 @@
   "annualIncome": 85000.00,
   "identityDocuments": []
 }</code></pre>
+                </div>
 
-                <p>The compliance DTO also supports legal addresses, employment history, identity documents, PEP entries, and additional disclaimer fields.</p>
+                <p>The compliance payload also supports legal addresses, employment history, identity documents (see <code>identityType</code> enum below), PEP entries, and additional disclaimer fields.</p>
 
                 <h2 id="associations">Association endpoints</h2>
+                <p>Associations link a contact to other contacts (e.g. spouse, child) or to organisations (e.g. employer, beneficial owner). Associations are stored as a list and can be replaced in full or added incrementally.</p>
                 <table>
                     <thead>
                         <tr><th>Endpoint</th><th>Purpose</th></tr>
@@ -151,7 +166,9 @@
                     </tbody>
                 </table>
 
-                <pre><code>[
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
   {
     "associatedContacts": [
       {
@@ -163,25 +180,28 @@
     "externalContacts": []
   }
 ]</code></pre>
+                </div>
 
                 <h2 id="credentials">Client portal credential flow</h2>
+                <p>Contacts can be given access to the Altafid client portal. The credential flow must be completed in sequence: initialise, then create the password.</p>
                 <table>
                     <thead>
                         <tr><th>Endpoint</th><th>Purpose</th><th>Response</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>POST /api/contacts/{contactUuid}/credentials/init</code></td><td>Initialize credentials for a contact.</td><td>Updated <code>ContactDTO</code> or <code>409</code> on invalid state.</td></tr>
-                        <tr><td><code>PUT /api/contacts/{contactUuid}/credentials/create</code></td><td>Create password credentials.</td><td><code>204</code> on success.</td></tr>
-                        <tr><td><code>POST /api/contacts/{contactUuid}/credentials/reset</code></td><td>Start reset flow.</td><td><code>202</code> on success.</td></tr>
-                        <tr><td><code>GET /api/contacts/client-portal/access/{contactUuid}</code></td><td>Deprecated direct portal access helper.</td><td>Still available but marked deprecated.</td></tr>
+                        <tr><td><code>POST /api/contacts/{contactUuid}/credentials/init</code></td><td>Initialise credentials for a contact.</td><td><code>200</code> with updated contact, or <code>409</code> if already initialised.</td></tr>
+                        <tr><td><code>PUT /api/contacts/{contactUuid}/credentials/create</code></td><td>Create password credentials.</td><td><code>204 No Content</code></td></tr>
+                        <tr><td><code>POST /api/contacts/{contactUuid}/credentials/reset</code></td><td>Start password reset flow.</td><td><code>202 Accepted</code></td></tr>
+                        <tr><td><code>GET /api/contacts/client-portal/access/{contactUuid}</code></td><td>Direct portal access helper (deprecated).</td><td>Available but marked deprecated.</td></tr>
                     </tbody>
                 </table>
 
-                <p>The password creation endpoint currently accepts the shared password reset payload; at minimum the controller enforces that <code>password</code> is present.</p>
-
                 <h2 id="filtering">V2 filtering</h2>
-                <p><span class="method-badge method-post">POST</span><code>/api/v2/contacts</code> supports complex filter logic and optional minimal custom field enrichment for grid rendering.</p>
-                <pre><code>{
+                <p><span class="method-badge method-post">POST</span><code>/api/v2/contacts</code> supports complex filter logic with optional minimal custom field enrichment for grid rendering.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "filters": [
     { "field": "contactType", "operator": "equals", "value": "ACTIVE" },
     { "field": "stageName", "operator": "in", "values": ["Prospect", "Client"] }
@@ -190,8 +210,104 @@
   "size": 20,
   "sort": ["createdAt,desc"]
 }</code></pre>
+                </div>
 
-                <p>Use <code>POST /api/v2/contacts/filter-values</code> to retrieve distinct values for a field inside the current tenant and role scope.</p>
+                <p>Use <code>POST /api/v2/contacts/filter-values</code> to retrieve distinct values for a field within the current tenant scope.</p>
+
+                <h2 id="enums">Enum reference</h2>
+                <p>The following fields accept a fixed set of values defined by the platform. Pass the exact string value shown.</p>
+
+                <h3>contactType</h3>
+                <p>Indicates whether the person is an active client or a prospect.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ACTIVE</span>
+                    <span class="enum-tag">SUBSCRIBER</span>
+                </div>
+
+                <h3>gender</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">MALE</span>
+                    <span class="enum-tag">FEMALE</span>
+                    <span class="enum-tag">OTHER</span>
+                </div>
+
+                <h3>maritalStatus</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">MARRIED</span>
+                    <span class="enum-tag">SINGLE</span>
+                    <span class="enum-tag">DIVORCED</span>
+                    <span class="enum-tag">WIDOWED</span>
+                </div>
+
+                <h3>preferredContactLanguage</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ENGLISH</span>
+                    <span class="enum-tag">SPANISH</span>
+                </div>
+
+                <h3>contactMeans</h3>
+                <p>The preferred communication channel.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">EMAIL</span>
+                    <span class="enum-tag">PHONE</span>
+                    <span class="enum-tag">MESSAGE</span>
+                </div>
+
+                <h3>contactPreference</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CALL</span>
+                    <span class="enum-tag">EMAIL</span>
+                    <span class="enum-tag">SMS</span>
+                </div>
+
+                <h3>firmType</h3>
+                <p>Indicates which kind of entity the contact belongs to.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">TENANT</span>
+                    <span class="enum-tag">PARTNER</span>
+                    <span class="enum-tag">ORGANISATION</span>
+                </div>
+
+                <h3>identityType (for identity documents)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CHILE_RUT</span>
+                    <span class="enum-tag">PASSPORT</span>
+                    <span class="enum-tag">NATIONAL_ID</span>
+                    <span class="enum-tag">US_EIN</span>
+                    <span class="enum-tag">DRIVING_LICENSE</span>
+                    <span class="enum-tag">UK_COMPANY_NUMBER</span>
+                    <span class="enum-tag">BVI_COMPANY_NUMBER</span>
+                </div>
+
+                <h3>addressType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">HOME</span>
+                    <span class="enum-tag">WORK</span>
+                    <span class="enum-tag">OTHER</span>
+                </div>
+
+                <h3>contactAddressType</h3>
+                <p>Indicates the compliance purpose of an address record.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">SALES</span>
+                    <span class="enum-tag">COMPLIANCE</span>
+                </div>
+
+                <h2 id="dynamic-fields">Dynamic fields</h2>
+                <p>The following contact fields are configured per-tenant and their valid values must be retrieved from the platform at runtime. See <a href="conventions.html#dynamic-enums">Dynamic configuration lookups</a> for the full list of endpoints.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Lookup endpoint</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>stage</code></td><td><code>GET /api/core/platformconfigs/v1/contacts/stages</code></td></tr>
+                        <tr><td><code>contactSource</code></td><td><code>GET /api/core/platformconfigs/v1/contacts/sources</code></td></tr>
+                        <tr><td><code>segment</code></td><td><code>GET /api/core/platformconfigs/v1/contacts/segments</code></td></tr>
+                        <tr><td><code>country fields</code></td><td><code>GET /api/core/geo/v1/countries</code></td></tr>
+                        <tr><td><code>phone country codes</code></td><td><code>GET /api/core/geo/v1/phone-codes</code></td></tr>
+                    </tbody>
+                </table>
             </main>
         </div>
     </div>
@@ -223,14 +339,15 @@
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -239,5 +356,7 @@
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

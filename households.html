@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="households.html" class="active">Households</a></li>
             </ul>
         </div>
     </nav>
@@ -32,13 +32,15 @@
                     <li><a href="#write">Create and update</a></li>
                     <li><a href="#members">Members</a></li>
                     <li><a href="#filtering">V2 filtering</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
                 </ul>
             </aside>
 
             <main class="doc-content">
                 <h1 id="overview">Households API</h1>
-                <span class="pill vendor">External vendor</span>
-                <p>Households group contacts or organisations into a single relationship context. The API supports household CRUD, linked accounts, member management, and v2 list filtering.</p>
+                <span class="pill vendor">External integration</span>
+
+                <p>Households group contacts or organisations into a single relationship context — typically a family unit, investment group, or trust structure. The API supports household CRUD, linked custodian accounts, member management, and v2 list filtering.</p>
 
                 <h2 id="read">Read endpoints</h2>
                 <table>
@@ -46,18 +48,21 @@
                         <tr><th>Endpoint</th><th>Purpose</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><code>GET /api/households</code></td><td>Paginated list.</td></tr>
-                        <tr><td><code>GET /api/households/{householdUuid}</code></td><td>Single household.</td></tr>
-                        <tr><td><code>GET /api/households/search?searchTerm=</code></td><td>Name search.</td></tr>
-                        <tr><td><code>GET /api/households/manager?rmType=&amp;rmUuid=</code></td><td>Households by relationship manager.</td></tr>
-                        <tr><td><code>GET /api/households/{householdUuid}/detail</code></td><td>Expanded household detail view.</td></tr>
-                        <tr><td><code>GET /api/households/{householdUuid}/accounts</code></td><td>Linked custodian accounts.</td></tr>
+                        <tr><td><code>GET /api/households</code></td><td>Paginated list of households.</td></tr>
+                        <tr><td><code>GET /api/households/{householdUuid}</code></td><td>Single household by UUID.</td></tr>
+                        <tr><td><code>GET /api/households/search?searchTerm=</code></td><td>Search by household name.</td></tr>
+                        <tr><td><code>GET /api/households/manager?rmType=&rmUuid=</code></td><td>Households by relationship manager.</td></tr>
+                        <tr><td><code>GET /api/households/{householdUuid}/detail</code></td><td>Expanded household detail with member and portfolio data.</td></tr>
+                        <tr><td><code>GET /api/households/{householdUuid}/accounts</code></td><td>Linked custodian account numbers.</td></tr>
                     </tbody>
                 </table>
 
                 <h2 id="write">Create and update</h2>
                 <p><span class="method-badge method-post">POST</span><code>/api/households</code></p>
-                <pre><code>{
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "name": "Doe Family Household",
   "relationshipManagerType": "TENANT_STAFF",
   "relationshipManagerUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
@@ -70,9 +75,13 @@
     }
   ]
 }</code></pre>
+                </div>
 
-                <p><span class="method-badge method-put">PUT</span><code>/api/households/{householdUuid}</code> supports selective updates, account linking and unlinking, and member add/remove operations.</p>
-                <pre><code>{
+                <p><span class="method-badge method-put">PUT</span><code>/api/households/{householdUuid}</code> supports selective updates, account linking/unlinking, and member add/remove in a single call.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "name": "Doe Family Household",
   "accountNumbersToLink": ["ACC-1003"],
   "accountNumbersToUnlink": ["ACC-1001"],
@@ -84,10 +93,13 @@
   ],
   "memberUuidsToRemove": ["HM019B9D0FD0E5772F9E8ED189895D40C4"]
 }</code></pre>
+                </div>
 
-                <p><span class="method-badge method-delete">DELETE</span><code>/api/households/{householdUuid}</code> returns <code>204</code> on success.</p>
+                <p><span class="method-badge method-delete">DELETE</span><code>/api/households/{householdUuid}</code> returns <code>204 No Content</code> on success.</p>
 
                 <h2 id="members">Household members</h2>
+                <p>Members are the individual contacts or organisations that belong to a household. Each member can have an optional relationship type that describes how they relate to the household (e.g. spouse, child, trustee).</p>
+
                 <table>
                     <thead>
                         <tr><th>Endpoint</th><th>Purpose</th></tr>
@@ -96,21 +108,29 @@
                         <tr><td><code>GET /api/households/{householdUuid}/members</code></td><td>List members. Supports <code>includeDeleted</code> and <code>searchTerm</code>.</td></tr>
                         <tr><td><code>GET /api/households/{householdUuid}/members/{memberUuid}</code></td><td>Get one member.</td></tr>
                         <tr><td><code>POST /api/households/{householdUuid}/members</code></td><td>Add a member.</td></tr>
-                        <tr><td><code>PUT /api/households/{householdUuid}/members/{memberUuid}</code></td><td>Update a member.</td></tr>
+                        <tr><td><code>PUT /api/households/{householdUuid}/members/{memberUuid}</code></td><td>Update a member's relationship type or primary flag.</td></tr>
                         <tr><td><code>DELETE /api/households/{householdUuid}/members/{memberUuid}</code></td><td>Remove a member.</td></tr>
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "memberType": "CONTACT",
-  "contactUuid": "C019B9D0FD0E5772F9E8ED189895D40C4"
+  "contactUuid": "C019B9D0FD0E5772F9E8ED189895D40C4",
+  "relationshipType": "SPOUSE",
+  "isPrimary": true
 }</code></pre>
+                </div>
 
-                <p>The member DTO returns both lightweight member fields and, when enriched, embedded contact or organisation data.</p>
+                <p>The member response returns both lightweight member fields and, when enriched, embedded contact or organisation data.</p>
 
                 <h2 id="filtering">V2 filtering</h2>
                 <p><span class="method-badge method-post">POST</span><code>/api/v2/households</code> filters within the current tenant and active status rules.</p>
-                <pre><code>{
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "filters": [
     { "field": "isActive", "operator": "equals", "value": "true" }
   ],
@@ -118,8 +138,45 @@
   "size": 20,
   "sort": ["updatedAt,desc"]
 }</code></pre>
+                </div>
 
-                <p>Use <code>POST /api/v2/households/filter-values</code> for distinct field values in the same filtering model.</p>
+                <p>Use <code>POST /api/v2/households/filter-values</code> for distinct field values within the same filtering model.</p>
+
+                <h2 id="enums">Enum reference</h2>
+
+                <h3>memberType</h3>
+                <p>Specifies whether a household member is an individual contact or a legal entity.</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CONTACT</span>
+                    <span class="enum-tag">ORGANISATION</span>
+                </div>
+
+                <h3>relationshipType</h3>
+                <p>Describes how a member relates to the household. Use in member create/update requests.</p>
+
+                <p><strong>Family relationships:</strong></p>
+                <div style="margin: 0.5rem 0 1rem;">
+                    <span class="enum-tag">SPOUSE</span>
+                    <span class="enum-tag">CHILD</span>
+                    <span class="enum-tag">PARENT</span>
+                    <span class="enum-tag">SIBLING</span>
+                    <span class="enum-tag">GRANDPARENT</span>
+                    <span class="enum-tag">GRANDCHILD</span>
+                    <span class="enum-tag">OTHER_FAMILY</span>
+                </div>
+
+                <p><strong>Business relationships:</strong></p>
+                <div style="margin: 0.5rem 0 1rem;">
+                    <span class="enum-tag">BUSINESS_PARTNER</span>
+                    <span class="enum-tag">ADVISOR</span>
+                </div>
+
+                <p><strong>Legal relationships:</strong></p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">TRUSTEE</span>
+                    <span class="enum-tag">BENEFICIARY</span>
+                    <span class="enum-tag">OTHER</span>
+                </div>
             </main>
         </div>
     </div>
@@ -151,14 +208,15 @@
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -167,5 +225,7 @@
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

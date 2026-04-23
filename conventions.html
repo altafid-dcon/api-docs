@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html" class="active">Conventions</a></li>
-                <li><a href="onboarding.html">Client Onboarding</a></li>
             </ul>
         </div>
     </nav>
@@ -29,21 +29,23 @@
                 <ul>
                     <li><a href="#audience">Audience and scope</a></li>
                     <li><a href="#base-url">Base URL</a></li>
-                    <li><a href="#headers">Headers</a></li>
+                    <li><a href="#headers">Required headers</a></li>
                     <li><a href="#pagination">Pagination</a></li>
                     <li><a href="#filtering">V2 filtering</a></li>
                     <li><a href="#errors">Errors</a></li>
+                    <li><a href="#error-formats">Error response formats</a></li>
+                    <li><a href="#dynamic-enums">Dynamic configuration</a></li>
                     <li><a href="#sample-data">Sample data</a></li>
                 </ul>
             </aside>
 
             <main class="doc-content">
                 <h1>Shared Conventions</h1>
-                <span class="pill vendor">External vendor</span>
-                <p>This page covers the rules that apply across all Altafid APIs so integrators do not have to re-learn the same patterns on each domain page.</p>
+                <span class="pill vendor">External integration</span>
+                <p>This page covers the rules that apply across all Altafid APIs so you do not have to re-learn the same patterns on each domain page.</p>
 
                 <h2 id="audience">Audience and scope</h2>
-                <p>This guide covers the full set of Altafid vendor-facing APIs, including entity management, saved views, tenant administration, staff management, and data export. All endpoints require standard JWT bearer token authentication and the tenant context headers described below.</p>
+                <p>This guide covers the full set of Altafid integration APIs, including entity management, saved views, tenant administration, staff management, and data export. All endpoints require standard JWT bearer token authentication and the tenant context headers described below.</p>
 
                 <h2 id="base-url">Base URL and environment</h2>
                 <table>
@@ -51,9 +53,9 @@
                         <tr><th>Field</th><th>Value</th><th>Notes</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Base URL</td><td><code>https://api.altafid.dev.altafid.net</code></td><td>UAT endpoint used in the current documentation set.</td></tr>
+                        <tr><td>Base URL</td><td><code>https://api.altafid.dev.altafid.net</code></td><td>UAT endpoint used throughout this documentation.</td></tr>
                         <tr><td>Authentication</td><td><code>Bearer</code> token</td><td>Returned by <code>/api/auth/login</code> or MFA verification flows.</td></tr>
-                        <tr><td>Tenant context</td><td><code>x-tenant-uuid</code></td><td>Required for downstream domain APIs.</td></tr>
+                        <tr><td>Tenant context</td><td><code>x-tenant-uuid</code></td><td>Required for all protected domain APIs.</td></tr>
                     </tbody>
                 </table>
 
@@ -66,26 +68,32 @@
                     <tbody>
                         <tr><td><code>Authorization</code></td><td>Yes</td><td><code>Bearer {token}</code> from login or MFA verification.</td></tr>
                         <tr><td><code>x-tenant-uuid</code></td><td>Yes</td><td>Tenant scope for the request.</td></tr>
-                        <tr><td><code>x-user-email</code></td><td>Yes</td><td>The authenticated user email from login response.</td></tr>
-                        <tr><td><code>x-user-id</code></td><td>Yes</td><td>User UUID from the login response. For tenant staff, this is typically <code>tenantStaffUuid</code>.</td></tr>
-                        <tr><td><code>x-user-type</code></td><td>Yes</td><td>User type such as <code>TENANT_STAFF</code>, <code>PARTNER_STAFF</code>, or <code>CONTACT</code>.</td></tr>
+                        <tr><td><code>x-user-email</code></td><td>Yes</td><td>The authenticated user email from the login response.</td></tr>
+                        <tr><td><code>x-user-id</code></td><td>Yes</td><td>User UUID from the login response. For tenant staff this is the <code>tenantStaffUuid</code>.</td></tr>
+                        <tr><td><code>x-user-type</code></td><td>Yes</td><td><code>TENANT_STAFF</code>, <code>PARTNER_STAFF</code>, or <code>CONTACT</code>.</td></tr>
                     </tbody>
                 </table>
 
                 <h2 id="pagination">Pagination conventions</h2>
-                <p>List endpoints generally use Spring pagination.</p>
+                <p>List endpoints use standard page-based pagination.</p>
                 <ul>
                     <li><code>page</code> is zero-based.</li>
                     <li><code>size</code> defaults to <code>20</code> on most endpoints.</li>
-                    <li><code>sort</code> is endpoint-specific for classic GET lists and an array for v2 filter endpoints.</li>
+                    <li><code>sort</code> is endpoint-specific for classic GET lists, and an array like <code>["createdAt,desc"]</code> for v2 filter endpoints.</li>
                 </ul>
 
-                <pre><code>GET /api/contacts?page=0&amp;size=20
-GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>GET /api/contacts?page=0&size=20
+GET /api/organisations/search?searchTerm=alta&page=0&size=20</code></pre>
+                </div>
 
                 <h2 id="filtering">V2 filtering conventions</h2>
                 <p>Contacts, organisations, and households expose v2 POST-based filtering APIs. The request accepts a list of conditions plus page, size, and sort values.</p>
-                <pre><code>{
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "filters": [
     { "field": "isActive", "operator": "equals", "value": "true" },
     { "field": "stageName", "operator": "in", "values": ["Prospect", "Client"] }
@@ -94,9 +102,13 @@ GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre
   "size": 20,
   "sort": ["createdAt,desc"]
 }</code></pre>
+                </div>
 
-                <p>Distinct values for a filterable field are fetched through the matching <code>/filter-values</code> endpoint.</p>
-                <pre><code>{
+                <p>Distinct values for a filterable field are fetched through the matching <code>/filter-values</code> endpoint:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "field": "stageName",
   "baseFilters": [
     { "field": "isActive", "operator": "equals", "value": "true" }
@@ -104,9 +116,10 @@ GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre
   "page": 0,
   "size": 20
 }</code></pre>
+                </div>
 
                 <h2 id="errors">Error handling</h2>
-                <p>Controllers return a mix of empty responses, booleans, Spring validation failures, and structured error bodies. Vendors should code to HTTP status first and then parse the response body if present.</p>
+                <p>The API returns standard HTTP status codes. Client code should check the status first, then parse the response body if present.</p>
                 <table>
                     <thead>
                         <tr><th>Status</th><th>Typical meaning</th><th>Recommended action</th></tr>
@@ -116,20 +129,194 @@ GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre
                         <tr><td><code>401</code></td><td>Missing or invalid authentication</td><td>Re-authenticate or refresh the token.</td></tr>
                         <tr><td><code>403</code></td><td>Authenticated but not allowed</td><td>Check role, tenant context, and ownership rules.</td></tr>
                         <tr><td><code>404</code></td><td>Resource not found</td><td>Verify UUIDs and whether the resource belongs to the current tenant.</td></tr>
-                        <tr><td><code>409</code></td><td>State conflict</td><td>Used on duplicate resources or invalid transitions such as credential initialization conflicts.</td></tr>
+                        <tr><td><code>409</code></td><td>State conflict</td><td>Used on duplicate resources or invalid state transitions.</td></tr>
                     </tbody>
                 </table>
 
                 <div class="callout warning">
-                    <strong>Important:</strong> some endpoints return only the HTTP status with an empty body on failure, while others return a structured payload. Client code should not assume a uniform error schema everywhere.
+                    <strong>Important:</strong> some endpoints return only the HTTP status with an empty body on failure, while others return a structured error payload. Do not assume a uniform error schema across all endpoints.
                 </div>
 
-                <h2 id="sample-data">Stable sample data guidance</h2>
+                <h3 id="error-formats">Error response formats</h3>
+                <p>When an error body is present, it follows one of two schemas depending on which part of the platform handles the error.</p>
+
+                <p><strong>Standard error response</strong> — returned by most endpoints. Includes a machine-readable <code>errorCode</code> with the format <code>BE####</code> that your code can switch on:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "errorCode": "BE0101",
+  "message": "Contact not found",
+  "status": 404,
+  "path": "/api/contacts/UNKNOWN-UUID",
+  "timestamp": "2024-01-15T10:30:00",
+  "details": null
+}</code></pre>
+                </div>
+
+                <p>For validation errors (<code>400</code>), the <code>details</code> array contains field-level messages:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "errorCode": "BE0201",
+  "message": "Validation failed",
+  "status": 400,
+  "path": "/api/contacts",
+  "timestamp": "2024-01-15T10:30:00",
+  "details": [
+    "firstName: must not be blank",
+    "contactType: must not be null"
+  ]
+}</code></pre>
+                </div>
+
+                <p><strong>Legacy error response</strong> — returned by some older endpoints. Uses a <code>details</code> map instead of an array:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": {
+    "firstName": "must not be blank"
+  }
+}</code></pre>
+                </div>
+
+                <h2 id="dynamic-enums">Dynamic configuration lookups</h2>
+                <p>Some fields on contacts and organisations accept values that are configured per-tenant rather than hardcoded in the platform. Retrieve the valid options for these fields at runtime using the endpoints below.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Entity</th><th>Endpoint</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>stage</code></td>
+                            <td>Contact</td>
+                            <td><code>GET /api/core/platformconfigs/v1/contacts/stages</code></td>
+                            <td>Pipeline stages configured for the current tenant.</td>
+                        </tr>
+                        <tr>
+                            <td><code>contactSource</code></td>
+                            <td>Contact</td>
+                            <td><code>GET /api/core/platformconfigs/v1/contacts/sources</code></td>
+                            <td>Lead source options (e.g. Referral, Event, Website).</td>
+                        </tr>
+                        <tr>
+                            <td><code>segment</code></td>
+                            <td>Contact</td>
+                            <td><code>GET /api/core/platformconfigs/v1/contacts/segments</code></td>
+                            <td>Market segment classifications (e.g. Retail, Institutional).</td>
+                        </tr>
+                        <tr>
+                            <td><code>industry</code></td>
+                            <td>Organisation</td>
+                            <td><code>GET /api/industries</code></td>
+                            <td>Industry options with display names for UI rendering.</td>
+                        </tr>
+                        <tr>
+                            <td><code>country</code> fields</td>
+                            <td>Contact / Org</td>
+                            <td><code>GET /api/core/geo/v1/countries</code></td>
+                            <td>ISO country list for address and citizenship fields.</td>
+                        </tr>
+                        <tr>
+                            <td><code>cities</code></td>
+                            <td>Contact / Org</td>
+                            <td><code>GET /api/core/geo/v1/cities?country={code}</code></td>
+                            <td>City options for a given country code.</td>
+                        </tr>
+                        <tr>
+                            <td><code>phoneCountryCode</code></td>
+                            <td>Contact / Org</td>
+                            <td><code>GET /api/core/geo/v1/phone-codes</code></td>
+                            <td>Phone dialling code options by country.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Example: fetch pipeline stages</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/core/platformconfigs/v1/contacts/stages" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
+
+                <p>The response is a list of stage objects with a <code>code</code> field that you pass as the <code>stageName</code> value when creating or updating a contact. Because stages are tenant-defined, always fetch them from the API rather than hardcoding them in your integration.</p>
+
+                <h3>Sample responses</h3>
+
+                <p><strong>Pipeline stages, contact sources, and contact segments</strong> — all three endpoints return the same structure:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "code": "prospect",
+    "displayName": "Prospect",
+    "enabled": true,
+    "deleted": false,
+    "sortOrder": 1,
+    "createdAt": "2024-01-10T08:00:00Z",
+    "updatedAt": "2024-01-10T08:00:00Z"
+  },
+  {
+    "code": "client",
+    "displayName": "Client",
+    "enabled": true,
+    "deleted": false,
+    "sortOrder": 2,
+    "createdAt": "2024-01-10T08:00:00Z",
+    "updatedAt": "2024-01-10T08:00:00Z"
+  }
+]</code></pre>
+                </div>
+
+                <p>Use the <code>code</code> value when setting <code>stageName</code>, <code>contactSource</code>, or <code>segmentName</code> on a contact. The <code>displayName</code> is intended for rendering in UIs. Only <code>enabled: true</code> and <code>deleted: false</code> items are valid for new records.</p>
+
+                <p><strong>Industries</strong> — <code>GET /api/industries</code> returns a flat list of name/displayName pairs:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  { "name": "TECHNOLOGY", "displayName": "Technology" },
+  { "name": "FINANCIAL_SERVICES", "displayName": "Financial Services" },
+  { "name": "HEALTHCARE", "displayName": "Healthcare" }
+]</code></pre>
+                </div>
+
+                <p>Use the <code>name</code> value when setting the <code>industry</code> field on an organisation.</p>
+
+                <p><strong>Countries</strong> — <code>GET /api/core/geo/v1/countries</code> returns an array of country objects. Use the optional <code>fields</code> query parameter to limit which fields are returned:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>GET /api/core/geo/v1/countries?fields=cca3,name.common
+
+[
+  { "cca3": "CHL", "name": { "common": "Chile" } },
+  { "cca3": "ARG", "name": { "common": "Argentina" } },
+  { "cca3": "USA", "name": { "common": "United States" } }
+]</code></pre>
+                </div>
+
+                <p>Use the <code>cca3</code> ISO-3 code for address fields such as <code>identityCountry</code>, <code>countryOfBirth</code>, and <code>countryOfCitizenship</code>.</p>
+
+                <h2 id="sample-data">Sample data guidance</h2>
                 <ul>
                     <li>Reuse a single documented tenant and user where possible.</li>
-                    <li>Prefer examples that can be re-run safely, such as list, search, and filter requests.</li>
-                    <li>For create and update samples, use obviously illustrative values and note that UUIDs returned from your tenant will differ.</li>
-                    <li>For note attachments, treat the upload URLs as short-lived and environment-specific.</li>
+                    <li>Prefer examples that can be re-run safely — list, search, and filter requests.</li>
+                    <li>For create and update samples, use obviously illustrative values. UUIDs returned from your tenant will differ.</li>
+                    <li>For note attachments, treat upload URLs as short-lived and environment-specific.</li>
                 </ul>
             </main>
         </div>
@@ -162,14 +349,15 @@ GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -178,5 +366,7 @@ GET /api/organisations/search?searchTerm=alta&amp;page=0&amp;size=20</code></pre
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

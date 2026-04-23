@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Overview - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html" class="active">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Platform Overview</h3>
+                <ul>
+                    <li><a href="#what-is-altafid">What is Altafid?</a></li>
+                    <li><a href="#core-concepts">Core concepts</a></li>
+                    <li><a href="#tenants">Tenants</a></li>
+                    <li><a href="#contacts">Contacts</a></li>
+                    <li><a href="#organisations">Organisations</a></li>
+                    <li><a href="#households">Households</a></li>
+                    <li><a href="#notes">Notes</a></li>
+                    <li><a href="#staff">Staff</a></li>
+                    <li><a href="#saved-views">Saved Views</a></li>
+                    <li><a href="#entity-relationships">Entity relationships</a></li>
+                    <li><a href="#api-structure">API structure</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="what-is-altafid">What is Altafid?</h1>
+
+                <p>Altafid is a wealth management and client relationship platform for financial advisory firms. It provides advisors with a unified view of their clients — who they are, who they are related to, what accounts they hold, and what interactions have taken place. Third-party integrations connect to Altafid through a REST API to create, read, and update this data programmatically.</p>
+
+                <div class="callout info">
+                    <strong>Integration model:</strong> All API requests are scoped to a <strong>tenant</strong> — your firm's isolated workspace on the platform. You authenticate as a staff member of that tenant, and every record you create or query belongs to your tenant only.
+                </div>
+
+                <h2 id="core-concepts">Core concepts</h2>
+
+                <p>The Altafid platform is organised around a small set of entities that represent the people, relationships, and activities in an advisory firm. Understanding how they connect is the key to building a successful integration.</p>
+
+                <h2 id="tenants">Tenants</h2>
+
+                <p>A <strong>tenant</strong> is your firm's isolated account on the Altafid platform. All data — contacts, households, notes, staff — belongs to exactly one tenant. When you authenticate, you receive a <code>tenantUuid</code> that must be included in every subsequent API call. No data crosses tenant boundaries.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>tenantUuid</code></td><td>Unique identifier for your firm's workspace</td></tr>
+                        <tr><td><code>name</code></td><td>Full legal name of the firm</td></tr>
+                        <tr><td><code>code</code></td><td>Short human-readable identifier (e.g. <code>CONPAT_UAT</code>)</td></tr>
+                    </tbody>
+                </table>
+
+                <p><a href="tenants.html">Tenants API documentation →</a></p>
+
+                <h2 id="contacts">Contacts</h2>
+
+                <p>A <strong>contact</strong> is any person tracked in the platform — a client, a prospect, a beneficiary, or a related individual. Contacts are the primary record type for people your firm works with or wants to work with. They hold personal information, communication preferences, compliance data (KYC), and financial profile details.</p>
+
+                <p>Each contact belongs to a firm (your tenant, a partner firm, or an organisation) and can be linked to one or more households. A contact can also be invited to access a client portal, at which point credentials are created for them.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Key field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>contactUuid</code></td><td>Unique identifier</td></tr>
+                        <tr><td><code>firstName</code> / <code>paternalLastName</code></td><td>Full name</td></tr>
+                        <tr><td><code>contactType</code></td><td><code>ACTIVE</code> client or <code>SUBSCRIBER</code> prospect</td></tr>
+                        <tr><td><code>stage</code></td><td>Where in the advisory pipeline this contact sits (tenant-defined)</td></tr>
+                        <tr><td><code>segment</code></td><td>Market segment classification (tenant-defined)</td></tr>
+                        <tr><td><code>preferredEmail</code></td><td>Primary contact email address</td></tr>
+                    </tbody>
+                </table>
+
+                <p><a href="contacts.html">Contacts API documentation →</a></p>
+
+                <h2 id="organisations">Organisations</h2>
+
+                <p>An <strong>organisation</strong> is a legal entity — a company, trust, fund, or other non-individual entity — that your firm tracks. Organisations can be employers of contacts, vehicles through which contacts invest, or clients in their own right. They can be linked to households and can have contact members (administrators, beneficial owners, etc.).</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Key field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>organisationUuid</code></td><td>Unique identifier</td></tr>
+                        <tr><td><code>legalCompanyName</code></td><td>Official registered name</td></tr>
+                        <tr><td><code>industry</code></td><td>Sector classification (e.g. FINANCIAL_AND_INSURANCE_ACTIVITIES)</td></tr>
+                        <tr><td><code>identificationType</code> / <code>identificationId</code></td><td>Tax ID, company registration number, or EIN</td></tr>
+                    </tbody>
+                </table>
+
+                <p><a href="organisations.html">Organisations API documentation →</a></p>
+
+                <h2 id="households">Households</h2>
+
+                <p>A <strong>household</strong> is a named group that brings together contacts and/or organisations sharing a financial relationship. A household might represent a married couple, a family unit, an investment club, or a trust's beneficiaries. Households are the primary unit for consolidated reporting — portfolio values, AUM, and analytics roll up to the household level.</p>
+
+                <p>Each household has a designated relationship manager (a staff member) and can have multiple members, each with a defined role or relationship type (spouse, child, trustee, etc.).</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Key field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>householdUuid</code></td><td>Unique identifier</td></tr>
+                        <tr><td><code>name</code></td><td>Display name (e.g. "Smith Family")</td></tr>
+                        <tr><td><code>relationshipManagerUuid</code></td><td>Assigned advisor staff UUID</td></tr>
+                        <tr><td><code>members</code></td><td>Contacts and/or organisations in this household</td></tr>
+                    </tbody>
+                </table>
+
+                <p><a href="households.html">Households API documentation →</a></p>
+
+                <h2 id="notes">Notes</h2>
+
+                <p>A <strong>note</strong> is a rich-text record capturing an interaction, observation, or piece of analysis related to a contact. Notes serve as the activity log for the advisory relationship — meeting summaries, call logs, investment rationale, compliance annotations, and follow-up items. Notes support file attachments (uploaded via presigned S3 URLs) and can be associated with both a contact and a household.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Key field</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>noteUuid</code></td><td>Unique identifier</td></tr>
+                        <tr><td><code>textContent</code></td><td>HTML-formatted note body</td></tr>
+                        <tr><td><code>associationType</code></td><td>Whether this note is linked to a contact, household, or both</td></tr>
+                        <tr><td><code>attachments</code></td><td>Files attached to this note (PDFs, images, documents)</td></tr>
+                    </tbody>
+                </table>
+
+                <p><a href="notes.html">Notes API documentation →</a></p>
+
+                <h2 id="staff">Staff</h2>
+
+                <p><strong>Staff</strong> are the users who access the Altafid platform on behalf of your firm. They can be advisors (who own client relationships), administrators (who manage the platform configuration), or managers (who oversee other advisors). When a staff member authenticates, their identity and role are embedded in the session token and control what data they can access.</p>
+
+                <p>Staff can be directly employed by the tenant (<code>TENANT_STAFF</code>) or assigned through a partner firm (<code>PARTNER_STAFF</code>).</p>
+
+                <p><a href="staff.html">Staff Management API documentation →</a></p>
+
+                <h2 id="saved-views">Saved Views</h2>
+
+                <p><strong>Saved views</strong> are personalised column and filter configurations that a staff member stores for their entity list screens (contacts, organisations, households, tasks). Each user can save up to five views per entity type and mark one as their favorite default. Views persist across sessions and devices.</p>
+
+                <p><a href="views.html">Saved Views API documentation →</a></p>
+
+                <h2 id="entity-relationships">Entity relationships</h2>
+
+                <p>The diagram below shows how the core platform entities are related to each other.</p>
+
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+erDiagram
+    Tenant ||--o{ Contact : "contains"
+    Tenant ||--o{ Organisation : "contains"
+    Tenant ||--o{ Household : "contains"
+    Tenant ||--o{ Staff : "employs"
+    Household ||--o{ Contact : "groups"
+    Household ||--o{ Organisation : "groups"
+    Contact ||--o{ Note : "has"
+    Contact }o--o{ Organisation : "associated with"
+    Staff }o--o{ Contact : "manages"
+    Staff }o--o{ Household : "advises"
+                </div>
+
+                <p>Key relationships to understand for integration:</p>
+
+                <ul>
+                    <li>A <strong>contact</strong> can belong to zero or many households. A household can have zero or many contacts as members.</li>
+                    <li>A <strong>contact</strong> can be associated with zero or many organisations (as an employee, beneficial owner, or director).</li>
+                    <li>A <strong>household</strong> has one assigned <strong>staff</strong> member as relationship manager, but multiple staff can view and work with the household.</li>
+                    <li>All records — contacts, organisations, households, notes — are owned by the <strong>tenant</strong> and invisible to other tenants.</li>
+                </ul>
+
+                <h2 id="api-structure">API structure</h2>
+
+                <p>The Altafid API is versioned and organised by entity. Most entity endpoints are under <code>/api/{entity}</code>. Filtering and aggregation endpoints use the v2 path prefix (<code>/api/v2/{entity}</code>).</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Version</th><th>Pattern</th><th>Use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>v1 (default)</td><td><code>/api/{entity}</code></td><td>Standard CRUD operations</td></tr>
+                        <tr><td>v2</td><td><code>/api/v2/{entity}</code></td><td>Advanced filtering and filter-value lookups</td></tr>
+                        <tr><td>Public</td><td><code>/api/public/...</code></td><td>Unauthenticated endpoints (branding)</td></tr>
+                    </tbody>
+                </table>
+
+                <p>Every authenticated request requires four headers in addition to the bearer token. See <a href="conventions.html#headers">Shared Conventions — Required headers</a> for details.</p>
+
+                <div class="callout info">
+                    <strong>Where to start:</strong> follow the <a href="quickstart.html">Quick Start</a> guide to make your first authenticated request in under five minutes, then return here to understand how the entities you need relate to each other.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+</body>
+</html>

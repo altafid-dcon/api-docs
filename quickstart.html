@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html" class="active">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="onboarding.html">Client Onboarding</a></li>
             </ul>
         </div>
     </nav>
@@ -37,23 +37,27 @@
 
             <main class="doc-content">
                 <h1>Quick Start</h1>
-                <p>Use this page to make a first authenticated request quickly. The examples below match the current `backend-core` login response shape, including the tenant and user headers required by downstream APIs.</p>
+                <p>Use this page to make your first authenticated request in under five minutes. The examples below walk through the Altafid login flow and the tenant and user headers required by all downstream APIs.</p>
 
                 <div class="callout info" id="credentials">
                     <strong>UAT base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
                     <strong>Sample tenant:</strong> <code>T019A16FF372A70B5A9307B00CE85E4DA</code><br>
-                    <strong>Sample user:</strong> <code>kaboom-poc@yopmail.com</code>
+                    <strong>Sample user:</strong> Contact your integration team for credentials.
                 </div>
 
                 <h2 id="login">1. Login</h2>
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/auth/login" \
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/auth/login" \
   -X POST \
   -H "accept: application/json" \
   -H "content-type: application/json" \
   --data '{
-    "username": "kaboom-poc@yopmail.com",
-    "password": "Password123!"
+    "username": "your-email@example.com",
+    "password": "YourPassword123!"
   }'</code></pre>
+                </div>
 
                 <p>The login response can return one of three statuses:</p>
                 <table>
@@ -62,16 +66,18 @@
                     </thead>
                     <tbody>
                         <tr><td><code>LOGIN_SUCCESS</code></td><td>Access token and refresh token returned.</td><td>Continue with API calls.</td></tr>
-                        <tr><td><code>MFA_SETUP_REQUIRED</code></td><td>User must initialize MFA first.</td><td>Go to <a href="authentication.html">Authentication and MFA</a>.</td></tr>
+                        <tr><td><code>MFA_SETUP_REQUIRED</code></td><td>User must initialise MFA first.</td><td>Go to <a href="authentication.html">Authentication and MFA</a>.</td></tr>
                         <tr><td><code>MFA_REQUIRED</code></td><td>Password accepted but MFA verification is required.</td><td>Submit the challenge token to <code>/api/auth/mfa/verify</code>.</td></tr>
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "status": "LOGIN_SUCCESS",
   "token": "eyJhbGciOiJIUzI1NiJ9...",
   "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-  "username": "kaboom-poc@yopmail.com",
+  "username": "your-email@example.com",
   "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
   "tenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
   "userUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
@@ -81,26 +87,37 @@
   "expiresIn": 3600000,
   "refreshExpiresIn": 604800000
 }</code></pre>
+                </div>
 
                 <h2 id="headers">2. Build request headers</h2>
-                <p>For authenticated vendor-facing endpoints, send all of the following headers.</p>
-                <pre><code>Authorization: Bearer {token}
-x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA
-x-user-email: kaboom-poc@yopmail.com
-x-user-id: TS019C06688AA57248B9EA5325DBDFC48E
+                <p>For all authenticated API requests, send the following headers using the values from your login response:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer {token}
+x-tenant-uuid: {tenantUuid}
+x-user-email: {username}
+x-user-id: {tenantStaffUuid}
 x-user-type: TENANT_STAFF</code></pre>
+                </div>
 
                 <h2 id="first-call">3. First successful call</h2>
                 <p>A safe first call is the contact list endpoint. It confirms your token, tenant scoping, and header values all work together.</p>
-                <pre><code>curl "https://api.altafid.dev.altafid.net/api/contacts?page=0&amp;size=1" \
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/contacts?page=0&size=1" \
   -H "accept: application/json" \
-  -H "authorization: Bearer YOUR_TOKEN" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "x-tenant-uuid: T019A16FF372A70B5A9307B00CE85E4DA" \
-  -H "x-user-email: kaboom-poc@yopmail.com" \
+  -H "x-user-email: your-email@example.com" \
   -H "x-user-id: TS019C06688AA57248B9EA5325DBDFC48E" \
   -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "content": [
     {
       "contactUuid": "C019B9D0FD0E5772F9E8ED189895D40C4",
@@ -117,6 +134,7 @@ x-user-type: TENANT_STAFF</code></pre>
   },
   "totalElements": 1
 }</code></pre>
+                </div>
 
                 <div class="callout success">
                     <strong>Success criteria:</strong> if this call returns a paginated JSON payload, your credentials, headers, and tenant context are wired correctly.
@@ -124,9 +142,10 @@ x-user-type: TENANT_STAFF</code></pre>
 
                 <h2 id="next">4. Next pages</h2>
                 <ul>
+                    <li><a href="platform-overview.html">Platform Overview</a> to understand all entities and their relationships.</li>
                     <li><a href="conventions.html">Shared Conventions</a> for pagination, filtering, and error handling.</li>
-                    <li><a href="authentication.html">Authentication and MFA</a> for full token lifecycle behavior.</li>
-                    <li><a href="contacts.html">Contacts</a> to start implementing the largest vendor-facing surface.</li>
+                    <li><a href="authentication.html">Authentication and MFA</a> for full token lifecycle behaviour.</li>
+                    <li><a href="contacts.html">Contacts</a> to start implementing the primary entity management APIs.</li>
                 </ul>
             </main>
         </div>
@@ -159,14 +178,15 @@ x-user-type: TENANT_STAFF</code></pre>
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -175,5 +195,7 @@ x-user-type: TENANT_STAFF</code></pre>
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>

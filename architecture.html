@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Architecture</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#system-diagram">System diagram</a></li>
+                    <li><a href="#service-responsibilities">Service responsibilities</a></li>
+                    <li><a href="#data-flows">Common data flows</a></li>
+                    <li><a href="#authentication-flow">Authentication flow</a></li>
+                    <li><a href="#event-flow">Event flow</a></li>
+                    <li><a href="#integration-points">Integration points</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1>Platform Architecture</h1>
+                <span class="pill vendor">External integration reference</span>
+
+                <p>This page describes the technical architecture of the Altafid platform. It is intended for integration architects and developers who need to understand service boundaries, data flows, and where API requests are handled.</p>
+
+                <h2 id="overview">Overview</h2>
+
+                <p>The Altafid platform is a multi-service system built on a microservices architecture. Client applications and third-party integrations reach the platform through an API Gateway, which routes requests to the appropriate backend service. The two primary services are the <strong>Core API</strong> (entity management, authentication, configuration) and the <strong>Analytics service</strong> (event ingestion and time-series queries).</p>
+
+                <div class="callout info">
+                    <strong>For integrators:</strong> you communicate only with the API Gateway. You do not need to know which internal service handles your request — the gateway routes transparently. Your base URL is always <code>https://api.altafid.dev.altafid.net</code>.
+                </div>
+
+                <h2 id="system-diagram">System diagram</h2>
+
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+flowchart TB
+    subgraph clients ["Client Applications"]
+        WebApp["Web Application"]
+        ThirdParty["Third-Party Integrations"]
+    end
+
+    subgraph gateway ["API Gateway"]
+        GW["Gateway Service\n(Routing · Auth validation · Rate limiting)"]
+    end
+
+    subgraph services ["Backend Services"]
+        Core["Core API Service\n(Contacts · Organisations · Households\nNotes · Staff · Views · Exports)"]
+        Analytics["Analytics Service\n(Event ingestion · Time-series queries)"]
+    end
+
+    subgraph storage ["Data Layer"]
+        PG[("PostgreSQL\nCore database")]
+        AnalyticsDB[("PostgreSQL\nAnalytics database")]
+        Redis[("Redis\nCache · Sessions")]
+        S3["S3 Object Storage\nAttachments · Branding assets"]
+    end
+
+    WebApp --> GW
+    ThirdParty --> GW
+
+    GW --> Core
+    GW --> Analytics
+
+    Core --> PG
+    Core --> Redis
+    Core --> S3
+    Core -.->|"Publishes events\n(outbox pattern)"| Analytics
+
+    Analytics --> AnalyticsDB
+                </div>
+
+                <h2 id="service-responsibilities">Service responsibilities</h2>
+
+                <h3>API Gateway</h3>
+                <p>The gateway is the single entry point for all external traffic. It handles:</p>
+                <ul>
+                    <li>TLS termination and request routing to backend services</li>
+                    <li>JWT token validation (tokens issued by the Core API)</li>
+                    <li>Rate limiting and traffic shaping</li>
+                    <li>Forwarding tenant and user identity headers to downstream services</li>
+                </ul>
+
+                <h3>Core API Service</h3>
+                <p>The Core API is the primary application service. It manages all business entities and the workflows around them:</p>
+                <ul>
+                    <li><strong>Identity and access:</strong> authentication, MFA, session management, staff provisioning</li>
+                    <li><strong>Entity management:</strong> contacts, organisations, households, notes, portfolio linkage</li>
+                    <li><strong>Configuration:</strong> tenant settings, branding, domains, pipeline stages, segments, sources</li>
+                    <li><strong>Data operations:</strong> tabular exports (CSV / XLSX), saved view management</li>
+                    <li><strong>File storage:</strong> attachment upload coordination via presigned S3 URLs</li>
+                    <li><strong>Event publishing:</strong> writes analytics events to an outbox table for delivery to the Analytics service</li>
+                </ul>
+                <p><strong>Technology:</strong> Java 21 · Spring Boot · PostgreSQL · Redis</p>
+
+                <h3>Analytics Service</h3>
+                <p>The Analytics service is a dedicated data service focused on event ingestion and querying. It is separate from the Core API to avoid coupling real-time request handling to analytical query load.</p>
+                <ul>
+                    <li><strong>Event ingestion:</strong> accepts structured events from the Core API and from direct API callers</li>
+                    <li><strong>Query execution:</strong> runs aggregate queries with time bucketing, filtering, and grouping</li>
+                    <li><strong>Data storage:</strong> events are stored in a dedicated PostgreSQL database with scheduled hourly rollups for efficient querying</li>
+                </ul>
+                <p><strong>Technology:</strong> Java · Spring Boot · PostgreSQL</p>
+
+                <h3>Data Layer</h3>
+
+                <table>
+                    <thead>
+                        <tr><th>System</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>PostgreSQL (Core)</td><td>Primary transactional database — all entity records, configuration, and audit data</td></tr>
+                        <tr><td>PostgreSQL (Analytics)</td><td>Event store and rollup tables for analytical queries</td></tr>
+                        <tr><td>Redis</td><td>MFA token cache, session invalidation, distributed locking for export jobs</td></tr>
+                        <tr><td>S3 Object Storage</td><td>Note attachments, tenant branding assets (logo, favicon)</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="data-flows">Common data flows</h2>
+
+                <h3>Creating a contact</h3>
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+sequenceDiagram
+    participant Integration as Third-Party Integration
+    participant GW as API Gateway
+    participant Core as Core API
+    participant DB as PostgreSQL
+
+    Integration->>GW: POST /api/contacts (JWT + headers)
+    GW->>GW: Validate JWT, extract tenant
+    GW->>Core: Forward request + identity headers
+    Core->>DB: INSERT contact record
+    Core->>Core: Publish contact.created event to outbox
+    Core-->>GW: 201 Created + contact DTO
+    GW-->>Integration: 201 Created + contact DTO
+                </div>
+
+                <h3>Querying analytics</h3>
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+sequenceDiagram
+    participant Integration as Third-Party Integration
+    participant GW as API Gateway
+    participant Analytics as Analytics Service
+    participant DB as Analytics DB
+
+    Integration->>GW: POST /api/analytics/query (JWT + headers)
+    GW->>GW: Validate JWT
+    GW->>Analytics: Forward request
+    Analytics->>DB: Execute aggregation query
+    DB-->>Analytics: Rows
+    Analytics-->>GW: AnalyticsResult
+    GW-->>Integration: AnalyticsResult
+                </div>
+
+                <h2 id="authentication-flow">Authentication flow</h2>
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+sequenceDiagram
+    participant Client
+    participant GW as API Gateway
+    participant Core as Core API
+    participant Redis
+
+    Client->>GW: POST /api/auth/login (email + password)
+    GW->>Core: Forward
+    Core->>Core: Validate credentials
+    alt MFA enabled
+        Core-->>Client: 200 OK (mfaRequired: true, challengeId)
+        Client->>GW: POST /api/mfa/verify-login (challengeId + TOTP code)
+        GW->>Core: Forward
+        Core->>Redis: Validate challenge
+    end
+    Core-->>Client: accessToken + refreshToken + tenantUuid
+                </div>
+
+                <p>See <a href="authentication.html">Authentication</a> for full details on token lifetimes, the refresh flow, and MFA setup.</p>
+
+                <h2 id="event-flow">Event flow: Core to Analytics</h2>
+
+                <p>The Core API publishes events to the Analytics service using a reliable outbox pattern, ensuring no events are lost even if the Analytics service is temporarily unavailable.</p>
+
+                <div class="mermaid" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+flowchart LR
+    A["Business operation\n(e.g. contact created)"] --> B["Write event to\noutbox table"]
+    B --> C["Scheduler flushes\noutbox periodically"]
+    C --> D["POST /api/analytics/events\nto Analytics service"]
+    D --> E["Event stored in\nAnalytics DB"]
+    E --> F["Hourly rollup\nscheduler"]
+    F --> G["Aggregated tables\nfor fast queries"]
+                </div>
+
+                <p>Events can also be sent directly to the Analytics service via the <a href="analytics.html#event-ingestion">event ingestion API</a> if you are instrumenting your own integration.</p>
+
+                <h2 id="integration-points">Integration points for third parties</h2>
+
+                <p>As a third-party integrator, you interact with the platform through these surfaces:</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Surface</th><th>Base path</th><th>Documentation</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Authentication</td><td><code>/api/auth</code>, <code>/api/mfa</code></td><td><a href="authentication.html">Authentication</a></td></tr>
+                        <tr><td>Contacts</td><td><code>/api/contacts</code>, <code>/api/v2/contacts</code></td><td><a href="contacts.html">Contacts</a></td></tr>
+                        <tr><td>Organisations</td><td><code>/api/organisations</code>, <code>/api/v2/organisations</code></td><td><a href="organisations.html">Organisations</a></td></tr>
+                        <tr><td>Households</td><td><code>/api/households</code>, <code>/api/v2/households</code></td><td><a href="households.html">Households</a></td></tr>
+                        <tr><td>Notes</td><td><code>/api/notes</code></td><td><a href="notes.html">Notes</a></td></tr>
+                        <tr><td>Staff management</td><td><code>/api/tenant-staff</code></td><td><a href="staff.html">Staff</a></td></tr>
+                        <tr><td>Saved Views</td><td><code>/api/v1/views</code></td><td><a href="views.html">Saved Views</a></td></tr>
+                        <tr><td>Tenant admin</td><td><code>/api/tenants</code></td><td><a href="tenants.html">Tenants</a></td></tr>
+                        <tr><td>Exports</td><td><code>/api/exports</code></td><td><a href="exports.html">Exports</a></td></tr>
+                        <tr><td>Analytics queries</td><td><code>/api/analytics/query</code></td><td><a href="analytics.html">Analytics</a></td></tr>
+                        <tr><td>Analytics event ingest</td><td><code>/api/analytics/events</code></td><td><a href="analytics.html#event-ingestion">Analytics — Events</a></td></tr>
+                        <tr><td>Configuration lookups</td><td><code>/api/core/platformconfigs/v1/contacts/stages</code>, <code>/api/core/geo/v1/countries</code>, etc.</td><td><a href="conventions.html#dynamic-enums">Dynamic configuration</a></td></tr>
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+</body>
+</html>

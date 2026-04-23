@@ -16,8 +16,8 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="quickstart.html">Quick Start</a></li>
                 <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
                 <li><a href="conventions.html">Conventions</a></li>
-                <li><a href="notes.html" class="active">Notes</a></li>
             </ul>
         </div>
     </nav>
@@ -36,8 +36,8 @@
 
             <main class="doc-content">
                 <h1 id="overview">Notes API</h1>
-                <span class="pill vendor">External vendor</span>
-                <p>Notes are contact-scoped records with optional household/contact associations and an attachment flow that uses presigned S3 uploads.</p>
+                <span class="pill vendor">External integration</span>
+                <p>Notes are activity records scoped to a contact, with optional household associations and an attachment flow that uses presigned upload URLs for direct-to-storage file delivery.</p>
 
                 <h2 id="crud">Core note endpoints</h2>
                 <table>
@@ -46,14 +46,16 @@
                     </thead>
                     <tbody>
                         <tr><td><code>POST /api/v1/notes/contacts/{contactUuid}</code></td><td>Create a note for a contact.</td></tr>
-                        <tr><td><code>GET /api/v1/notes/contacts/{contactUuid}</code></td><td>List notes for a contact.</td></tr>
+                        <tr><td><code>GET /api/v1/notes/contacts/{contactUuid}</code></td><td>List notes for a contact (paginated).</td></tr>
                         <tr><td><code>GET /api/v1/notes/{noteUuid}</code></td><td>Get a single note.</td></tr>
                         <tr><td><code>PUT /api/v1/notes/{noteUuid}</code></td><td>Update note text, associations, and attachments.</td></tr>
                         <tr><td><code>DELETE /api/v1/notes/{noteUuid}</code></td><td>Delete a note.</td></tr>
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "textContent": "&lt;p&gt;Client asked for an updated proposal.&lt;/p&gt;",
   "description": "Proposal follow-up",
   "noteCreatedFor": "C019B9D0FD0E5772F9E8ED189895D40C4",
@@ -66,8 +68,13 @@
     }
   ]
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <p>Note response:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "noteUuid": "N019B9D0FD0E5772F9E8ED189895D40C4",
   "textContent": "&lt;p&gt;Client asked for an updated proposal.&lt;/p&gt;",
   "description": "Proposal follow-up",
@@ -81,28 +88,37 @@
   "createdAt": "2026-04-22T09:15:00",
   "updatedAt": "2026-04-22T09:15:00"
 }</code></pre>
+                </div>
 
                 <h2 id="search">Search</h2>
-                <p><code>GET /api/v1/notes/contacts/{contactUuid}/search</code> accepts either <code>q</code> or <code>search</code>. The term must be 2 to 100 characters.</p>
-                <pre><code>GET /api/v1/notes/contacts/{contactUuid}/search?q=proposal&amp;page=0&amp;size=20</code></pre>
+                <p><code>GET /api/v1/notes/contacts/{contactUuid}/search</code> accepts either <code>q</code> or <code>search</code>. The search term must be between 2 and 100 characters.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>GET /api/v1/notes/contacts/{contactUuid}/search?q=proposal&page=0&size=20</code></pre>
+                </div>
 
                 <h2 id="attachments">Attachment flow</h2>
-                <p>Attachments are a three-step flow: initialize upload, upload to S3 with the presigned URL, then confirm the upload before referencing those URLs from the note payload.</p>
+                <p>Attachments are a three-step process: initialize the upload, upload the file directly to the returned presigned URL, then confirm the upload before referencing the file URLs in the note payload.</p>
 
                 <table>
                     <thead>
                         <tr><th>Step</th><th>Endpoint</th><th>Purpose</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>1</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/init</code></td><td>Request upload tickets and final URLs.</td></tr>
-                        <tr><td>2</td><td>Use returned presigned URL</td><td>Upload the file directly to storage.</td></tr>
-                        <tr><td>3</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/confirm-upload</code></td><td>Mark the uploaded files as usable.</td></tr>
+                        <tr><td>1</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/init</code></td><td>Request upload tickets and final storage URLs.</td></tr>
+                        <tr><td>2</td><td>Use returned presigned URL</td><td>Upload the file directly to object storage (S3).</td></tr>
+                        <tr><td>3</td><td><code>POST /api/v1/notes/contacts/{contactUuid}/attachments/confirm-upload</code></td><td>Mark the uploaded files as ready to use.</td></tr>
                         <tr><td>Optional cleanup</td><td><code>DELETE /api/v1/notes/contacts/{contactUuid}/attachments/cancel</code></td><td>Delete unused uploads.</td></tr>
                         <tr><td>Download</td><td><code>GET /api/v1/notes/{noteUuid}/attachments/download</code></td><td>Retrieve attachment data for a note.</td></tr>
                     </tbody>
                 </table>
 
-                <pre><code>{
+                <p>Init request body:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "files": [
     {
       "fileName": "proposal",
@@ -111,15 +127,21 @@
     }
   ]
 }</code></pre>
+                </div>
 
-                <pre><code>{
+                <p>Init response (contains the presigned upload URL and the final attachment URL to store on the note):</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
   "attachmentUrls": [
     "https://storage.example.com/notes/..."
   ]
 }</code></pre>
+                </div>
 
                 <div class="callout warning">
-                    <strong>Attachment constraints:</strong> the init request enforces a maximum file size of 200 KB and limited extensions such as <code>pdf</code>, <code>jpg</code>, <code>jpeg</code>, <code>png</code>, and <code>svg</code>.
+                    <strong>Attachment constraints:</strong> the init request enforces a maximum file size of 200 KB. Accepted file types: <code>pdf</code>, <code>jpg</code>, <code>jpeg</code>, <code>png</code>, <code>svg</code>.
                 </div>
             </main>
         </div>
@@ -152,14 +174,15 @@
                         <li><a href="tenants.html">Tenants</a></li>
                         <li><a href="staff.html">Staff</a></li>
                         <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Reference</h4>
                     <ul>
-                        <li><a href="mailto:api-support@altafid.com">api-support@altafid.com</a></li>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
                         <li><a href="docs.html">Documentation Hub</a></li>
-                        <li><a href="onboarding.html">Client Onboarding</a></li>
                     </ul>
                 </div>
             </div>
@@ -168,5 +191,7 @@
             </div>
         </div>
     </footer>
+
+    <script src="assets/js/scripts.js"></script>
 </body>
 </html>
