@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post   { background: #d1fae5; color: #065f46; }
+        .method-get    { background: #dbeafe; color: #1e40af; }
+        .method-put    { background: #fef3c7; color: #78350f; }
+        .method-delete { background: #fee2e2; color: #991b1b; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 160px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Reports</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#model">Object model</a></li>
+                    <li><a href="#flow">Report flow</a></li>
+                    <li><a href="#report-types">Report types</a></li>
+                    <li><a href="#steps">Report type steps</a></li>
+                    <li><a href="#reports">Reports</a></li>
+                    <li><a href="#create">Request a report</a></li>
+                    <li><a href="#status">Status and download</a></li>
+                    <li><a href="#subscriptions">Subscriptions</a></li>
+                    <li><a href="#scheduler">Scheduler</a></li>
+                    <li><a href="#data-model">Data model</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Reports API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The Reports API generates account and household reports. A <strong>report type</strong> is a reusable template made of ordered processing steps; a <strong>report</strong> is one generated instance for a specific account or household; a <strong>subscription</strong> is a standing order that produces reports automatically on a schedule.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    All requests require standard auth headers — see <a href="#auth">Authentication</a> and <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <div class="callout info">
+                    <strong>Generation is asynchronous.</strong> Creating a report returns immediately with status <code>PENDING</code>. The report then moves to <code>PROCESSING</code> and finally <code>COMPLETED</code> (or <code>FAILED</code>). When complete, <code>fileId</code> references the generated PDF in the <a href="documents.html">Documents</a> service, where it is downloaded.
+                </div>
+
+                <h2 id="auth">Authentication and headers</h2>
+                <table>
+                    <thead>
+                        <tr><th>Header</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Authorization: Bearer &lt;token&gt;</code></td><td><span class="badge-required">required</span></td><td>Access token.</td></tr>
+                        <tr><td><code>x-tenant-uuid</code></td><td><span class="badge-required">required</span></td><td>Tenant context.</td></tr>
+                        <tr><td><code>x-user-id</code></td><td><span class="badge-required">required</span></td><td>Current user UUID.</td></tr>
+                        <tr><td><code>x-user-email</code></td><td><span class="badge-required">required</span></td><td>Current user email.</td></tr>
+                        <tr><td><code>x-user-type</code></td><td><span class="badge-required">required</span></td><td><code>TENANT_STAFF</code> or <code>PARTNER_STAFF</code>.</td></tr>
+                        <tr><td><code>x-partner-uuid</code></td><td><span class="badge-optional">optional</span></td><td>Required for partner staff.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- OBJECT MODEL -->
+                <h2 id="model">Object model</h2>
+                <table>
+                    <thead>
+                        <tr><th>Concept</th><th>What it is</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Report Type</strong></td><td>A tenant template: a code, target entity type (<code>ACCOUNT</code> or <code>HOUSEHOLD</code>), periodic flags, and an ordered list of steps.</td></tr>
+                        <tr><td><strong>Report Type Step</strong></td><td>One ordered processing step (<code>stepOrder</code> + a <code>ReportStepCode</code>) that fetches a slice of data — e.g. <code>HOUSEHOLD_BALANCE_CHART</code>, <code>ACCOUNT_ASSET_ALLOCATION</code>.</td></tr>
+                        <tr><td><strong>Report</strong></td><td>One generated instance for a given entity and period, with a lifecycle status and a resulting <code>fileId</code>.</td></tr>
+                        <tr><td><strong>Subscription</strong></td><td>A standing order, one per account/household, holding currency + language defaults for reports generated automatically on schedule.</td></tr>
+                    </tbody>
+                </table>
+                <div class="callout info">
+                    <strong>Reporting is on accounts and households.</strong> Every report and subscription targets an <code>entityType</code> of <code>ACCOUNT</code> or <code>HOUSEHOLD</code> by <code>entityId</code>, drawing data from the <a href="accounts.html">Accounts</a> service.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FLOW -->
+                <h2 id="flow">Report flow</h2>
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Discover types</div>
+                        <div class="step-desc">POST /api/report-types/filter<br>pick a report type</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Request report</div>
+                        <div class="step-desc">POST /api/reports<br>returns status PENDING</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Poll status</div>
+                        <div class="step-desc">GET /api/reports/{id}<br>PROCESSING → COMPLETED</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">4</div>
+                        <div class="step-title">Download</div>
+                        <div class="step-desc">use <code>fileId</code> via<br>Documents service</div>
+                    </div>
+                </div>
+                <p>For recurring delivery, create or configure a <a href="#subscriptions">subscription</a> instead of requesting each report by hand; the scheduler then generates reports automatically with <code>requestedByType = SYSTEM</code>.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- REPORT TYPES -->
+                <h2 id="report-types">Report types</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/report-types</code></td><td>Create a report type. Returns <code>201</code>.</td></tr>
+                        <tr><td><code>GET /api/report-types/{id}</code></td><td>Single report type.</td></tr>
+                        <tr><td><code>PUT /api/report-types/{id}</code></td><td>Update name, description, periodic flags, template.</td></tr>
+                        <tr><td><code>DELETE /api/report-types/{id}</code></td><td>Delete (only if no reports reference it). Returns <code>204</code>.</td></tr>
+                        <tr><td><code>POST /api/report-types/filter</code></td><td>Search by <code>code</code>, <code>entityType</code>, <code>name</code>, <code>isPeriodic</code>. Query: <code>sortColumn</code>, <code>sortOrder</code>, <code>page</code>, <code>size</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3><span class="method-badge method-post">POST</span>/api/report-types</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "code":               "HOUSEHOLD_ANNUAL",
+  "name":               "Household Annual Report",
+  "entityType":         "HOUSEHOLD",
+  "description":        "Year-end household performance and allocation",
+  "isPeriodic":         true,
+  "isYearlyEnabled":    true,
+  "isQuarterlyEnabled": false,
+  "templateId":         "tmpl-hh-annual"
+}</code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>code</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Unique per tenant.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Display name.</td></tr>
+                        <tr><td><code>entityType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>ACCOUNT</code> | <code>HOUSEHOLD</code>.</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td></td></tr>
+                        <tr><td><code>isPeriodic</code></td><td>boolean</td><td><span class="badge-optional">optional</span></td><td>Default <code>false</code>. Eligible for scheduling.</td></tr>
+                        <tr><td><code>isYearlyEnabled</code> / <code>isQuarterlyEnabled</code></td><td>boolean</td><td><span class="badge-optional">optional</span></td><td>Default <code>false</code>.</td></tr>
+                        <tr><td><code>templateId</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>External template reference.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="steps">Report type steps</h2>
+                <p>Steps define, in order, what data a report type collects. Each step is a <code>ReportStepCode</code> mapped to a data-fetch operation against the accounts/workstation services.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/report-types/{id}/steps</code></td><td>List the steps configured for a report type.</td></tr>
+                        <tr><td><code>POST /api/report-types/{id}/steps</code></td><td>Add a step (<code>code</code>, <code>stepOrder</code>, optional <code>resultKey</code>). Returns <code>201</code>.</td></tr>
+                        <tr><td><code>DELETE /api/report-types/{id}/steps/{stepId}</code></td><td>Remove a step. Returns <code>204</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- REPORTS -->
+                <h2 id="reports">Reports</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/reports</code></td><td>Request a report. Returns <code>201</code> with status <code>PENDING</code>.</td></tr>
+                        <tr><td><code>GET /api/reports/{id}</code></td><td>Fetch a report and its current status.</td></tr>
+                        <tr><td><code>DELETE /api/reports/{id}</code></td><td>Delete a report (not allowed while <code>PROCESSING</code>). Returns <code>204</code>.</td></tr>
+                        <tr><td><code>POST /api/reports/filter</code></td><td>Search reports with pagination + sorting.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="create"><span class="method-badge method-post">POST</span>/api/reports</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "reportTypeId": 5,
+  "entityType":   "HOUSEHOLD",
+  "entityId":     "H019B9D0FD0E5772F9E8ED189895D40C4",
+  "name":         "2026 Annual Report",
+  "language":     "en",
+  "currency":     "USD",
+  "periodStart":  "2026-01-01",
+  "periodEnd":    "2026-12-31"
+}</code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>reportTypeId</code></td><td>integer</td><td><span class="badge-required">required</span></td><td>Report type to use.</td></tr>
+                        <tr><td><code>entityType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>ACCOUNT</code> | <code>HOUSEHOLD</code>.</td></tr>
+                        <tr><td><code>entityId</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Account or household UUID.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Report display name.</td></tr>
+                        <tr><td><code>language</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>en</code> | <code>es</code>.</td></tr>
+                        <tr><td><code>currency</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>CLP</code> | <code>EUR</code> | <code>USD</code>.</td></tr>
+                        <tr><td><code>periodStart</code> / <code>periodEnd</code></td><td>date</td><td><span class="badge-optional">optional</span></td><td><code>yyyy-MM-dd</code>. Reporting period.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="status">Status and download</h3>
+                <p>Poll <span class="method-badge method-get">GET</span><code>/api/reports/{id}</code> until <code>status</code> is <code>COMPLETED</code>. The response then carries <code>fileId</code> — the generated PDF's reference in the <a href="documents.html">Documents</a> service, where the file is downloaded. If generation fails, <code>status</code> is <code>FAILED</code> and <code>errorMessage</code> explains why.</p>
+                <p><span class="method-badge method-post">POST</span><code>/api/reports/filter</code> searches reports. Sortable on <code>id</code>, <code>name</code>, <code>entityType</code>, <code>status</code>, <code>periodStart</code>, <code>periodEnd</code>, <code>requestedAt</code>, <code>requestedBy</code>, <code>createdAt</code>.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "reportTypeIds":   [5],
+  "entityType":      ["HOUSEHOLD"],
+  "entityIds":       ["H019B9D0FD0E5772F9E8ED189895D40C4"],
+  "status":          ["COMPLETED", "PROCESSING"],
+  "name":            "annual",
+  "periodStartFrom": "2026-01-01",
+  "periodStartTo":   "2026-12-31",
+  "requestedBy":     ["PS0199CA8F08C270B5A5B0DFD3B565B332"]
+}</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- SUBSCRIPTIONS -->
+                <h2 id="subscriptions">Subscriptions</h2>
+                <p>A subscription is a standing order to generate reports automatically for an account or household. There is one subscription per entity; it holds the default currency and language. Subscriptions are seeded for all active entities and then tuned.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/reports/subscriptions/setup</code></td><td>Scan all active accounts/households and upsert any missing subscriptions. Idempotent. <strong>TENANT_ADMIN only.</strong></td></tr>
+                        <tr><td><code>POST /api/reports/subscriptions/filter</code></td><td>List subscriptions by <code>entityType</code>, <code>entityIds</code>, <code>entityName</code>. Paginated.</td></tr>
+                        <tr><td><code>PUT /api/reports/subscriptions/{id}</code></td><td>Update <code>currency</code> and/or <code>language</code>.</td></tr>
+                        <tr><td><code>PUT /api/reports/subscriptions/bulk</code></td><td>Update many subscriptions in one call.</td></tr>
+                    </tbody>
+                </table>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  { "subscriptionId": 1, "currency": "USD", "language": "en" },
+  { "subscriptionId": 2, "currency": "EUR", "language": "es" }
+]</code></pre>
+                </div>
+
+                <h2 id="scheduler">Scheduler</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/reports/scheduler/trigger</code> runs the periodic generation logic for a window without waiting for the cron — intended for testing. Query params <code>periodStart</code> and <code>periodEnd</code> (<code>yyyy-MM-dd</code>) are required.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl -X POST "https://api.altafid.dev.altafid.net/api/reports/scheduler/trigger?periodStart=2026-01-01&periodEnd=2026-01-31" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DATA MODEL -->
+                <h2 id="data-model">Data model</h2>
+
+                <h3>Report</h3>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>id</code></td><td>integer</td><td>Report identifier.</td></tr>
+                        <tr><td><code>tenantUuid</code> / <code>partnerUuid</code></td><td>string</td><td>Owning tenant; partner if applicable.</td></tr>
+                        <tr><td><code>reportTypeId</code> / <code>reportTypeCode</code> / <code>reportTypeName</code></td><td>varies</td><td>Source report type.</td></tr>
+                        <tr><td><code>entityType</code> / <code>entityId</code> / <code>entityName</code></td><td>varies</td><td>Target account or household.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td>Report name.</td></tr>
+                        <tr><td><code>language</code> / <code>currency</code></td><td>enum</td><td>Output language and currency.</td></tr>
+                        <tr><td><code>periodStart</code> / <code>periodEnd</code></td><td>date</td><td>Reporting period.</td></tr>
+                        <tr><td><code>requestedAt</code> / <code>requestedBy</code> / <code>requestedByName</code></td><td>varies</td><td>Request audit.</td></tr>
+                        <tr><td><code>requestedByType</code></td><td>enum</td><td><code>STAFF</code> | <code>PARTNER</code> | <code>SYSTEM</code>.</td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td><code>PENDING</code> | <code>PROCESSING</code> | <code>COMPLETED</code> | <code>FAILED</code>.</td></tr>
+                        <tr><td><code>fileId</code></td><td>string</td><td>Generated file reference (Documents service); set when complete.</td></tr>
+                        <tr><td><code>errorMessage</code></td><td>string</td><td>Set when <code>status = FAILED</code>.</td></tr>
+                        <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>datetime</td><td>Audit timestamps.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>ReportType &amp; Step</h3>
+                <p><strong>ReportType:</strong> <code>id</code>, <code>tenantUuid</code>, <code>code</code>, <code>name</code>, <code>entityType</code>, <code>description</code>, <code>isPeriodic</code>, <code>isYearlyEnabled</code>, <code>isQuarterlyEnabled</code>, <code>templateId</code>, <code>createdAt</code>, <code>updatedAt</code>. <strong>Step:</strong> <code>id</code>, <code>reportTypeId</code>, <code>stepOrder</code>, <code>code</code> (<code>ReportStepCode</code>), <code>resultKey</code>.</p>
+
+                <h3>Subscription</h3>
+                <p><code>id</code>, <code>tenantUuid</code>, <code>entityId</code>, <code>entityName</code>, <code>entityType</code>, <code>currency</code>, <code>language</code>, <code>createdAt</code>, <code>updatedAt</code>.</p>
+
+                <h3>PagedResponse</h3>
+                <p>Pagination envelope: <code>content[]</code>, <code>page</code>, <code>size</code>, <code>totalElements</code>, <code>totalPages</code>.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ENUMS -->
+                <h2 id="enums">Enum reference</h2>
+                <p>The following fields accept a fixed set of values. Pass the exact string value shown.</p>
+
+                <h3>entityType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ACCOUNT</span>
+                    <span class="enum-tag">HOUSEHOLD</span>
+                </div>
+
+                <h3>status (report)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">PENDING</span>
+                    <span class="enum-tag">PROCESSING</span>
+                    <span class="enum-tag">COMPLETED</span>
+                    <span class="enum-tag warn">FAILED</span>
+                </div>
+
+                <h3>language</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">en</span>
+                    <span class="enum-tag">es</span>
+                </div>
+
+                <h3>currency</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CLP</span>
+                    <span class="enum-tag">EUR</span>
+                    <span class="enum-tag">USD</span>
+                </div>
+
+                <h3>requestedByType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">STAFF</span>
+                    <span class="enum-tag">PARTNER</span>
+                    <span class="enum-tag">SYSTEM</span>
+                </div>
+
+                <h3>period (scheduling cadence)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">MONTHLY</span>
+                    <span class="enum-tag">QUARTERLY</span>
+                    <span class="enum-tag">YEARLY</span>
+                </div>
+
+                <h3>ReportStepCode — household steps</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">HOUSEHOLD_DETAIL</span>
+                    <span class="enum-tag">HOUSEHOLD_LINKED_ACCOUNTS</span>
+                    <span class="enum-tag">HOUSEHOLD_SUMMARY_METADATA</span>
+                    <span class="enum-tag">HOUSEHOLD_BALANCE_CHART</span>
+                    <span class="enum-tag">HOUSEHOLD_BALANCE_TABLE</span>
+                    <span class="enum-tag">HOUSEHOLD_ASSET_ALLOCATION</span>
+                    <span class="enum-tag">HOUSEHOLD_PERFORMANCE_AGGREGATES</span>
+                    <span class="enum-tag">HOUSEHOLD_PERFORMANCE_TABLE</span>
+                </div>
+
+                <h3>ReportStepCode — account steps</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ACCOUNT_HEADER_INFO</span>
+                    <span class="enum-tag">ACCOUNT_SUMMARY_METADATA</span>
+                    <span class="enum-tag">ACCOUNT_BALANCE_CHART</span>
+                    <span class="enum-tag">ACCOUNT_BALANCE_AGGREGATES</span>
+                    <span class="enum-tag">ACCOUNT_PERFORMANCE_CHART</span>
+                    <span class="enum-tag">ACCOUNT_PERFORMANCE_AGGREGATES</span>
+                    <span class="enum-tag">ACCOUNT_ASSET_ALLOCATION_SIMPLE</span>
+                    <span class="enum-tag">ACCOUNT_CONTRIBUTION_WITHDRAWAL_SUMMARY</span>
+                    <span class="enum-tag">ACCOUNT_CONTRIBUTION_WITHDRAWAL_TABLE</span>
+                    <span class="enum-tag">ACCOUNT_ASSET_ALLOCATION</span>
+                    <span class="enum-tag">ACCOUNT_FX_DISCLOSURE</span>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

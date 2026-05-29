@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post   { background: #d1fae5; color: #065f46; }
+        .method-get    { background: #dbeafe; color: #1e40af; }
+        .method-put    { background: #fef3c7; color: #78350f; }
+        .method-delete { background: #fee2e2; color: #991b1b; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 160px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Documents</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#model">Object model</a></li>
+                    <li><a href="#setup">Setup flow</a></li>
+                    <li><a href="#types">Types and categories</a></li>
+                    <li><a href="#specifications">Specifications</a></li>
+                    <li><a href="#folders">Folders</a></li>
+                    <li><a href="#documents">Documents</a></li>
+                    <li><a href="#upload">Upload a document</a></li>
+                    <li><a href="#manage">Update, move, delete</a></li>
+                    <li><a href="#retrieve">List, filter, download</a></li>
+                    <li><a href="#data-model">Data model</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Documents API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The Documents API is the Altafid <strong>document locker</strong>: it stores uploaded files and their metadata, organises them in folders, and governs what may be stored through tenant-defined <em>document specifications</em>. It tracks compliance, signature, and expiration state per document and supports single and bulk download.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    All requests require standard auth headers — see <a href="#auth">Authentication</a> and <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <div class="callout info">
+                    <strong>Files are stored in object storage.</strong> Uploads are multipart; the stored file is referenced by <code>fileUrl</code> on the document record. Maximum upload size is <strong>10 MB</strong> per request. Deletes are <em>soft</em> — a deleted document can be listed and recovered.
+                </div>
+
+                <h2 id="auth">Authentication and headers</h2>
+                <p>All endpoints below require the standard gateway headers. <code>x-tenant-uuid</code> scopes every request to a single tenant; no cross-tenant access is possible.</p>
+                <table>
+                    <thead>
+                        <tr><th>Header</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Authorization: Bearer &lt;token&gt;</code></td><td><span class="badge-required">required</span></td><td>Access token.</td></tr>
+                        <tr><td><code>x-tenant-uuid</code></td><td><span class="badge-required">required</span></td><td>Tenant context.</td></tr>
+                        <tr><td><code>x-user-id</code></td><td><span class="badge-required">required</span></td><td>Current user UUID.</td></tr>
+                        <tr><td><code>x-user-email</code></td><td><span class="badge-required">required</span></td><td>Current user email.</td></tr>
+                        <tr><td><code>x-user-type</code></td><td><span class="badge-required">required</span></td><td><code>SYSTEM_STAFF</code>, <code>TENANT_STAFF</code>, or <code>PARTNER_STAFF</code>.</td></tr>
+                        <tr><td><code>x-partner-uuid</code></td><td><span class="badge-optional">optional</span></td><td>Required for partner staff.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- OBJECT MODEL -->
+                <h2 id="model">Object model</h2>
+                <p>Documents sit at the bottom of a small hierarchy. <strong>Types</strong> and <strong>categories</strong> are platform reference data; <strong>specifications</strong> are defined per tenant and decide what may be uploaded and how it is governed; <strong>folders</strong> organise the stored files.</p>
+                <table>
+                    <thead>
+                        <tr><th>Concept</th><th>Scope</th><th>What it is</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Document Type</strong></td><td>Platform reference</td><td>Top-level classification, e.g. <code>Document</code>, <code>Agreement</code>. Fetched at runtime.</td></tr>
+                        <tr><td><strong>Document Category</strong></td><td>Platform reference</td><td>Sub-classification under a type, e.g. <code>Proof of Identity</code>, <code>Portfolio</code>, <code>Risk</code>.</td></tr>
+                        <tr><td><strong>Document Specification</strong></td><td>Tenant</td><td>A named rule binding a type + categories + entity types and the compliance / signature / expiration requirements. Controls what may be uploaded.</td></tr>
+                        <tr><td><strong>Folder</strong></td><td>Tenant</td><td>Hierarchical container (self-referential <code>parentId</code>) for organising documents.</td></tr>
+                        <tr><td><strong>Document</strong></td><td>Tenant</td><td>The uploaded file plus metadata: specification, type, category, assigned entity, related entities, status, expiration.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout info">
+                    <strong>Entity binding:</strong> every document is assigned to one primary entity (<code>assignedEntityId</code>) whose kind is the specification's <code>primaryEntityType</code> (<code>CONTACT</code>, <code>HOUSEHOLD</code>, <code>ACCOUNT</code>, <code>ORGANIZATION</code>, or <code>PORTFOLIO</code>) and may reference additional <code>relatedEntities</code>.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- SETUP FLOW -->
+                <h2 id="setup">Setup flow</h2>
+                <p>Onboarding a tenant's document locker follows a fixed order: reference data first, then tenant specifications, then folders, then uploads.</p>
+
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Resolve types &amp; categories</div>
+                        <div class="step-desc">GET /api/document-types/all<br>GET .../{typeId}/categories</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Define specifications</div>
+                        <div class="step-desc">POST /api/document-specifications<br>per allowed document</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Create folders</div>
+                        <div class="step-desc">POST /api/folders<br>optional hierarchy</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">4</div>
+                        <div class="step-title">Upload &amp; organise</div>
+                        <div class="step-desc">POST /api/documents<br>then move into folders</div>
+                    </div>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Specifications depend on categories.</strong> A specification references <code>categoryIds</code>, so the relevant document types and categories must exist before you create specifications. Resolve their IDs from the types/categories endpoints rather than hard-coding them.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- TYPES & CATEGORIES -->
+                <h2 id="types">Types and categories</h2>
+                <p>Document types and categories are platform reference data. Resolve their IDs at runtime; do not hard-code them.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Returns</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/document-types/all</code></td><td>All document types.</td><td>AllDocumentTypesList (<code>types[]</code>, <code>totalCount</code>)</td></tr>
+                        <tr><td><code>GET /api/document-types/{documentTypeId}/categories</code></td><td>Categories under a type.</td><td>AllDocumentCategoriesList</td></tr>
+                        <tr><td><code>GET /api/document-types/categories/{categoryId}</code></td><td>A single category.</td><td>DocumentCategory</td></tr>
+                    </tbody>
+                </table>
+                <p>Typical reference data: types <code>Document</code> and <code>Agreement</code>; categories such as <code>Proof of Identity</code>, <code>Proof of Income</code>, <code>Proof of Address</code>, <code>Portfolio</code>, <code>Risk</code>, and <code>Account Administration</code>.</p>
+
+                <h2 id="specifications">Specifications</h2>
+                <p>A document specification is a tenant-defined rule for one kind of document. It binds a document type and one or more categories, declares the primary and related entity types it applies to, and sets whether the document requires expiration, compliance review, and signature.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/document-specifications</code></td><td>Search specifications. Query: <code>keyword</code>, <code>categoryIds</code>, <code>documentTypeId</code>, <code>sortColumn</code>, <code>sortOrder</code>, <code>page</code>, <code>size</code>. Returns <code>PagedResponse</code>.</td></tr>
+                        <tr><td><code>POST /api/document-specifications</code></td><td>Create a specification. Returns <code>201</code>.</td></tr>
+                        <tr><td><code>GET /api/document-specifications/{id}</code></td><td>Single specification.</td></tr>
+                        <tr><td><code>GET /api/document-specifications/category/{categoryId}</code></td><td>Specifications in a category.</td></tr>
+                        <tr><td><code>PUT /api/document-specifications/{id}</code></td><td>Update a specification.</td></tr>
+                        <tr><td><code>DELETE /api/document-specifications/{id}</code></td><td>Delete a specification. Returns <code>204</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="spec-create"><span class="method-badge method-post">POST</span>/api/document-specifications</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "name":               "Cedula de identidad",
+  "description":        "National ID document",
+  "primaryEntityType":  "CONTACT",
+  "relatedEntityTypes": ["CONTACT"],
+  "requiresExpiration": true,
+  "requiresCompliance": true,
+  "requiresSignature":  false,
+  "enabled":            true,
+  "importable":         true,
+  "categoryIds":        [11]
+}</code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>name</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Max 250 characters.</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td></td></tr>
+                        <tr><td><code>primaryEntityType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td>See <a href="#enums">EntityType</a>.</td></tr>
+                        <tr><td><code>relatedEntityTypes</code></td><td>enum[]</td><td><span class="badge-optional">optional</span></td><td>Other entity kinds the document may reference.</td></tr>
+                        <tr><td><code>requiresExpiration</code></td><td>boolean</td><td><span class="badge-required">required</span></td><td>If true, uploads should carry an <code>expirationDate</code>.</td></tr>
+                        <tr><td><code>requiresCompliance</code></td><td>boolean</td><td><span class="badge-required">required</span></td><td>Enables compliance-status tracking.</td></tr>
+                        <tr><td><code>requiresSignature</code></td><td>boolean</td><td><span class="badge-required">required</span></td><td>Enables signature-status tracking.</td></tr>
+                        <tr><td><code>enabled</code></td><td>boolean</td><td><span class="badge-required">required</span></td><td>Whether the specification is selectable.</td></tr>
+                        <tr><td><code>importable</code></td><td>boolean</td><td><span class="badge-required">required</span></td><td>Whether documents may be imported (vs. created only).</td></tr>
+                        <tr><td><code>categoryIds</code></td><td>integer[]</td><td><span class="badge-required">required</span></td><td>At least one category ID.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout info">
+                    <strong>Example specification set.</strong> A tenant's locker typically defines specifications such as <em>Cedula de identidad</em> (Document → Proof of Identity, CONTACT, expiry + compliance), <em>Pasaporte</em> (Document → Proof of Identity, CONTACT), <em>Contrato de gestion de inversiones</em> (Agreement → Portfolio, PORTFOLIO, expiry + compliance), and <em>Portfolio</em> (Agreement → Portfolio, PORTFOLIO with related CONTACT and HOUSEHOLD).
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FOLDERS -->
+                <h2 id="folders">Folders</h2>
+                <p>Folders organise stored documents and may nest via <code>parentId</code>. Deleting a folder unlinks its documents rather than deleting them.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/folders</code></td><td>Create a folder (<code>name</code> required, optional <code>parentId</code>). Returns <code>201</code>.</td></tr>
+                        <tr><td><code>GET /api/folders</code></td><td>List root folders as a tree. Query: <code>keyword</code>, <code>page</code>, <code>size</code>.</td></tr>
+                        <tr><td><code>GET /api/folders/{id}</code></td><td>Folder detail with paginated child items (folders + documents). Query: <code>keyword</code>, <code>complianceStatus</code>, <code>signatureStatus</code> (comma-separated), <code>page</code>, <code>size</code>.</td></tr>
+                        <tr><td><code>PUT /api/folders/{id}</code></td><td>Rename a folder (unique within its level).</td></tr>
+                        <tr><td><code>DELETE /api/folders/{id}</code></td><td>Delete a folder; documents are unlinked, not deleted. Returns <code>204</code>.</td></tr>
+                        <tr><td><code>POST /api/folders/{id}/documents/{documentId}</code></td><td>Move a document into the folder. Returns the document.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DOCUMENTS -->
+                <h2 id="documents">Documents</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/documents</code></td><td>Upload a document (multipart: <code>metadata</code> + <code>file</code>). Returns <code>201</code>.</td></tr>
+                        <tr><td><code>GET /api/documents</code></td><td>Paginated list for the tenant.</td></tr>
+                        <tr><td><code>GET /api/documents/{id}</code></td><td>Single document. Query <code>deleted=true</code> to include soft-deleted.</td></tr>
+                        <tr><td><code>PUT /api/documents/{id}</code></td><td>Update metadata (name, status, expiration, related entities).</td></tr>
+                        <tr><td><code>POST /api/documents/{id}</code></td><td>Replace the file (multipart <code>file</code>).</td></tr>
+                        <tr><td><code>DELETE /api/documents/{id}</code></td><td>Soft-delete. Returns <code>204</code>.</td></tr>
+                        <tr><td><code>GET /api/documents/deleted</code></td><td>List soft-deleted documents. Query: <code>keyword</code>, <code>page</code>, <code>size</code>.</td></tr>
+                        <tr><td><code>POST /api/documents/filter</code></td><td>Filter by criteria with sorting (see <a href="#retrieve">List, filter, download</a>).</td></tr>
+                        <tr><td><code>GET /api/documents/{id}/download</code></td><td>Download one file (<code>application/octet-stream</code>).</td></tr>
+                        <tr><td><code>POST /api/documents/download/zip</code></td><td>Download many as a ZIP. Body: array of document IDs.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="upload"><span class="method-badge method-post">POST</span>/api/documents</h3>
+                <p>Uploads a document. Send <code>multipart/form-data</code> with a <code>metadata</code> part (JSON) and a <code>file</code> part (the binary). Returns <code>201 Created</code> with a <a href="#data-model">Document</a>.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl -X POST "https://api.altafid.dev.altafid.net/api/documents" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-type: TENANT_STAFF" \
+  -F 'metadata={
+        "documentSpecificationId": 145,
+        "folderId": 43,
+        "documentTypeId": 1,
+        "documentCategoryId": 11,
+        "assignedEntityId": "C019B9D0FD0E5772F9E8ED189895D40C4",
+        "relatedEntities": [
+          { "entityType": "ACCOUNT", "entityId": "A019..." }
+        ],
+        "name": "Cedula - Jane Doe",
+        "expirationDate": "2030-12-31 23:59:59",
+        "complianceStatus": "PENDING",
+        "signatureStatus": "NOT_APPLY"
+      };type=application/json' \
+  -F 'file=@cedula.pdf'</code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Metadata field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>documentSpecificationId</code></td><td>integer</td><td><span class="badge-required">required</span></td><td>The governing specification.</td></tr>
+                        <tr><td><code>folderId</code></td><td>integer</td><td><span class="badge-required">required</span></td><td>Destination folder.</td></tr>
+                        <tr><td><code>documentTypeId</code></td><td>integer</td><td><span class="badge-required">required</span></td><td>From the types endpoint.</td></tr>
+                        <tr><td><code>documentCategoryId</code></td><td>integer</td><td><span class="badge-required">required</span></td><td>From the categories endpoint.</td></tr>
+                        <tr><td><code>assignedEntityId</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Primary entity UUID.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Display name.</td></tr>
+                        <tr><td><code>relatedEntities</code></td><td>object[]</td><td><span class="badge-optional">optional</span></td><td><code>{ entityType, entityId }</code> entries.</td></tr>
+                        <tr><td><code>identityId</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Linked identity reference.</td></tr>
+                        <tr><td><code>expirationDate</code></td><td>datetime</td><td><span class="badge-optional">optional</span></td><td>Format <code>yyyy-MM-dd HH:mm:ss</code>. Set when the spec requires expiration.</td></tr>
+                        <tr><td><code>complianceStatus</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td>Defaults to <code>NOT_APPLY</code>.</td></tr>
+                        <tr><td><code>signatureStatus</code></td><td>enum</td><td><span class="badge-optional">optional</span></td><td>Defaults to <code>NOT_APPLY</code>.</td></tr>
+                    </tbody>
+                </table>
+                <div class="callout info">
+                    <strong>Service integrations.</strong> Three specialised upload routes attach generated files to platform objects: <code>POST /api/documents/report/{reportId}</code> (report-service stores a generated PDF and gets back a <code>documentId</code>), <code>POST /api/documents/portfolio/{portfolioId}/strategy/{strategyId}/proposal/{proposalId}</code>, and <code>POST /api/documents/portfolio/{portfolioId}/strategy/{strategyId}/trade-recommendation</code>.
+                </div>
+
+                <h3 id="manage">Update, move, delete</h3>
+                <p><span class="method-badge method-put">PUT</span><code>/api/documents/{id}</code> updates metadata only — <code>name</code>, <code>complianceStatus</code>, <code>signatureStatus</code>, <code>relatedEntities</code>, <code>expirationDate</code>. Omitted fields are unchanged.</p>
+                <p><span class="method-badge method-post">POST</span><code>/api/documents/{id}</code> (multipart <code>file</code>) replaces the stored file without touching metadata.</p>
+                <p><span class="method-badge method-post">POST</span><code>/api/folders/{id}/documents/{documentId}</code> moves a document into a folder.</p>
+                <p><span class="method-badge method-delete">DELETE</span><code>/api/documents/{id}</code> soft-deletes (<code>204</code>); recover via <code>GET /api/documents/deleted</code> then re-link.</p>
+
+                <h3 id="retrieve">List, filter, download</h3>
+                <p><span class="method-badge method-post">POST</span><code>/api/documents/filter</code> filters with query-param sorting (<code>sortColumn</code>, <code>sortOrder</code>, <code>page</code>, <code>size</code>).</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "assignedEntityIds":  ["C019B9D0FD0E5772F9E8ED189895D40C4"],
+  "documentTypeId":     1,
+  "complianceStatus":   ["PENDING", "APPROVED"],
+  "signatureStatus":    ["SIGNED"],
+  "expired":            false,
+  "createdFrom":        "2026-01-01",
+  "createdTo":          "2026-05-31",
+  "name":               "cedula"
+}</code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>assignedEntityIds</code></td><td>string[]</td><td>Primary entity UUIDs.</td></tr>
+                        <tr><td><code>relatedEntities</code></td><td>object[]</td><td><code>{ entityType, entityId }</code>.</td></tr>
+                        <tr><td><code>documentTypeId</code> / <code>documentSpecificationId</code></td><td>integer</td><td>Narrow by type or specification.</td></tr>
+                        <tr><td><code>complianceStatus</code> / <code>signatureStatus</code></td><td>string[]</td><td>Status filters.</td></tr>
+                        <tr><td><code>expired</code></td><td>boolean</td><td>Past-expiration filter.</td></tr>
+                        <tr><td><code>createdFrom</code> / <code>createdTo</code></td><td>date</td><td>Creation date range.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td>Name search.</td></tr>
+                    </tbody>
+                </table>
+                <p>Download a single file with <span class="method-badge method-get">GET</span><code>/api/documents/{id}/download</code>. For several files, <span class="method-badge method-post">POST</span><code>/api/documents/download/zip</code> with a JSON array of document IDs streams an <code>application/zip</code> archive (<code>204</code> if none match).</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[ 101, 102, 103 ]</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DATA MODEL -->
+                <h2 id="data-model">Data model</h2>
+
+                <h3>Document</h3>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>id</code></td><td>integer</td><td>Document identifier.</td></tr>
+                        <tr><td><code>tenantUuid</code></td><td>string</td><td>Owning tenant.</td></tr>
+                        <tr><td><code>documentSpecificationId</code></td><td>integer</td><td>Governing specification.</td></tr>
+                        <tr><td><code>documentTypeId</code> / <code>documentCategoryId</code></td><td>integer</td><td>Classification.</td></tr>
+                        <tr><td><code>assignedEntityId</code></td><td>string</td><td>Primary entity.</td></tr>
+                        <tr><td><code>relatedEntities</code></td><td>RelatedEntity[]</td><td><code>{ entityType, entityId }</code>.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td>Display name.</td></tr>
+                        <tr><td><code>identityId</code></td><td>string</td><td>Identity reference.</td></tr>
+                        <tr><td><code>fileUrl</code></td><td>string</td><td>Stored object reference.</td></tr>
+                        <tr><td><code>expirationDate</code></td><td>datetime</td><td>When the document expires.</td></tr>
+                        <tr><td><code>complianceStatus</code></td><td>enum</td><td>See <a href="#enums">ComplianceStatus</a>.</td></tr>
+                        <tr><td><code>signatureStatus</code></td><td>enum</td><td>See <a href="#enums">SignatureStatus</a>.</td></tr>
+                        <tr><td><code>deleted</code></td><td>boolean</td><td>Soft-delete flag.</td></tr>
+                        <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>datetime</td><td>Audit timestamps.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>DocumentSpecification</h3>
+                <p><code>id</code>, <code>name</code>, <code>description</code>, <code>primaryEntityType</code>, <code>relatedEntityTypes[]</code>, <code>documentCategoryIds[]</code>, <code>documentTypeId</code>, <code>documentType</code> (name), <code>importable</code>, <code>requiresCompliance</code>, <code>requiresExpiration</code>, <code>requiresSignature</code>, <code>enabled</code>.</p>
+
+                <h3>Folder</h3>
+                <p><code>id</code>, <code>name</code>, <code>parentId</code>, <code>parentName</code>, <code>items[]</code> (each a <code>FolderItem</code> with <code>type</code> = <code>FOLDER</code> | <code>DOCUMENT</code> and the corresponding <code>folder</code> or <code>document</code>), <code>childFolderCount</code>, <code>documentCount</code>.</p>
+
+                <h3>Document type &amp; category</h3>
+                <p><strong>DocumentType:</strong> <code>id</code>, <code>name</code>, <code>description</code>. <strong>DocumentCategory:</strong> <code>id</code>, <code>name</code>, <code>description</code>, <code>documentType</code> (name), <code>documentTypeId</code>. List wrappers carry <code>types[]</code>, <code>totalCount</code>, and <code>message</code>.</p>
+
+                <h3>PagedResponse</h3>
+                <p>Pagination envelope: <code>content[]</code>, <code>page</code>, <code>size</code>, <code>totalElements</code>, <code>totalPages</code>.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ENUMS -->
+                <h2 id="enums">Enum reference</h2>
+                <p>The following fields accept a fixed set of values. Pass the exact string value shown.</p>
+
+                <h3>EntityType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CONTACT</span>
+                    <span class="enum-tag">HOUSEHOLD</span>
+                    <span class="enum-tag">ACCOUNT</span>
+                    <span class="enum-tag">ORGANIZATION</span>
+                    <span class="enum-tag">PORTFOLIO</span>
+                </div>
+
+                <h3>ComplianceStatus</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">APPROVED</span>
+                    <span class="enum-tag">PENDING</span>
+                    <span class="enum-tag warn">REJECTED</span>
+                    <span class="enum-tag">NOT_APPLY</span>
+                    <span class="enum-tag">NOT_SENT</span>
+                </div>
+
+                <h3>SignatureStatus</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">SIGNED</span>
+                    <span class="enum-tag">PENDING</span>
+                    <span class="enum-tag warn">CANCELED</span>
+                    <span class="enum-tag">NOT_APPLY</span>
+                </div>
+
+                <h3>Document types (reference data)</h3>
+                <p>Resolved at runtime from <code>GET /api/document-types/all</code>. Commonly:</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">Document</span>
+                    <span class="enum-tag">Agreement</span>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>
