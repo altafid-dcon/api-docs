@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post   { background: #d1fae5; color: #065f46; }
+        .method-get    { background: #dbeafe; color: #1e40af; }
+        .method-put    { background: #fef3c7; color: #78350f; }
+        .method-delete { background: #fee2e2; color: #991b1b; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 170px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Accounts</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#flow">Linking flow</a></li>
+                    <li><a href="#accounts">Account endpoints</a></li>
+                    <li><a href="#linking">Linking and households</a></li>
+                    <li><a href="#preview">Account analytics</a></li>
+                    <li><a href="#household">Household aggregation</a></li>
+                    <li><a href="#tenant">Tenant aggregation</a></li>
+                    <li><a href="#workstation">Workstation</a></li>
+                    <li><a href="#securities">Securities classification</a></li>
+                    <li><a href="#audit">Audit</a></li>
+                    <li><a href="#data-model">Data model</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Accounts API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The Accounts API manages financial investment accounts (brokerage and custodial accounts) on the Altafid platform. It covers account discovery, linking accounts to the platform and to households, multi-currency balances and performance, holdings and transactions, and tenant- and household-level aggregation for dashboards.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    All requests require standard auth headers — see <a href="#auth">Authentication</a> and <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <div class="callout info">
+                    <strong>What is an account?</strong> An account is a financial investment account sourced from a custodian. Each account has a <code>linkState</code> of <code>linked</code> (actively tracked) or <code>unlinked</code>, can be mapped one-to-one to a household for aggregation, and holds balances, positions, and transactions in multiple currencies (USD, CLP, EUR, and others) with FX conversion tracking.
+                </div>
+
+                <h2 id="auth">Authentication and headers</h2>
+                <p>All endpoints below require the standard gateway headers. <code>x-tenant-uuid</code> is mandatory and scopes every request to a single tenant.</p>
+                <table>
+                    <thead>
+                        <tr><th>Header</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Authorization: Bearer &lt;token&gt;</code></td><td><span class="badge-required">required</span></td><td>Access token.</td></tr>
+                        <tr><td><code>x-tenant-uuid</code></td><td><span class="badge-required">required</span></td><td>Tenant context; checked on every endpoint.</td></tr>
+                        <tr><td><code>x-user-id</code></td><td><span class="badge-required">required</span></td><td>Current user UUID.</td></tr>
+                        <tr><td><code>x-user-email</code></td><td><span class="badge-required">required</span></td><td>Current user email.</td></tr>
+                        <tr><td><code>x-user-type</code></td><td><span class="badge-required">required</span></td><td><code>SYSTEM_STAFF</code>, <code>TENANT_STAFF</code>, <code>PARTNER_STAFF</code>, or <code>CONTACT</code>.</td></tr>
+                        <tr><td><code>x-partner-uuid</code></td><td><span class="badge-optional">optional</span></td><td>Required for partner staff.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FLOW -->
+                <h2 id="flow">Linking flow</h2>
+                <p>Newly ingested accounts arrive unlinked. To surface an account in reporting you link it to the platform, then map it to a household. Analytics endpoints become meaningful once an account is linked.</p>
+
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Discover</div>
+                        <div class="step-desc">GET /api/accounts/unlinked<br>Find accounts to onboard</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Link to platform</div>
+                        <div class="step-desc">PUT .../{accountUuid}/link-state?state=linked</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Map to household</div>
+                        <div class="step-desc">PUT .../{accountUuid}/household/{householdUuid}/link</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">4</div>
+                        <div class="step-title">Report</div>
+                        <div class="step-desc">Balances, performance,<br>positions, aggregation</div>
+                    </div>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Order matters:</strong> an account must have <code>linkState=linked</code> before it can be mapped to a household. The household link is a one-to-one mapping.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ACCOUNT ENDPOINTS -->
+                <h2 id="accounts">Account endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/accounts/unlinked</code></td><td>Paginated list of unlinked accounts. Optional <code>keyword</code> searches by account number.</td></tr>
+                        <tr><td><code>GET /api/accounts/linked</code></td><td>Paginated list of linked accounts (detailed summary). Optional <code>keyword</code>.</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}</code></td><td>Single account detail as <a href="#data-model">AccountDetailedSummary</a>.</td></tr>
+                        <tr><td><code>PUT /api/accounts/{accountUuid}/link-state</code></td><td>Set link state. Query <code>state=linked|unlinked</code>. Returns <code>204</code>.</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/transactions</code></td><td>Paginated transactions. Optional <code>transactionType</code>; sortable.</td></tr>
+                        <tr><td><code>GET /api/accounts/fxc</code></td><td>Latest FX conversion rates (FX↔USD) as of a date (default today).</td></tr>
+                    </tbody>
+                </table>
+
+                <p>List endpoints accept <code>page</code> (zero-indexed, default <code>0</code>) and <code>size</code> (default <code>20</code>) and return a <a href="#data-model">PagedResponse</a>. The transactions endpoint sorts on <code>executeDate</code> (default), <code>snapshotDate</code>, <code>transactionType</code>, <code>grossAmount</code>, or <code>accountNumber</code> via <code>sortColumn</code> + <code>sortOrder</code>.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/accounts/unlinked?keyword=12345&page=0&size=20" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-type: TENANT_STAFF"</code></pre>
+                </div>
+
+                <h2 id="linking">Linking and households</h2>
+                <p>Use the link-state endpoint to attach an account to the platform, then map it to a household. Each mapping is one-to-one.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Response</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>PUT /api/accounts/{accountUuid}/link-state?state=linked</code></td><td>Link or unlink an account; updates <code>linkDate</code>.</td><td><code>204 No Content</code></td></tr>
+                        <tr><td><code>PUT /api/accounts/{accountUuid}/household/{householdUuid}/link</code></td><td>Map a linked account to a household.</td><td><code>204 No Content</code></td></tr>
+                        <tr><td><code>PUT /api/accounts/{accountUuid}/household/{householdUuid}/unlink</code></td><td>Remove the account↔household mapping.</td><td><code>204 No Content</code></td></tr>
+                        <tr><td><code>PUT /api/accounts/household/{householdUuid}/unlink</code></td><td>Remove all account mappings for a household.</td><td><code>204 No Content</code></td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ACCOUNT ANALYTICS -->
+                <h2 id="preview">Account analytics</h2>
+                <p>Per-account analytics for a single linked account. When a date range is omitted, the service uses <code>startDate = linkDate</code> and <code>endDate = today</code>.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Returns</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/allocations</code></td><td>Latest-snapshot classification allocation (market value and %).</td><td><a href="#data-model">AccountAllocation[]</a></td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/performance</code></td><td>Daily performance (EOD, BOD, flow, fee, 1D and cumulative return). Optional <code>startDate</code>, <code>endDate</code>.</td><td>AccountDailyPerformance[]</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/performance-by-period</code></td><td>Performance by period (1D, 3M, 6M, YTD, 1Y, Since Funded).</td><td>AccountPeriodPerformance[]</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/performance-by-month</code></td><td>Monthly performance aggregation.</td><td>AccountMonthlyPerformance[]</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/balance-summary</code></td><td>EOD balance, net deposits, and FX-based balances. Optional <code>startDate</code>, <code>endDate</code>.</td><td>AccountBalanceSummaryResponse</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/balance-summary-period</code></td><td>Period balance summaries.</td><td>AccountBalancePeriod[]</td></tr>
+                        <tr><td><code>GET /api/accounts/{accountUuid}/positions</code></td><td>Latest-snapshot holdings with USD/CLP/EUR valuations.</td><td>AccountPosition[]</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="household">Household aggregation</h2>
+                <p>Roll up the accounts mapped to a household.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Returns</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/accounts/household/{householdUuid}/linked</code></td><td>Paginated linked accounts for the household.</td><td>PagedResponse&lt;AccountDetailedSummary&gt;</td></tr>
+                        <tr><td><code>GET /api/accounts/household/{householdUuid}/summary</code></td><td>Aggregate summary for the household.</td><td>AccountsListSummary</td></tr>
+                        <tr><td><code>POST /api/accounts/household/bulk/summary</code></td><td>Summaries for many households. Body: list of household UUIDs.</td><td>HouseholdAccountsSummary[]</td></tr>
+                        <tr><td><code>GET /api/accounts/household/{householdUuid}/asset-class</code></td><td>Asset-class market-value breakdown.</td><td>AssetClass[]</td></tr>
+                        <tr><td><code>GET /api/accounts/household/{householdUuid}/balance-chart</code></td><td>Daily balances and flows. Optional <code>startDate</code> (default −90d), <code>endDate</code> (default today).</td><td>BalanceChart[]</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="tenant">Tenant aggregation</h2>
+                <p>Roll up every linked account in the tenant.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/accounts/tenant/summary</code></td><td>Tenant-wide account summary (<code>AccountsListSummary</code>).</td></tr>
+                        <tr><td><code>GET /api/accounts/tenant/asset-class</code></td><td>Tenant-wide asset-class breakdown (<code>AssetClass[]</code>).</td></tr>
+                        <tr><td><code>GET /api/accounts/tenant/balance-chart</code></td><td>Tenant-wide daily balances/flows. Optional <code>startDate</code> (default −90d), <code>endDate</code>.</td></tr>
+                        <tr><td><code>GET /api/accounts/tenant/contribution-withdrawal</code></td><td>Tenant-wide contribution/withdrawal. Optional <code>startDate</code> (default −1y), <code>endDate</code>.</td></tr>
+                        <tr><td><code>POST /api/accounts/tenant</code></td><td>Tenant Admin — provision a tenant mapping (<a href="#data-model">FintreeTenantCreate</a>). Returns <code>201</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- WORKSTATION -->
+                <h2 id="workstation">Workstation</h2>
+                <p>The workstation endpoints power the advisor dashboard: filtered grids and chart aggregates across accounts, households, and contacts. Filter requests support quintile buckets (values <code>1</code>–<code>5</code>) for MTD, QTD, and YTD returns and for EOD balances, plus an optional <code>staffUuid</code> scope.</p>
+
+                <h3>Grids</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Filter body</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/accounts/workstation/filter</code></td><td><a href="#data-model">WorkstationFilter</a> (by account)</td></tr>
+                        <tr><td><code>POST /api/accounts/workstation/household/filter</code></td><td>HouseholdWorkstationFilter</td></tr>
+                        <tr><td><code>POST /api/accounts/workstation/contact/filter</code></td><td>ContactWorkstationFilter</td></tr>
+                        <tr><td><code>GET /api/accounts/workstation/contact/{contactUuid}/accounts</code></td><td>Accounts for a contact</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Charts</h3>
+                <p><code>POST /api/accounts/workstation/charts</code>, <code>.../household/charts</code>, and <code>.../contact/charts</code> accept a <a href="#data-model">WorkstationChart</a> request (<code>metric</code> = <code>BALANCE</code> | <code>MTD</code> | <code>QTD</code> | <code>YTD</code>; <code>currency</code> required when <code>metric=BALANCE</code>).</p>
+
+                <h3>Account detail aggregates</h3>
+                <p>The <code>POST /api/accounts/workstation/account/*</code> family returns specific aggregates for a set of accounts over a date window (<a href="#data-model">WorkstationAccount</a> request: <code>startDate</code>, <code>endDate</code>, optional <code>accountUuids</code>):</p>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">asset-allocation</span>
+                    <span class="enum-tag">asset-allocation-detailed</span>
+                    <span class="enum-tag">balance-aggregates</span>
+                    <span class="enum-tag">balance-line-chart</span>
+                    <span class="enum-tag">performance-aggregates</span>
+                    <span class="enum-tag">performance-monthly-aggregates</span>
+                    <span class="enum-tag">performance-line-chart</span>
+                    <span class="enum-tag">account-summary</span>
+                    <span class="enum-tag">contribution-withdrawal-summary</span>
+                    <span class="enum-tag">contribution-withdrawal-table</span>
+                    <span class="enum-tag">fx-disclosure</span>
+                </div>
+                <p>The <code>POST /api/accounts/workstation/household/*</code> family mirrors these for households (<code>WorkstationHousehold</code> request: <code>startDate</code>, <code>endDate</code>, optional <code>householdUuids</code>): asset-allocation-pie-chart, asset-allocation-detailed, balance-line-chart, balance-line-chart-summary, performance-line-chart, performance-line-chart-summary, and household-summary.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- SECURITIES -->
+                <h2 id="securities">Securities classification</h2>
+                <p>Admin endpoints for classifying the share-class FIGIs held across the tenant's accounts.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/accounts/share_class_figi/non_classified</code></td><td>Paginated FIGIs not yet classified for the tenant.</td></tr>
+                        <tr><td><code>GET /api/accounts/share_class_figi/manual_classified</code></td><td>Paginated manually classified FIGIs.</td></tr>
+                        <tr><td><code>GET /api/accounts/share_class_figi/hierarchy/{hierarchyId}/leafnodes</code></td><td>Leaf nodes of a classification hierarchy.</td></tr>
+                        <tr><td><code>POST /api/accounts/share_class_figi/do_classification</code></td><td>Classify a FIGI (<a href="#data-model">ClassifyFigi</a>).</td></tr>
+                        <tr><td><code>DELETE /api/accounts/share_class_figi/classification</code></td><td>Delete a classification (<a href="#data-model">DeleteFigi</a>).</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="audit">Audit</h2>
+                <p><span class="method-badge method-post">POST</span><code>/api/accounts/audit</code> returns a paginated, filterable log of link/unlink events.</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "householdUuids": ["H019..."],
+  "accountUuids":   ["A019..."],
+  "events":         ["ACCOUNT_LINKED_HOUSEHOLD", "ACCOUNT_UNLINKED_HOUSEHOLD"],
+  "startDate":      "2026-01-01",
+  "endDate":        "2026-05-31"
+}</code></pre>
+                </div>
+                <p>Query params: <code>sortColumn</code> (<code>id</code>, <code>householdUuid</code>, <code>accountUuid</code>, <code>event</code>, <code>createdAt</code> — default <code>createdAt</code>), <code>sortOrder</code> (<code>asc</code>/<code>desc</code>), <code>page</code>, <code>size</code>. Returns <code>PagedResponse&lt;AccountAudit&gt;</code>.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DATA MODEL -->
+                <h2 id="data-model">Data model</h2>
+
+                <h3>PagedResponse</h3>
+                <p>Standard pagination envelope: <code>content[]</code>, <code>page</code>, <code>size</code>, <code>totalElements</code>, <code>totalPages</code>.</p>
+
+                <h3>AccountSummary</h3>
+                <p>Returned by the unlinked list. Core account attributes.</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>accountUuid</code></td><td>string</td><td>Identifier.</td></tr>
+                        <tr><td><code>linkState</code></td><td>string</td><td><code>linked</code> | <code>unlinked</code>.</td></tr>
+                        <tr><td><code>linkDate</code></td><td>datetime</td><td>When linked.</td></tr>
+                        <tr><td><code>tenantUuid</code></td><td>string</td><td>Owning tenant.</td></tr>
+                        <tr><td><code>accountNumber</code></td><td>string</td><td>Custodian account number.</td></tr>
+                        <tr><td><code>custodian</code></td><td>string</td><td>Source custodian.</td></tr>
+                        <tr><td><code>accountStatus</code> / <code>accountType</code></td><td>string</td><td>Status and type.</td></tr>
+                        <tr><td><code>marginAccount</code> / <code>positionOnly</code> / <code>taxable</code></td><td>boolean</td><td>Account flags.</td></tr>
+                        <tr><td><code>taxResidency</code> / <code>w8W9Indicator</code></td><td>string</td><td>Tax attributes.</td></tr>
+                        <tr><td><code>disposalMethodForMutualFunds</code> / <code>disposalMethodForOtherSecurities</code></td><td>string</td><td>Disposal methods.</td></tr>
+                        <tr><td><code>baseCurrency</code> / <code>defaultFxCurrency</code></td><td>string</td><td>Currencies.</td></tr>
+                        <tr><td><code>householdUuid</code> / <code>householdName</code></td><td>string</td><td>Mapped household (nullable).</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>AccountDetailedSummary</h3>
+                <p>Returned by the linked list and single-account detail. Includes everything in <code>AccountSummary</code> plus portfolio/manager attribution, <code>snapshotDate</code>, <code>trading</code>, <code>distinctFxCurrencies</code>, and current/previous EOD balances, net deposits, day change, and gain/loss in USD, CLP, and EUR.</p>
+
+                <h3>Transaction</h3>
+                <p>Fields: <code>accountUuid</code>, <code>accountNumber</code>, <code>snapshotDate</code>, <code>executeDate</code>, <code>transactionType</code>, <code>description</code>, <code>actionCode</code>, <code>pricePerShare</code>, <code>grossAmount</code>, <code>custodian</code>, <code>fxCurrency</code>, <code>fxRate</code>, <code>transactionQuantity</code>, <code>executePrice</code>, and the CLP/USD conversions (<code>executePriceClp</code>, <code>pricePerShareClp</code>, <code>grossAmountClp</code>, <code>executePriceUsd</code>, <code>pricePerShareUsd</code>, <code>grossAmountUsd</code>).</p>
+
+                <h3>AccountPosition</h3>
+                <p>Holding for the latest snapshot: <code>name</code>, <code>ticker</code>, <code>price</code>, <code>rank</code>, <code>quantity</code>, market value in USD/CLP/EUR/CAD/GBP, <code>fxCurrency</code>, <code>reinvestDividend</code>, <code>ppShareClassFigi</code>, <code>fsShareClassFigi</code>, <code>countryCode</code>.</p>
+
+                <h3>AccountAllocation &amp; AssetClass</h3>
+                <p>Classification breakdown: <code>level1Classification</code> plus total market value and percentage in USD, CLP, and EUR.</p>
+
+                <h3>AccountFxRate</h3>
+                <p><code>conversionDate</code>, <code>fxCurrency</code>, <code>fxCurrencyInUsd</code>, <code>usdInFxCurrency</code>.</p>
+
+                <h3>AccountsListSummary / HouseholdAccountsSummary</h3>
+                <p>Aggregate roll-up: <code>accountCount</code>, <code>householdBaseCurrency</code>, total assets, beginning/ending value, net deposits, change in value, and gain/loss across USD, CLP, and EUR. <code>HouseholdAccountsSummary</code> adds <code>householdUuid</code>.</p>
+
+                <h3>AccountAudit</h3>
+                <p><code>tenantUuid</code>, <code>householdUuid</code>, <code>householdName</code>, <code>accountNumber</code>, <code>accountUuid</code>, <code>event</code> (<a href="#enums">AccountAuditEvent</a>), <code>createdAt</code>.</p>
+
+                <h3>Request bodies</h3>
+                <table>
+                    <thead>
+                        <tr><th>DTO</th><th>Fields</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>WorkstationFilter</code></td><td><code>accountUuid[]</code>, <code>custodian[]</code>, quintiles (<code>mtdReturnQuintile</code>, <code>qtdReturnQuintile</code>, <code>ytdReturnQuintile</code>, <code>eodBalanceUsdQuintile</code>, <code>eodBalanceClpQuintile</code>) values 1–5, <code>staffUuid</code> — all optional.</td></tr>
+                        <tr><td><code>WorkstationAccount</code></td><td><code>startDate</code>, <code>endDate</code> (required for most), <code>accountUuids[]</code> (empty = all tenant accounts).</td></tr>
+                        <tr><td><code>WorkstationHousehold</code></td><td><code>startDate</code>, <code>endDate</code>, <code>householdUuids[]</code> (empty = all).</td></tr>
+                        <tr><td><code>WorkstationChart</code></td><td><code>metric</code> (<code>BALANCE</code>/<code>MTD</code>/<code>QTD</code>/<code>YTD</code>), <code>currency</code> (required if <code>BALANCE</code>: USD/CLP/EUR), optional <code>accountUuids[]</code>, <code>householdUuids[]</code>, <code>contactUuids[]</code>, <code>staffUuid</code>.</td></tr>
+                        <tr><td><code>ClassifyFigi</code></td><td><code>tenant</code>, <code>shareClassFigi</code>, <code>symbol</code>, <code>currency</code>, <code>country</code> (required); <code>securityName</code>, <code>securityMastersList</code>, <code>companyName</code>, <code>riskScore</code>, <code>validStart</code>, <code>validEnd</code> (optional).</td></tr>
+                        <tr><td><code>DeleteFigi</code></td><td><code>tenant</code>, <code>symbol</code>, <code>currency</code>, <code>country</code> (all optional).</td></tr>
+                        <tr><td><code>FintreeTenantCreate</code></td><td><code>fintree_tenant_id</code>, <code>dev_tenant_id</code>, <code>tenant_name</code>, <code>default_reconciliation_service_level</code> (≥0) — all required.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ENUMS -->
+                <h2 id="enums">Enum reference</h2>
+                <p>The following fields accept a fixed set of values. Pass the exact string value shown.</p>
+
+                <h3>linkState</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">linked</span>
+                    <span class="enum-tag">unlinked</span>
+                </div>
+
+                <h3>AccountAuditEvent</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ACCOUNT_LINKED_PLATFORM</span>
+                    <span class="enum-tag">ACCOUNT_UNLINKED_PLATFORM</span>
+                    <span class="enum-tag">ACCOUNT_LINKED_HOUSEHOLD</span>
+                    <span class="enum-tag">ACCOUNT_UNLINKED_HOUSEHOLD</span>
+                </div>
+
+                <h3>workstation chart metric</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">BALANCE</span>
+                    <span class="enum-tag">MTD</span>
+                    <span class="enum-tag">QTD</span>
+                    <span class="enum-tag">YTD</span>
+                </div>
+
+                <h3>currency</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">USD</span>
+                    <span class="enum-tag">CLP</span>
+                    <span class="enum-tag">EUR</span>
+                </div>
+
+                <h3>performance / balance period labels</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">1D</span>
+                    <span class="enum-tag">3M</span>
+                    <span class="enum-tag">6M</span>
+                    <span class="enum-tag">YTD</span>
+                    <span class="enum-tag">1Y</span>
+                    <span class="enum-tag">Since Funded</span>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

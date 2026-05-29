@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exports API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Exports</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#request">Request structure</a></li>
+                    <li><a href="#columns">Column configuration</a></li>
+                    <li><a href="#filters">Applying filters</a></li>
+                    <li><a href="#examples">Examples</a></li>
+                    <li><a href="#errors">Error handling</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Exports API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The exports API generates downloadable tabular files for contacts, organisations, and households. Both CSV and XLSX formats are supported. The export respects a configurable column list and optional filters, making it suitable for integrating with downstream data pipelines or reporting tools.</p>
+
+                <p>All export endpoints are under <code>/api/exports</code> and require one of the roles: <code>SYSTEM_ADMIN</code>, <code>TENANT_ADMIN</code>, <code>PARTNER_ADMIN</code>, <code>TENANT_STAFF</code>, or <code>PARTNER_STAFF</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Entity exported</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/exports/contacts</code></td><td>Contacts</td></tr>
+                        <tr><td><code>POST /api/exports/organisations</code></td><td>Organisations</td></tr>
+                        <tr><td><code>POST /api/exports/households</code></td><td>Households</td></tr>
+                    </tbody>
+                </table>
+
+                <p>A successful response is a file download with the appropriate <code>Content-Type</code> header (<code>text/csv;charset=UTF-8</code> for CSV or <code>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</code> for XLSX) and a <code>Content-Disposition: attachment</code> header with the generated filename.</p>
+
+                <h2 id="request">Request structure</h2>
+                <p>All three endpoints share the same request body structure (<code>TabularExportRequest</code>):</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "format": "CSV",
+  "viewState": {
+    "columns": [ ... ],
+    "sort": {
+      "field": "createdAt",
+      "direction": "DESC"
+    }
+  },
+  "locale": "en",
+  "timezone": "America/Mexico_City",
+  "filters": [ ... ]
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>format</code></td><td>Yes</td><td><code>CSV</code> or <code>XLSX</code>.</td></tr>
+                        <tr><td><code>viewState</code></td><td>Yes</td><td>Must contain at least one column. The <code>sort</code> object is optional; if omitted the server applies a default sort.</td></tr>
+                        <tr><td><code>viewState.columns</code></td><td>Yes</td><td>Must not be empty. Controls which columns appear in the export and their order.</td></tr>
+                        <tr><td><code>locale</code></td><td>No</td><td>BCP 47 locale tag (e.g. <code>en</code>, <code>es</code>, <code>es-CL</code>). Controls date and number formatting in the output file.</td></tr>
+                        <tr><td><code>timezone</code></td><td>No</td><td>IANA timezone name. Dates and times in the file are adjusted to this timezone.</td></tr>
+                        <tr><td><code>filters</code></td><td>No</td><td>Same <code>FilterCondition</code> format used by v2 list endpoints. Only rows matching all filters are exported.</td></tr>
+                        <tr><td><code>includeAllCustomFields</code></td><td>No</td><td>When <code>true</code> and no custom field columns are specified, all custom fields for the entity are appended to the export.</td></tr>
+                        <tr><td><code>uiScreenName</code></td><td>No</td><td>Optional hint for server-side logging (e.g. <code>CONTACTS_TABLE</code>).</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="columns">Column configuration</h2>
+                <p>Each entry in <code>viewState.columns</code> describes one column in the output file. The order of the array determines the column order in the export.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  {
+    "id": "firstName",
+    "label": "First Name",
+    "custom": false,
+    "type": "STRING"
+  },
+  {
+    "id": "paternalLastName",
+    "label": "Last Name",
+    "custom": false,
+    "type": "STRING"
+  },
+  {
+    "id": "preferredEmail",
+    "label": "Email",
+    "custom": false,
+    "type": "STRING"
+  },
+  {
+    "id": "createdAt",
+    "label": "Created",
+    "custom": false,
+    "type": "DATE_TIME"
+  }
+]</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>id</code></td><td>The field key as used in the filter and sort model (e.g. <code>firstName</code>, <code>stage</code>). For custom fields, use the format <code>custom:cf_UUID</code>.</td></tr>
+                        <tr><td><code>label</code></td><td>The column header text written to the file. Can be a localized string.</td></tr>
+                        <tr><td><code>custom</code></td><td><code>true</code> for custom field columns; <code>false</code> for standard entity fields.</td></tr>
+                        <tr><td><code>type</code></td><td>Data type hint for formatting: <code>STRING</code>, <code>DATE</code>, <code>DATE_TIME</code>, <code>NUMBER</code>, <code>BOOLEAN</code>.</td></tr>
+                        <tr><td><code>formUuid</code></td><td>Optional. UUID of the custom field form, used to disambiguate custom fields with the same name across forms.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="filters">Applying filters</h2>
+                <p>The <code>filters</code> array uses the same <code>FilterCondition</code> format as the v2 list and filtering endpoints. Multiple conditions are combined with AND logic.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>[
+  { "field": "contactType", "operator": "equals", "value": "ACTIVE" },
+  { "field": "stage", "operator": "in", "values": ["Prospect", "Client"] }
+]</code></pre>
+                </div>
+
+                <p>See the <a href="conventions.html#filtering">Shared Conventions — V2 filtering</a> page for the full list of operators and multi-value syntax.</p>
+
+                <h2 id="examples">Examples</h2>
+
+                <h3>Export active contacts to CSV</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/contacts" \
+  -X POST \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_STAFF" \
+  -o contacts_export.csv \
+  --data '{
+    "format": "CSV",
+    "locale": "en",
+    "timezone": "America/New_York",
+    "viewState": {
+      "columns": [
+        { "id": "firstName", "label": "First Name", "custom": false, "type": "STRING" },
+        { "id": "paternalLastName", "label": "Last Name", "custom": false, "type": "STRING" },
+        { "id": "preferredEmail", "label": "Email", "custom": false, "type": "STRING" },
+        { "id": "stage", "label": "Stage", "custom": false, "type": "STRING" },
+        { "id": "createdAt", "label": "Created", "custom": false, "type": "DATE_TIME" }
+      ],
+      "sort": { "field": "createdAt", "direction": "DESC" }
+    },
+    "filters": [
+      { "field": "contactType", "operator": "equals", "value": "ACTIVE" }
+    ]
+  }'</code></pre>
+                </div>
+
+                <h3>Export all households to XLSX</h3>
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/exports/households" \
+  -X POST \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-user-email: YOUR_EMAIL" \
+  -H "x-user-id: YOUR_USER_ID" \
+  -H "x-user-type: TENANT_STAFF" \
+  -o households_export.xlsx \
+  --data '{
+    "format": "XLSX",
+    "locale": "es-CL",
+    "timezone": "America/Santiago",
+    "viewState": {
+      "columns": [
+        { "id": "name", "label": "Household", "custom": false, "type": "STRING" },
+        { "id": "isActive", "label": "Active", "custom": false, "type": "BOOLEAN" },
+        { "id": "createdAt", "label": "Created", "custom": false, "type": "DATE_TIME" }
+      ]
+    }
+  }'</code></pre>
+                </div>
+
+                <h2 id="errors">Error handling</h2>
+                <p>On error the API returns a JSON body instead of a file, with an appropriate HTTP status code.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Error</th><th>Status</th><th>Cause</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>No rows to export</td><td><code>400</code></td><td>The filter produces an empty result set.</td></tr>
+                        <tr><td>Row limit exceeded</td><td><code>400</code></td><td>The result set exceeds the server-enforced row limit. Apply tighter filters to reduce the export size.</td></tr>
+                        <tr><td>Invalid column</td><td><code>400</code></td><td>A column <code>id</code> does not exist for the requested entity type.</td></tr>
+                        <tr><td>No columns supplied</td><td><code>400</code></td><td><code>viewState.columns</code> is empty or missing.</td></tr>
+                        <tr><td>Unauthorized</td><td><code>401</code></td><td>Missing or expired bearer token.</td></tr>
+                        <tr><td>Forbidden</td><td><code>403</code></td><td>Authenticated user does not have the required role.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout info">
+                    <strong>Locale and date formatting:</strong> when <code>locale</code> is <code>es-CL</code>, date fields use the Chilean format (day/month/year) and decimal separators follow the Spanish convention. When <code>locale</code> is omitted or set to <code>en</code>, ISO 8601 formatting is used for dates.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication and MFA - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Authentication</h3>
+                <ul>
+                    <li><a href="#login">Login</a></li>
+                    <li><a href="#refresh">Refresh</a></li>
+                    <li><a href="#session">Session endpoints</a></li>
+                    <li><a href="#mfa-login">MFA during login</a></li>
+                    <li><a href="#mfa-setup">MFA setup</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1>Authentication and MFA</h1>
+                <span class="pill vendor">External integration</span>
+                <p>The Altafid authentication flow supports plain login, refresh token rotation, and MFA setup or verification depending on the user's policy and current configuration.</p>
+
+                <h2 id="login">POST /api/auth/login</h2>
+                <p>Use email and password to initiate the session.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/auth/login" \
+  -X POST \
+  -H "accept: application/json" \
+  -H "content-type: application/json" \
+  --data '{
+    "username": "your-email@example.com",
+    "password": "YourPassword123!"
+  }'</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Status</th><th>Tokens returned</th><th>Meaning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>LOGIN_SUCCESS</code></td><td><code>token</code>, <code>refreshToken</code></td><td>Authentication completed. Use the token in the <code>Authorization</code> header for all subsequent requests.</td></tr>
+                        <tr><td><code>MFA_SETUP_REQUIRED</code></td><td><code>setupToken</code></td><td>MFA policy requires setup before access is granted.</td></tr>
+                        <tr><td><code>MFA_REQUIRED</code></td><td><code>challengeToken</code></td><td>Password accepted; MFA verification still required.</td></tr>
+                    </tbody>
+                </table>
+
+                <p>A successful <code>LOGIN_SUCCESS</code> response body:</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "status": "LOGIN_SUCCESS",
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "username": "your-email@example.com",
+  "tenantUuid": "T019A16FF372A70B5A9307B00CE85E4DA",
+  "tenantStaffUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "userUuid": "TS019C06688AA57248B9EA5325DBDFC48E",
+  "tenantCode": "CONPAT_UAT",
+  "userType": "TENANT_STAFF",
+  "staffType": "ADMIN",
+  "expiresIn": 3600000,
+  "refreshExpiresIn": 604800000
+}</code></pre>
+                </div>
+
+                <h2 id="refresh">POST /api/auth/refresh</h2>
+                <p>Refresh tokens are rotated on every successful refresh. Store the new refresh token immediately.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "refreshToken": "YOUR_REFRESH_TOKEN"
+}</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "token": "NEW_ACCESS_TOKEN",
+  "refreshToken": "NEW_REFRESH_TOKEN",
+  "expiresIn": 3600,
+  "refreshExpiresIn": 604800
+}</code></pre>
+                </div>
+
+                <div class="callout info">
+                    <strong>Token lifetime note:</strong> the login response documents expiration in <em>milliseconds</em>, while refresh and MFA verification responses document expiration in <em>seconds</em>. Normalise these before computing renewal times in your integration.
+                </div>
+
+                <h2 id="session">Session helper endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Typical use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/auth/logout</code></td><td>Invalidate or terminate the current session.</td><td>Optional client logout flow.</td></tr>
+                        <tr><td><code>POST /api/auth/validate-token</code></td><td>Check whether a JWT is still valid.</td><td>Session diagnostics and support tooling.</td></tr>
+                        <tr><td><code>POST /api/auth/change-password</code></td><td>Change password for the authenticated user.</td><td>User self-service account maintenance.</td></tr>
+                        <tr><td><code>GET /api/auth/me</code></td><td>Return current user identity and tenant context.</td><td>Session bootstrap and debugging.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="mfa-login">MFA during login</h2>
+                <p>If login returns <code>MFA_REQUIRED</code>, submit the challenge token and the six-digit TOTP code to complete login.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "challengeToken": "CHALLENGE_TOKEN",
+  "method": "TOTP",
+  "otp": "123456"
+}</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "success": true,
+  "token": "ACCESS_TOKEN",
+  "refreshToken": "REFRESH_TOKEN",
+  "expiresIn": 3600,
+  "refreshExpiresIn": 604800
+}</code></pre>
+                </div>
+
+                <h2 id="mfa-setup">MFA setup flow</h2>
+                <p>If login returns <code>MFA_SETUP_REQUIRED</code>, use the short-lived setup token in the <code>Authorization</code> header for the setup endpoints.</p>
+
+                <h3>POST /api/auth/mfa/setup/init</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer SETUP_TOKEN
+
+{
+  "method": "TOTP"
+}</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "method": "TOTP",
+  "secret": "BASE32_SECRET",
+  "otpauthUri": "otpauth://totp/Altafid:email@example.com?secret=..."
+}</code></pre>
+                </div>
+
+                <h3>POST /api/auth/mfa/setup/confirm</h3>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer SETUP_TOKEN
+
+{
+  "method": "TOTP",
+  "otp": "123456"
+}</code></pre>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "success": true,
+  "challengeToken": "CHALLENGE_TOKEN"
+}</code></pre>
+                </div>
+
+                <p>After confirmation, call <code>POST /api/auth/mfa/verify</code> with the returned challenge token to obtain the final access and refresh tokens.</p>
+
+                <h3>GET /api/auth/mfa/status</h3>
+                <p>Returns whether MFA is enabled, whether it is locked, and the currently configured methods for the authenticated user.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "mfaEnabled": true,
+  "isLocked": false,
+  "methods": [
+    {
+      "type": "TOTP",
+      "label": "Authenticator App",
+      "isActive": true,
+      "failedAttempts": 0
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="callout warning">
+                    <strong>Failure cases to handle:</strong> invalid login credentials, expired refresh tokens, expired challenge or setup tokens, invalid OTP codes, and temporarily locked MFA methods after repeated failures.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>
