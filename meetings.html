@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meetings API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post   { background: #d1fae5; color: #065f46; }
+        .method-get    { background: #dbeafe; color: #1e40af; }
+        .method-put    { background: #fef3c7; color: #78350f; }
+        .method-delete { background: #fee2e2; color: #991b1b; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 170px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-section ul { list-style: none; margin-left: 0; }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Meetings</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#flow">Meeting lifecycle</a></li>
+                    <li><a href="#meetings">Meeting endpoints</a></li>
+                    <li><a href="#create">Create a meeting</a></li>
+                    <li><a href="#list">List and filter</a></li>
+                    <li><a href="#manage">Update and cancel</a></li>
+                    <li><a href="#invitations">Invitations and sync</a></li>
+                    <li><a href="#availability">Availability</a></li>
+                    <li><a href="#rsvp">RSVP</a></li>
+                    <li><a href="#connection">Calendar connection</a></li>
+                    <li><a href="#webhooks">Webhooks</a></li>
+                    <li><a href="#data-model">Data model</a></li>
+                    <li><a href="#enums">Enum reference</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Meetings API</h1>
+                <span class="pill vendor">External integration</span>
+
+                <p>The Meetings API manages scheduled meetings and calendar integration on the Altafid platform. It covers meeting creation and lifecycle, participant invitations and RSVP, staff availability checks, and two-way synchronisation with Google Calendar and Outlook.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    Standard auth headers are required on all endpoints except public webhooks and OAuth callbacks — see <a href="#auth">Authentication</a> and <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <div class="callout info">
+                    <strong>Access model:</strong> a meeting is owned by a <em>host</em> and read/write actions are scoped to participants. The response fields <code>canEdit</code>, <code>canCancel</code>, <code>canResend</code>, and <code>canRemoveFromCalendar</code> tell the caller which actions the current user is permitted to perform.
+                </div>
+
+                <h2 id="auth">Authentication and headers</h2>
+                <p>Authenticated endpoints expect the standard gateway headers. Public RSVP links, OAuth callbacks, and provider webhooks are unauthenticated.</p>
+                <table>
+                    <thead>
+                        <tr><th>Header</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Authorization: Bearer &lt;token&gt;</code></td><td><span class="badge-required">required</span></td><td>Access token.</td></tr>
+                        <tr><td><code>x-tenant-uuid</code></td><td><span class="badge-required">required</span></td><td>Tenant context.</td></tr>
+                        <tr><td><code>x-user-id</code></td><td><span class="badge-required">required</span></td><td>Current user UUID.</td></tr>
+                        <tr><td><code>x-user-email</code></td><td><span class="badge-required">required</span></td><td>Current user email.</td></tr>
+                        <tr><td><code>x-user-type</code></td><td><span class="badge-required">required</span></td><td><code>TENANT_STAFF</code>, <code>PARTNER_STAFF</code>, or <code>CLIENT</code>.</td></tr>
+                        <tr><td><code>x-tenant-code</code></td><td><span class="badge-optional">optional</span></td><td>Tenant code.</td></tr>
+                        <tr><td><code>x-partner-uuid</code></td><td><span class="badge-optional">optional</span></td><td>Partner context for partner staff.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- FLOW -->
+                <h2 id="flow">Meeting lifecycle</h2>
+                <p>A typical meeting moves through availability checking, creation, invitation delivery, and external calendar sync. Participants then RSVP, and the host can update, resend, or cancel.</p>
+
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Check availability</div>
+                        <div class="step-desc">POST /api/v1/availability/check<br>Find a free slot for staff</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Create meeting</div>
+                        <div class="step-desc">POST /api/v1/meetings<br>Returns <code>meetingUuid</code></div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Invite &amp; sync</div>
+                        <div class="step-desc">Invitations sent;<br>monitor <code>externalSyncStatus</code></div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">4</div>
+                        <div class="step-title">RSVP</div>
+                        <div class="step-desc">PUT .../rsvp<br>Participants accept or decline</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">5</div>
+                        <div class="step-title">Manage</div>
+                        <div class="step-desc">Update, resend,<br>or cancel</div>
+                    </div>
+                </div>
+
+                <div class="callout info">
+                    <strong>External calendar is optional.</strong> If the host has connected Google or Outlook (see <a href="#connection">Calendar connection</a>), meetings sync to that calendar and <code>externalSyncStatus</code> tracks progress. Otherwise the meeting is internal-only and <code>externalSyncStatus</code> is <code>NOT_APPLICABLE</code>.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- MEETING ENDPOINTS -->
+                <h2 id="meetings">Meeting endpoints</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v1/meetings</code></td><td>Create a meeting. Returns the full meeting with <code>meetingUuid</code>.</td></tr>
+                        <tr><td><code>GET /api/v1/meetings</code></td><td>List meetings on the current user's calendar.</td></tr>
+                        <tr><td><code>POST /api/v2/meetings</code></td><td>Advanced filtered list (see <a href="#list">List and filter</a>).</td></tr>
+                        <tr><td><code>GET /api/v1/meetings/{meetingUuid}</code></td><td>Get a single meeting with full detail and participants.</td></tr>
+                        <tr><td><code>PUT /api/v1/meetings/{meetingUuid}</code></td><td>Update a meeting (partial — send only changed fields).</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/cancel</code></td><td>Cancel a meeting; status moves to <code>CANCELED</code>.</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/resend</code></td><td>Resend invitations to all participants.</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/participants/{participantUuid}/resend</code></td><td>Resend the invitation to a single participant.</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/sync</code></td><td>Retry a failed external calendar sync.</td></tr>
+                        <tr><td><code>DELETE /api/v1/meetings/{meetingUuid}/calendar-visibility</code></td><td>Hide a canceled meeting from the calendar. Returns <code>204 No Content</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="create">
+                    <span class="method-badge method-post">POST</span>/api/v1/meetings
+                </h2>
+                <p>Creates a meeting. Participants are supplied as platform contacts, platform staff, and free-form external attendees. Invitations are dispatched automatically and, if the host has a connected calendar, the meeting is queued for external sync. Returns <code>201 Created</code> with a <a href="#data-model">MeetingResponse</a>.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "title":            "Quarterly portfolio review",
+  "startDateTime":    "2026-06-15T15:00:00",
+  "endDateTime":      "2026-06-15T15:45:00",
+  "timezone":         "America/Santiago",
+  "allDay":           false,
+  "locationType":     "ONLINE",
+  "locationDetail":   "https://meet.google.com/abc-defg-hij",
+  "description":      "Review Q2 performance and rebalancing plan.",
+  "internalNotes":    "Bring the updated IPS draft.",
+  "meetingProvider":  "GOOGLE_MEET",
+  "meetingLink":      "https://meet.google.com/abc-defg-hij",
+  "meetingPassword":  null,
+
+  "contactIds":       ["C019B9D0FD0E5772F9E8ED189895D40C4"],
+  "staffIds":         ["PS0199CA8F08C270B5A5B0DFD3B565B332"],
+  "externalAttendees": [
+    {
+      "name":        "Jane Roe",
+      "email":       "jane.roe@example.com",
+      "language":    "ENGLISH",
+      "countryCode": "+1",
+      "phone":       "5551234567"
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>title</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Meeting title.</td></tr>
+                        <tr><td><code>startDateTime</code></td><td>datetime</td><td><span class="badge-required">required</span></td><td>Local date-time, e.g. <code>2026-06-15T15:00:00</code>.</td></tr>
+                        <tr><td><code>endDateTime</code></td><td>datetime</td><td><span class="badge-required">required</span></td><td>Must be after <code>startDateTime</code>.</td></tr>
+                        <tr><td><code>timezone</code></td><td>string</td><td><span class="badge-required">required</span></td><td>IANA zone, e.g. <code>America/Santiago</code>.</td></tr>
+                        <tr><td><code>allDay</code></td><td>boolean</td><td><span class="badge-optional">optional</span></td><td>Marks the meeting as all-day.</td></tr>
+                        <tr><td><code>locationType</code></td><td>enum</td><td><span class="badge-required">required</span></td><td><code>ONLINE</code> | <code>IN_PERSON</code>.</td></tr>
+                        <tr><td><code>locationDetail</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Address or meeting URL.</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Shown to all participants.</td></tr>
+                        <tr><td><code>internalNotes</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Visible to internal staff only.</td></tr>
+                        <tr><td><code>meetingInformation</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Additional free-form meeting info.</td></tr>
+                        <tr><td><code>meetingLink</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Conference link.</td></tr>
+                        <tr><td><code>meetingPassword</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Conference passcode.</td></tr>
+                        <tr><td><code>meetingProvider</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Conference provider label, e.g. <code>GOOGLE_MEET</code>.</td></tr>
+                        <tr><td><code>contactIds</code></td><td>string[]</td><td><span class="badge-optional">optional</span></td><td>Contact UUIDs to invite.</td></tr>
+                        <tr><td><code>staffIds</code></td><td>string[]</td><td><span class="badge-optional">optional</span></td><td>Staff UUIDs to invite.</td></tr>
+                        <tr><td><code>externalAttendees</code></td><td>object[]</td><td><span class="badge-optional">optional</span></td><td>Free-form guests — see <a href="#data-model">ExternalAttendee</a>.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout info">
+                    <strong>Save <code>meetingUuid</code></strong> — it is required for all update, RSVP, resend, sync, and cancel calls.
+                </div>
+
+                <h2 id="list">List and filter</h2>
+                <p><span class="method-badge method-get">GET</span><code>/api/v1/meetings</code> returns the meetings on the current user's calendar as a <a href="#data-model">MeetingListResponse</a>.</p>
+
+                <p><span class="method-badge method-post">POST</span><code>/api/v2/meetings</code> supports advanced filtering, paging, and sorting. Each filter condition names a <code>field</code>, an <code>operator</code>, and a value (or <code>values</code> / <code>min</code> / <code>max</code> depending on the operator).</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "filters": [
+    { "field": "status",        "operator": "EQUALS", "value": "ACTIVE" },
+    { "field": "startDateTime", "operator": "RANGE",  "min": "2026-06-01T00:00:00", "max": "2026-06-30T23:59:59" }
+  ],
+  "page": 0,
+  "size": 20,
+  "sort": ["startDateTime,asc"]
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>filters[].field</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Field to filter on.</td></tr>
+                        <tr><td><code>filters[].operator</code></td><td>enum</td><td><span class="badge-required">required</span></td><td>See <a href="#enums">FilterOperator</a>.</td></tr>
+                        <tr><td><code>filters[].value</code> / <code>values</code> / <code>min</code> / <code>max</code></td><td>varies</td><td><span class="badge-optional">optional</span></td><td><code>value</code> for scalar ops, <code>values</code> for <code>IN</code>/<code>NOT_IN</code>, <code>min</code>+<code>max</code> for <code>RANGE</code>.</td></tr>
+                        <tr><td><code>page</code></td><td>integer</td><td><span class="badge-optional">optional</span></td><td>Zero-indexed. Minimum <code>0</code>.</td></tr>
+                        <tr><td><code>size</code></td><td>integer</td><td><span class="badge-optional">optional</span></td><td>Between <code>1</code> and <code>100</code>.</td></tr>
+                        <tr><td><code>sort</code></td><td>string[]</td><td><span class="badge-optional">optional</span></td><td><code>field,direction</code> entries.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 id="manage">Update and cancel</h2>
+                <p><span class="method-badge method-put">PUT</span><code>/api/v1/meetings/{meetingUuid}</code> accepts the same fields as create — all optional. Omitted fields are left unchanged. Updating a meeting that is externally synced queues a follow-up sync.</p>
+                <p><span class="method-badge method-post">POST</span><code>/api/v1/meetings/{meetingUuid}/cancel</code> moves the meeting to <code>CANCELED</code> and notifies participants. Use <span class="method-badge method-delete">DELETE</span><code>/api/v1/meetings/{meetingUuid}/calendar-visibility</code> to remove a canceled meeting from the calendar view (<code>204 No Content</code>).</p>
+
+                <h2 id="invitations">Invitations and sync</h2>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Response</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/resend</code></td><td>Resend invitations to every participant.</td><td><code>200</code> with per-recipient <a href="#data-model">ResendInvitation</a> results.</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/participants/{participantUuid}/resend</code></td><td>Resend to a single participant.</td><td><code>200</code> with one result; <code>lastInvitationResentAt</code> is null if skipped.</td></tr>
+                        <tr><td><code>POST /api/v1/meetings/{meetingUuid}/sync</code></td><td>Retry external calendar sync after a failure.</td><td><code>200</code> with the refreshed meeting.</td></tr>
+                    </tbody>
+                </table>
+                <div class="callout warning">
+                    <strong>Sync is best-effort.</strong> When <code>externalSyncStatus</code> is <code>FAILED</code> and <code>canRetrySync</code> is <code>true</code>, call the sync endpoint to retry. <code>syncFailureCode</code> and <code>syncFailureReason</code> describe the last failure.
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- AVAILABILITY -->
+                <h2 id="availability">
+                    <span class="method-badge method-post">POST</span>/api/v1/availability/check
+                </h2>
+                <p>Checks whether the given staff are free during a window. Returns one status per requested user.</p>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "userUuids":     ["PS0199CA8F08C270B5A5B0DFD3B565B332"],
+  "startDateTime": "2026-06-15T15:00:00",
+  "endDateTime":   "2026-06-15T15:45:00",
+  "timezone":      "America/Santiago"
+}</code></pre>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>userUuids</code></td><td>string[]</td><td><span class="badge-required">required</span></td><td>Must be non-empty.</td></tr>
+                        <tr><td><code>startDateTime</code></td><td>datetime</td><td><span class="badge-required">required</span></td><td>Window start.</td></tr>
+                        <tr><td><code>endDateTime</code></td><td>datetime</td><td><span class="badge-required">required</span></td><td>Window end.</td></tr>
+                        <tr><td><code>timezone</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>IANA zone for the window.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{
+  "availabilities": [
+    { "userUuid": "PS0199CA8F08C270B5A5B0DFD3B565B332", "status": "AVAILABLE" }
+  ]
+}</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- RSVP -->
+                <h2 id="rsvp">RSVP</h2>
+                <p>Participants accept or decline an invitation. Authenticated users RSVP for themselves; guests use a per-participant public link delivered in their invitation email.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th><th>Auth</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>PUT /api/v1/meetings/{meetingUuid}/rsvp</code></td><td>RSVP as the authenticated participant.</td><td>Standard headers.</td></tr>
+                        <tr><td><code>PUT /api/v1/meetings/{meetingUuid}/participants/{participantUuid}/rsvp</code></td><td>RSVP via public link (JSON).</td><td>Public; optional <code>token</code> query param.</td></tr>
+                        <tr><td><code>GET /api/v1/meetings/{meetingUuid}/participants/{participantUuid}/rsvp</code></td><td>RSVP via email link; returns an HTML confirmation page.</td><td>Public; <code>status</code> + optional <code>token</code> query params.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>{ "status": "ACCEPTED" }</code></pre>
+                </div>
+                <p><code>status</code> is required and must be <code>ACCEPTED</code> or <code>DECLINED</code>. For the public GET link, pass it as a query parameter: <code>?status=ACCEPTED&amp;token=...</code>.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- CALENDAR CONNECTION -->
+                <h2 id="connection">Calendar connection</h2>
+                <p>A host can connect a Google or Outlook calendar so meetings sync both ways. The OAuth flow is initiated from the API and completed in the provider's consent screen.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>GET /api/v1/calendar/connection</code></td><td>Current connection status and modal preferences.</td></tr>
+                        <tr><td><code>POST /api/v1/calendar/connect/{provider}</code></td><td>Begin OAuth for <code>google</code> or <code>outlook</code>; returns an <code>authorizationUrl</code>.</td></tr>
+                        <tr><td><code>GET /api/v1/calendar/callback/{provider}</code></td><td>OAuth callback handler (provider redirect).</td></tr>
+                        <tr><td><code>GET /api/v1/calendar/callback/success</code></td><td>OAuth success page (HTML).</td></tr>
+                        <tr><td><code>GET /api/v1/calendar/callback/oauth-failed</code></td><td>OAuth failure page (HTML).</td></tr>
+                        <tr><td><code>POST /api/v1/calendar/disconnect</code></td><td>Disconnect the calendar.</td></tr>
+                        <tr><td><code>POST /api/v1/calendar/sync</code></td><td>Pull meetings from the external calendar.</td></tr>
+                        <tr><td><code>PUT /api/v1/calendar/connection/preferences</code></td><td>Update the first-time modal preference (<code>action</code> required).</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="step-flow">
+                    <div class="step-box">
+                        <div class="step-num">1</div>
+                        <div class="step-title">Initiate</div>
+                        <div class="step-desc">POST /calendar/connect/{provider}<br>Returns <code>authorizationUrl</code></div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">2</div>
+                        <div class="step-title">Authorize</div>
+                        <div class="step-desc">User consents in provider UI</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">3</div>
+                        <div class="step-title">Callback</div>
+                        <div class="step-desc">GET /calendar/callback/{provider}<br>Connection stored</div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-box">
+                        <div class="step-num">4</div>
+                        <div class="step-title">Sync</div>
+                        <div class="step-desc">POST /calendar/sync<br>Meetings flow both ways</div>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- WEBHOOKS -->
+                <h2 id="webhooks">Webhooks</h2>
+                <p>Providers push change notifications to these unauthenticated endpoints. They always return <code>200</code> even on internal sync errors, to prevent the provider from retrying.</p>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>POST /api/v1/webhooks/google</code></td><td>Google push notifications. Requires the <code>x-goog-channel-id</code> header; unknown channel returns <code>403</code>, missing header <code>400</code>.</td></tr>
+                        <tr><td><code>POST /api/v1/webhooks/outlook</code></td><td>Outlook subscription notifications. A <code>validationToken</code> query param triggers a plain-text handshake response.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DATA MODEL -->
+                <h2 id="data-model">Data model</h2>
+
+                <h3>Meeting</h3>
+                <p>Returned by create, get, update, and sync. The summary form (used in list responses) carries a reduced subset.</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>meetingUuid</code></td><td>string</td><td>Identifier.</td></tr>
+                        <tr><td><code>tenantUuid</code></td><td>string</td><td>Owning tenant.</td></tr>
+                        <tr><td><code>title</code></td><td>string</td><td></td></tr>
+                        <tr><td><code>startDateTime</code> / <code>endDateTime</code></td><td>datetime</td><td>Local date-times.</td></tr>
+                        <tr><td><code>timezone</code></td><td>string</td><td>IANA zone.</td></tr>
+                        <tr><td><code>allDay</code></td><td>boolean</td><td></td></tr>
+                        <tr><td><code>locationType</code></td><td>enum</td><td><code>ONLINE</code> | <code>IN_PERSON</code>.</td></tr>
+                        <tr><td><code>locationDetail</code></td><td>string</td><td></td></tr>
+                        <tr><td><code>description</code> / <code>internalNotes</code> / <code>meetingInformation</code></td><td>string</td><td><code>internalNotes</code> is staff-only.</td></tr>
+                        <tr><td><code>meetingLink</code> / <code>meetingPassword</code> / <code>meetingProvider</code></td><td>string</td><td>Conferencing details.</td></tr>
+                        <tr><td><code>status</code></td><td>enum</td><td><code>ACTIVE</code> | <code>CANCELED</code>.</td></tr>
+                        <tr><td><code>source</code></td><td>enum</td><td><code>INTERNAL</code> | <code>GOOGLE</code> | <code>OUTLOOK</code>.</td></tr>
+                        <tr><td><code>hostUuid</code> / <code>hostType</code> / <code>hostName</code> / <code>hostEmail</code></td><td>string</td><td>Meeting owner.</td></tr>
+                        <tr><td><code>createdByUuid</code> / <code>createdByType</code></td><td>string</td><td>Creator.</td></tr>
+                        <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>datetime</td><td></td></tr>
+                        <tr><td><code>durationMinutes</code></td><td>integer</td><td>Derived length.</td></tr>
+                        <tr><td><code>attendeeCount</code></td><td>integer</td><td>Number of participants.</td></tr>
+                        <tr><td><code>participants</code></td><td>Participant[]</td><td>See below.</td></tr>
+                        <tr><td><code>canEdit</code> / <code>canCancel</code> / <code>canResend</code> / <code>canRemoveFromCalendar</code></td><td>boolean</td><td>Permitted actions for the current user.</td></tr>
+                        <tr><td><code>organizerEmail</code> / <code>organizerName</code></td><td>string</td><td>External organizer, when applicable.</td></tr>
+                        <tr><td><code>externallyOrganized</code> / <code>showExternalCalendarIcon</code></td><td>boolean</td><td>Origin flags.</td></tr>
+                        <tr><td><code>externalSyncStatus</code></td><td>enum</td><td><code>NOT_APPLICABLE</code> | <code>PENDING</code> | <code>SYNCED</code> | <code>FAILED</code>.</td></tr>
+                        <tr><td><code>lastSyncOperation</code></td><td>enum</td><td><code>CREATE</code> | <code>UPDATE</code> | <code>DELETE</code>.</td></tr>
+                        <tr><td><code>syncFailedAt</code> / <code>syncFailureCode</code> / <code>syncFailureReason</code></td><td>varies</td><td>Last failure detail.</td></tr>
+                        <tr><td><code>canRetrySync</code> / <code>externalSyncFailureVisibleToViewer</code></td><td>boolean</td><td>Sync UX flags.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Participant</h3>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>participantUuid</code></td><td>string</td><td>Participant identifier (used in per-participant RSVP/resend).</td></tr>
+                        <tr><td><code>participantEntityUuid</code></td><td>string</td><td>Underlying contact/staff UUID.</td></tr>
+                        <tr><td><code>participantType</code></td><td>enum</td><td><code>CONTACT</code> | <code>TENANT_STAFF</code> | <code>PARTNER_STAFF</code> | <code>EXTERNAL</code>.</td></tr>
+                        <tr><td><code>email</code> / <code>name</code></td><td>string</td><td></td></tr>
+                        <tr><td><code>language</code> / <code>countryCode</code> / <code>phone</code></td><td>string</td><td><code>EXTERNAL</code> participants only.</td></tr>
+                        <tr><td><code>rsvpStatus</code></td><td>enum</td><td><code>UNKNOWN</code> | <code>ACCEPTED</code> | <code>DECLINED</code>.</td></tr>
+                        <tr><td><code>canResend</code> / <code>lastInvitationResentAt</code></td><td>varies</td><td>Resend state.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>ExternalAttendee</h3>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>email</code></td><td>string</td><td><span class="badge-required">required</span></td><td>Guest email.</td></tr>
+                        <tr><td><code>name</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Display name.</td></tr>
+                        <tr><td><code>language</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Invitation language.</td></tr>
+                        <tr><td><code>countryCode</code> / <code>phone</code></td><td>string</td><td><span class="badge-optional">optional</span></td><td>Validated as a guest phone number.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>ResendInvitation</h3>
+                <p>Returned by the resend endpoints: <code>email</code> and <code>lastInvitationResentAt</code> (null when the recipient was skipped).</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- ENUMS -->
+                <h2 id="enums">Enum reference</h2>
+                <p>The following fields accept a fixed set of values. Pass the exact string value shown.</p>
+
+                <h3>locationType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ONLINE</span>
+                    <span class="enum-tag">IN_PERSON</span>
+                </div>
+
+                <h3>status (meeting)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">ACTIVE</span>
+                    <span class="enum-tag">CANCELED</span>
+                </div>
+
+                <h3>source</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">INTERNAL</span>
+                    <span class="enum-tag">GOOGLE</span>
+                    <span class="enum-tag">OUTLOOK</span>
+                </div>
+
+                <h3>participantType</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CONTACT</span>
+                    <span class="enum-tag">TENANT_STAFF</span>
+                    <span class="enum-tag">PARTNER_STAFF</span>
+                    <span class="enum-tag">EXTERNAL</span>
+                </div>
+
+                <h3>rsvpStatus</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">UNKNOWN</span>
+                    <span class="enum-tag">ACCEPTED</span>
+                    <span class="enum-tag">DECLINED</span>
+                </div>
+
+                <h3>externalSyncStatus</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">NOT_APPLICABLE</span>
+                    <span class="enum-tag">PENDING</span>
+                    <span class="enum-tag">SYNCED</span>
+                    <span class="enum-tag warn">FAILED</span>
+                </div>
+
+                <h3>lastSyncOperation</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CREATE</span>
+                    <span class="enum-tag">UPDATE</span>
+                    <span class="enum-tag">DELETE</span>
+                </div>
+
+                <h3>provider (calendar connection)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">GOOGLE</span>
+                    <span class="enum-tag">OUTLOOK</span>
+                </div>
+
+                <h3>connection status</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">CONNECTED</span>
+                    <span class="enum-tag">DISCONNECTED</span>
+                    <span class="enum-tag">NONE</span>
+                </div>
+
+                <h3>modal preference (firstTimeModalPref)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">SHOW_ALWAYS</span>
+                    <span class="enum-tag">DONT_SHOW</span>
+                    <span class="enum-tag">REMIND_LATER</span>
+                </div>
+
+                <h3>FilterOperator (v2 filtering)</h3>
+                <div style="margin: 0.5rem 0 1.5rem;">
+                    <span class="enum-tag">EQUALS</span>
+                    <span class="enum-tag">NOT_EQUALS</span>
+                    <span class="enum-tag">IN</span>
+                    <span class="enum-tag">NOT_IN</span>
+                    <span class="enum-tag">CONTAINS</span>
+                    <span class="enum-tag">STARTS_WITH</span>
+                    <span class="enum-tag">ENDS_WITH</span>
+                    <span class="enum-tag">RANGE</span>
+                    <span class="enum-tag">GREATER_THAN</span>
+                    <span class="enum-tag">GREATER_THAN_OR_EQUAL</span>
+                    <span class="enum-tag">LESS_THAN</span>
+                    <span class="enum-tag">LESS_THAN_OR_EQUAL</span>
+                    <span class="enum-tag">IS_NULL</span>
+                    <span class="enum-tag">IS_NOT_NULL</span>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="meetings.html">Meetings</a></li>
+                        <li><a href="accounts.html">Accounts</a></li>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>
