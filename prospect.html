@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospect API - Altafid API</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-button:hover { background: #2563eb; }
+        .copy-button.copied { background: #10b981; }
+        .code-block-wrapper { position: relative; }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .method-post   { background: #d1fae5; color: #065f46; }
+        .method-get    { background: #dbeafe; color: #1e40af; }
+        .method-put    { background: #fef3c7; color: #78350f; }
+        .method-delete { background: #fee2e2; color: #991b1b; }
+        .method-patch  { background: #f3e8ff; color: #5b21b6; }
+
+        .step-flow {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            min-width: 170px;
+            flex: 1;
+            text-align: center;
+        }
+        .step-box .step-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 auto 0.5rem auto;
+        }
+        .step-box .step-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .step-box .step-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .step-arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1.4rem;
+            padding: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .badge-optional {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .enum-tag {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .enum-tag.warn {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Altafid API</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="platform-overview.html">Platform Overview</a></li>
+                <li><a href="conventions.html">Conventions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 3rem 20px;">
+        <div class="doc-layout">
+            <aside class="doc-sidebar">
+                <h3>Prospect API</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#auth">Authentication</a></li>
+                    <li><a href="#workflow">Workflows</a></li>
+                    <li><a href="#settings">Settings & Stages</a></li>
+                    <li><a href="#custom-fields">Custom Fields</a></li>
+                    <li><a href="#leads">Leads</a></li>
+                    <li><a href="#contact-pipeline">Contact Pipeline</a></li>
+                    <li><a href="#data-model">Data model</a></li>
+                    <li><a href="#status-codes">Status codes</a></li>
+                </ul>
+            </aside>
+
+            <main class="doc-content">
+                <h1 id="overview">Prospect API</h1>
+                <span class="pill vendor">Sales Pipeline Management</span>
+
+                <p>The Prospect API manages the complete sales pipeline and opportunity workflow for prospects (leads and conversions). It covers prospect workflow creation and management, multi-stage customizable pipelines, automated and manual task handling, custom field definitions and values, lead-to-prospect conversion, meeting tracking, health scoring, and email notifications.</p>
+
+                <div class="callout info">
+                    <strong>Base URL:</strong> <code>https://api.altafid.dev.altafid.net</code><br>
+                    All requests require standard auth headers — see <a href="#auth">Authentication</a> and <a href="index.html#overview">Global Headers</a>.
+                </div>
+
+                <div class="callout info">
+                    <strong>Key Concepts:</strong> A <code>Prospect Workflow</code> represents an opportunity (person or organization) moving through your sales pipeline. Each workflow progresses through customizable <code>Stages</code>, with automatic or manual <code>Tasks</code> assigned to drive progression. <code>Custom Fields</code> extend the data model, and health scoring identifies at-risk or hot opportunities.
+                </div>
+
+                <h2 id="auth">Authentication and headers</h2>
+                <p>All endpoints below require standard headers. <code>x-tenant-uuid</code> is mandatory and scopes every request to a single tenant.</p>
+                <table>
+                    <thead>
+                        <tr><th>Header</th><th>Required</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Authorization: Bearer &lt;token&gt;</code></td><td><span class="badge-required">required</span></td><td>Access token.</td></tr>
+                        <tr><td><code>x-tenant-uuid</code></td><td><span class="badge-required">required</span></td><td>Tenant context; checked on every endpoint.</td></tr>
+                        <tr><td><code>x-staff-uuid</code></td><td><span class="badge-optional">optional</span></td><td>Current staff UUID for attribution.</td></tr>
+                        <tr><td><code>x-roles</code></td><td><span class="badge-optional">optional</span></td><td>Comma-separated roles: SYSTEM_ADMIN, TENANT_ADMIN, TENANT_STAFF.</td></tr>
+                        <tr><td><code>x-workflow-version</code></td><td><span class="badge-optional">optional</span></td><td>Optimistic locking version for concurrent updates.</td></tr>
+                        <tr><td><code>If-Match</code></td><td><span class="badge-optional">optional</span></td><td>ETag for concurrency control.</td></tr>
+                        <tr><td><code>Idempotency-Key</code></td><td><span class="badge-optional">optional</span></td><td>Unique key for idempotent request handling.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- WORKFLOWS -->
+                <h2 id="workflow">Workflows</h2>
+                <p>Manage prospect workflows through the sales pipeline. Workflows represent opportunities and progress through customizable stages with automatic task completion, status transitions, and comprehensive tracking.</p>
+
+                <h3>List and create workflows</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows</code></td><td>List workflows with advanced filtering (table/kanban view). Supports pagination, sorting, filtering by stage, priority, status, date ranges, currency.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows</code></td><td>Create new workflow. Request: <code>contactUuid</code>, <code>stageUuid</code>, <code>priority</code>, <code>opportunityValue</code>, <code>prospectDueDate</code>, <code>autoAdvance</code> (optional), custom field values.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}</code></td><td>Get complete workflow detail including stage state, custom fields, tasks, meetings, notes, and history.</td></tr>
+                        <tr><td><span class="method-badge method-patch">PATCH</span><code>/api/v1/prospect/workflows/{workflowUuid}</code></td><td>Update workflow. Can update: <code>priority</code>, <code>opportunityValue</code>, <code>prospectDueDate</code>, <code>stageDueDate</code>, auto-advance setting, and custom field values.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl "https://api.altafid.dev.altafid.net/api/v1/prospect/workflows?page=0&size=20" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "x-staff-uuid: YOUR_STAFF_UUID"</code></pre>
+                </div>
+
+                <h3>Workflow transitions and state changes</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/transitions/manual</code></td><td>Manually transition workflow to a specific stage. Request: <code>targetStageUuid</code>, optional <code>notes</code>.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/transitions/drag</code></td><td>Drag-drop workflow to a stage (kanban view). Request: <code>targetStageUuid</code>, optional <code>position</code>.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/mark-lost</code></td><td>Mark workflow as lost/closed. Request: optional <code>reason</code>, <code>notes</code>.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/reactivate</code></td><td>Reactivate a lost or completed workflow. Request: <code>targetStageUuid</code>.</td></tr>
+                        <tr><td><span class="method-badge method-patch">PATCH</span><code>/api/v1/prospect/workflows/{workflowUuid}/auto-advance</code></td><td>Toggle auto-advance setting. Request: <code>autoAdvance</code> boolean.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Workflow tasks</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/manual-tasks</code></td><td>Create manual (adhoc) task. Request: <code>taskType</code>, <code>dueDate</code>, <code>assignedToUuid</code>, <code>description</code>.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}/stages/{stageUuid}/tasks</code></td><td>Get all tasks for a workflow stage (automated and manual).</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Workflow notes and meetings</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}/stages/{stageUuid}/notes</code></td><td>Get notes added during stage execution.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/workflows/{workflowUuid}/meetings</code></td><td>Link calendar meeting to workflow. Request: <code>meetingUuid</code>, optional <code>meetingDate</code>, <code>attendees</code>.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}/stages/{stageUuid}/meetings</code></td><td>Get meetings linked to stage.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}/history</code></td><td>Get complete workflow history timeline (all transitions, task completions, notes).</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- SETTINGS -->
+                <h2 id="settings">Settings & Stages</h2>
+                <p>Configure and manage pipeline stages, priorities, notifications, auto-advance behavior, and automated task templates.</p>
+
+                <h3>Stage management</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/stages</code></td><td>List all pipeline stages for the tenant with ordering and configuration.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/settings/stages</code></td><td>Create new stage. Request: <code>name</code>, <code>description</code>, optional <code>defaultDueDateDays</code>, <code>color</code>.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/settings/stages/{stageUuid}</code></td><td>Update stage (full replacement). Request: <code>name</code>, <code>description</code>, and config fields.</td></tr>
+                        <tr><td><span class="method-badge method-patch">PATCH</span><code>/api/v1/prospect/settings/stages/{stageUuid}</code></td><td>Patch stage (partial update).</td></tr>
+                        <tr><td><span class="method-badge method-delete">DELETE</span><code>/api/v1/prospect/settings/stages/{stageUuid}</code></td><td>Delete stage (cascades if no workflows reference it).</td></tr>
+                        <tr><td><span class="method-badge method-patch">PATCH</span><code>/api/v1/prospect/settings/stages/order</code></td><td>Reorder stages in pipeline. Request: array of <code>{stageUuid, order}</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Path and workflow configuration</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/path-status</code></td><td>Get path (pipeline) configuration status and activation state.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/settings/path/activate</code></td><td>Activate path and enroll existing prospects. Request: optional filters for prospect selection.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/default-workflow-due-date</code></td><td>Get default due date calculation rules.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Priorities and notifications</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/priorities</code></td><td>Get priority disclosures and descriptions.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/settings/priorities</code></td><td>Update priority labels and explanations.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/notifications</code></td><td>Get email notification settings (when to notify on stage transitions, overdue tasks, etc.).</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/settings/notifications</code></td><td>Update notification configuration. Request: flags for stage-change, task-assigned, overdue alerts.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Auto-advance and automated tasks</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/auto-advance</code></td><td>Get default auto-advance setting for new workflows.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/settings/auto-advance</code></td><td>Update default auto-advance behavior. Request: <code>autoAdvanceDefault</code> boolean.</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/settings/stages/{stageUuid}/automated-tasks</code></td><td>List automated task templates for a stage.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/settings/stages/{stageUuid}/automated-tasks</code></td><td>Create automated task template. Request: <code>taskType</code>, <code>name</code>, <code>description</code>, <code>dueDateDays</code>.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/settings/stages/{stageUuid}/automated-tasks/{templateUuid}</code></td><td>Update task template (full replacement).</td></tr>
+                        <tr><td><span class="method-badge method-delete">DELETE</span><code>/api/v1/prospect/settings/stages/{stageUuid}/automated-tasks/{templateUuid}</code></td><td>Delete task template.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- CUSTOM FIELDS -->
+                <h2 id="custom-fields">Custom Fields</h2>
+                <p>Define and manage custom fields to extend the prospect workflow data model. Custom fields can be text, numbers, dates, dropdowns, or multi-select with optional validation rules.</p>
+
+                <h3>Custom field definitions</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/custom-fields</code></td><td>List all custom field definitions for the tenant.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/custom-fields</code></td><td>Create custom field. Request: <code>fieldName</code>, <code>fieldType</code> (TEXT, NUMBER, DATE, DROPDOWN, MULTI_SELECT), <code>required</code>, optional <code>description</code>, <code>defaultValue</code>.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/custom-fields/{definitionUuid}</code></td><td>Update custom field definition.</td></tr>
+                        <tr><td><span class="method-badge method-delete">DELETE</span><code>/api/v1/prospect/custom-fields/{definitionUuid}</code></td><td>Delete custom field (cascades if workflows have values).</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Custom field values</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/workflows/{workflowUuid}/custom-fields</code></td><td>Get all custom field values for a workflow.</td></tr>
+                        <tr><td><span class="method-badge method-put">PUT</span><code>/api/v1/prospect/workflows/{workflowUuid}/custom-fields</code></td><td>Upsert (create or update) custom field values for workflow. Request: map of <code>{fieldDefinitionUuid: value}</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Custom field options (for dropdowns)</h3>
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/custom-fields/{definitionUuid}/options</code></td><td>List dropdown options for a DROPDOWN-type field.</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/custom-fields/{definitionUuid}/options</code></td><td>Add option to dropdown field. Request: <code>optionLabel</code>, <code>optionValue</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- LEADS -->
+                <h2 id="leads">Leads</h2>
+                <p>Manage leads and convert them to prospects. Leads originate from external sources or manual entry and move through a lead-scoring workflow before conversion to prospects.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/leads</code></td><td>List leads with pagination and filtering by status, source, date range.</td></tr>
+                        <tr><td><span class="method-badge method-patch">PATCH</span><code>/api/v1/prospect/leads/{contactUuid}/status</code></td><td>Update lead status. Request: <code>status</code> (NEW, QUALIFIED, DISQUALIFIED, CONVERTED).</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/leads/{contactUuid}/convert</code></td><td>Convert single lead to prospect. Request: <code>initialStageUuid</code>, <code>priority</code>, <code>opportunityValue</code> (optional).</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span><code>/api/v1/prospect/leads/bulk-convert</code></td><td>Bulk convert leads to prospects. Request: array of <code>{contactUuid, initialStageUuid, priority, opportunityValue}</code>.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block-wrapper">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>curl -X POST "https://api.altafid.dev.altafid.net/api/v1/prospect/leads/{contactUuid}/convert" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-tenant-uuid: YOUR_TENANT_UUID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "initialStageUuid": "stage-uuid-123",
+    "priority": "HIGH",
+    "opportunityValue": 50000
+  }'</code></pre>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- CONTACT PIPELINE -->
+                <h2 id="contact-pipeline">Contact Pipeline</h2>
+                <p>Access a contact's current workflow and pipeline state. This endpoint provides a single contact's perspective on their prospect status in the pipeline.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-get">GET</span><code>/api/v1/prospect/contacts/{contactUuid}/pipeline</code></td><td>Get contact's current workflow (if active) and pipeline state including current stage, stage duration, tasks, and health indicators.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- DATA MODEL -->
+                <h2 id="data-model">Data model</h2>
+
+                <h3>WorkflowResponse</h3>
+                <p>Summary of a prospect workflow:</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>workflowUuid</code></td><td>string</td><td>Unique identifier.</td></tr>
+                        <tr><td><code>contactUuid</code></td><td>string</td><td>Associated contact.</td></tr>
+                        <tr><td><code>currentStageUuid</code></td><td>string</td><td>Current pipeline stage.</td></tr>
+                        <tr><td><code>stageName</code></td><td>string</td><td>Current stage name.</td></tr>
+                        <tr><td><code>priority</code></td><td>string</td><td>LOW, MEDIUM, HIGH.</td></tr>
+                        <tr><td><code>opportunityValue</code></td><td>number</td><td>Estimated deal value.</td></tr>
+                        <tr><td><code>prospectDueDate</code></td><td>datetime</td><td>Target close date.</td></tr>
+                        <tr><td><code>stageDueDate</code></td><td>datetime</td><td>Target date for current stage.</td></tr>
+                        <tr><td><code>workflowStatus</code></td><td>string</td><td>ACTIVE, LOST, COMPLETED.</td></tr>
+                        <tr><td><code>healthScore</code></td><td>number</td><td>0-100 health indicator.</td></tr>
+                        <tr><td><code>autoAdvance</code></td><td>boolean</td><td>Auto-advance on task completion.</td></tr>
+                        <tr><td><code>createdAt</code></td><td>datetime</td><td>Workflow creation time.</td></tr>
+                        <tr><td><code>updatedAt</code></td><td>datetime</td><td>Last update time.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>WorkflowDetailResponse</h3>
+                <p>Complete workflow details including stage state, tasks, custom fields, meetings, and notes.</p>
+
+                <h3>StageResponse</h3>
+                <p>Pipeline stage definition:</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>stageUuid</code></td><td>string</td><td>Stage identifier.</td></tr>
+                        <tr><td><code>stageName</code></td><td>string</td><td>Display name.</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td>Stage description.</td></tr>
+                        <tr><td><code>order</code></td><td>number</td><td>Pipeline position (0-based).</td></tr>
+                        <tr><td><code>defaultDueDateDays</code></td><td>number</td><td>Days to auto-calculate due date.</td></tr>
+                        <tr><td><code>color</code></td><td>string</td><td>Hex color for UI display.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>CustomFieldDefinition</h3>
+                <p>Schema for a custom field:</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>definitionUuid</code></td><td>string</td><td>Field identifier.</td></tr>
+                        <tr><td><code>fieldName</code></td><td>string</td><td>Display name.</td></tr>
+                        <tr><td><code>fieldType</code></td><td>string</td><td>TEXT, NUMBER, DATE, DROPDOWN, MULTI_SELECT.</td></tr>
+                        <tr><td><code>required</code></td><td>boolean</td><td>Mandatory field flag.</td></tr>
+                        <tr><td><code>description</code></td><td>string</td><td>Field help text.</td></tr>
+                        <tr><td><code>defaultValue</code></td><td>any</td><td>Default if not provided.</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>LeadResponse</h3>
+                <p>Lead object:</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>contactUuid</code></td><td>string</td><td>Contact reference.</td></tr>
+                        <tr><td><code>contactName</code></td><td>string</td><td>Contact full name.</td></tr>
+                        <tr><td><code>status</code></td><td>string</td><td>NEW, QUALIFIED, DISQUALIFIED, CONVERTED.</td></tr>
+                        <tr><td><code>source</code></td><td>string</td><td>Lead source (WEB_FORM, IMPORT, MANUAL, etc.).</td></tr>
+                        <tr><td><code>createdAt</code></td><td>datetime</td><td>Lead creation date.</td></tr>
+                        <tr><td><code>convertedWorkflowUuid</code></td><td>string</td><td>Workflow UUID if converted (nullable).</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Pagination Response</h3>
+                <p>Standard pagination envelope for list endpoints:</p>
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>content</code></td><td>array</td><td>Page of results.</td></tr>
+                        <tr><td><code>page</code></td><td>number</td><td>Zero-indexed page number.</td></tr>
+                        <tr><td><code>size</code></td><td>number</td><td>Items per page (default 20).</td></tr>
+                        <tr><td><code>totalElements</code></td><td>number</td><td>Total item count.</td></tr>
+                        <tr><td><code>totalPages</code></td><td>number</td><td>Total page count.</td></tr>
+                    </tbody>
+                </table>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- STATUS CODES -->
+                <h2 id="status-codes">Status codes and errors</h2>
+                <p>Endpoints return standard HTTP status codes. Success responses are in the 2xx range; client errors in the 4xx range.</p>
+
+                <div style="margin: 1.5rem 0;">
+                    <h3>Success Codes</h3>
+                    <div style="margin: 0.5rem 0 1.5rem;">
+                        <span class="enum-tag">200 OK</span>
+                        <span class="enum-tag">201 Created</span>
+                        <span class="enum-tag">204 No Content</span>
+                    </div>
+
+                    <h3>Client Error Codes</h3>
+                    <div style="margin: 0.5rem 0 1.5rem;">
+                        <span class="enum-tag">400 Bad Request</span>
+                        <span class="enum-tag">401 Unauthorized</span>
+                        <span class="enum-tag">403 Forbidden</span>
+                        <span class="enum-tag">404 Not Found</span>
+                        <span class="enum-tag">409 Conflict</span>
+                        <span class="enum-tag">422 Unprocessable Entity</span>
+                    </div>
+
+                    <h3>Server Error Codes</h3>
+                    <div style="margin: 0.5rem 0 1.5rem;">
+                        <span class="enum-tag warn">500 Internal Server Error</span>
+                        <span class="enum-tag warn">503 Service Unavailable</span>
+                    </div>
+                </div>
+
+                <p>Error responses include a JSON body with <code>error</code>, <code>message</code>, and <code>timestamp</code> fields for debugging.</p>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                <!-- KEY FEATURES -->
+                <h2>Key Features</h2>
+                <div style="margin: 1.5rem 0;">
+                    <span class="enum-tag">✓ Multi-stage pipeline</span>
+                    <span class="enum-tag">✓ Automated tasks</span>
+                    <span class="enum-tag">✓ Auto-advance workflow</span>
+                    <span class="enum-tag">✓ Custom fields</span>
+                    <span class="enum-tag">✓ Health scoring</span>
+                    <span class="enum-tag">✓ Lead conversion</span>
+                    <span class="enum-tag">✓ Meeting tracking</span>
+                    <span class="enum-tag">✓ Email notifications</span>
+                    <span class="enum-tag">✓ Complete audit trail</span>
+                    <span class="enum-tag">✓ Concurrency control</span>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li><a href="quickstart.html">Quick Start</a></li>
+                        <li><a href="conventions.html">Conventions</a></li>
+                        <li><a href="authentication.html">Authentication</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Core Domains</h4>
+                    <ul>
+                        <li><a href="contacts.html">Contacts</a></li>
+                        <li><a href="organisations.html">Organisations</a></li>
+                        <li><a href="households.html">Households</a></li>
+                        <li><a href="notes.html">Notes</a></li>
+                        <li><a href="prospect.html">Prospect</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="views.html">Saved Views</a></li>
+                        <li><a href="tenants.html">Tenants</a></li>
+                        <li><a href="staff.html">Staff</a></li>
+                        <li><a href="exports.html">Exports</a></li>
+                        <li><a href="analytics.html">Analytics</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Reference</h4>
+                    <ul>
+                        <li><a href="platform-overview.html">Platform Overview</a></li>
+                        <li><a href="architecture.html">Architecture</a></li>
+                        <li><a href="docs.html">Documentation Hub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Altafid. Developer guide.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/scripts.js"></script>
+</body>
+</html>
